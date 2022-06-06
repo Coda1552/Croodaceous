@@ -75,18 +75,16 @@ public class LiyoteEntity extends Wolf implements IAnimatable {
 				return InteractionResult.SUCCESS;
 			}
 			
-			if (!item.equals(CEItems.RAMU_EGG.get())) {
-				InteractionResult interactionresult = super.mobInteract(pPlayer, pHand);
-				if ((!interactionresult.consumesAction() || this.isBaby()) && this.isOwnedBy(pPlayer)) {
-					this.setOrderedToSit(!this.isOrderedToSit());
-					this.jumping = false;
-					this.navigation.stop();
-					this.setTarget(null);
-					return InteractionResult.SUCCESS;
-				}
-
-				return interactionresult;
+			InteractionResult interactionresult = super.mobInteract(pPlayer, pHand);
+			if ((!interactionresult.consumesAction()) && this.isOwnedBy(pPlayer)) {
+				this.setOrderedToSit(!this.isOrderedToSit());
+				this.jumping = false;
+				this.navigation.stop();
+				this.setTarget(null);
+				return InteractionResult.SUCCESS;
 			}
+
+			return interactionresult;
 		} else if (itemstack.is(CEItems.RAMU_EGG.get()) && !this.isAngry()) {
 			if (!pPlayer.getAbilities().instabuild) {
 				itemstack.shrink(1);
