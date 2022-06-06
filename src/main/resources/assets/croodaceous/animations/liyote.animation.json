@@ -367,25 +367,16 @@
 			"animation_length": 1,
 			"bones": {
 				"head": {
-					"rotation": {
-						"0.0": ["Math.sin((query.anim_time + 1.4) * 720) * -2", 0, 0],
-						"0.1667": ["20+Math.sin((query.anim_time + 1.4) * 720) * -2", 0, 0],
-						"0.5": ["-25+Math.sin((query.anim_time + 1.4) * 720) * -2", 0, 0],
-						"1.0": ["Math.sin((query.anim_time + 1.4) * 720) * -2", 0, 0]
-					}
+					"rotation": ["-15+Math.sin((query.anim_time + 1.2) * 720) * 12", 0, 0]
 				},
 				"tongue": {
-					"rotation": {
-						"0.25": ["-15+Math.sin((query.anim_time + 1.2) * 720) * -6", 0, 0],
-						"0.5": ["20+Math.sin((query.anim_time + 1.2) * 720) * -6", 0, 0],
-						"0.75": ["-15+Math.sin((query.anim_time + 1.2) * 720) * -6", 0, 0]
-					}
+					"rotation": ["Math.sin((query.anim_time + 1) * 720) * 10", 0, 0]
 				},
 				"earLeft": {
-					"rotation": [0, 0, "Math.sin((query.anim_time + 1.2) * 720) * 6"]
+					"rotation": [0, 0, "Math.sin((query.anim_time + 1) * 720) * -10"]
 				},
 				"earRight": {
-					"rotation": [0, 0, "Math.sin((query.anim_time + 1.2) * 720) * -6"]
+					"rotation": [0, 0, "Math.sin((query.anim_time + 1) * 720) * 10"]
 				}
 			}
 		}
