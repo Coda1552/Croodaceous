@@ -4,8 +4,8 @@ license="All rights reserved"
 [[mods]] #mandatory
 modId="croodaceous" #mandatory
 version="${file.jarVersion}" #mandatory
-displayName="Croodaceous Mod" #mandatory
-authors="anar4732" #optional
+displayName="Croodaceous Era" #mandatory
+authors="anar4732, Coda1552" #optional
 description='''
 
 '''

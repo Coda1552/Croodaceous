@@ -1,4 +1,9 @@
 {
+  "itemGroup.croodaceous": "Croodaceous Era",
+
   "entity.croodaceous.liyote": "Liyote",
-  "item.croodaceous.liyote_spawn_egg": "Liyote Spawn Egg"
+
+  "item.croodaceous.liyote_spawn_egg": "Liyote Spawn Egg",
+
+  "item.croodaceous.ramu_egg": "Ramu Egg"
 }

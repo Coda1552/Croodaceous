@@ -1,7 +1,8 @@
-package com.anar4732.croodaceous.rendering;
+package com.anar4732.croodaceous.client.render;
 
 import com.anar4732.croodaceous.CroodaceousMod;
-import com.anar4732.croodaceous.LiyoteEntity;
+import com.anar4732.croodaceous.common.entities.LiyoteEntity;
+import com.anar4732.croodaceous.client.model.SimpleGeoModel;
 import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.blaze3d.vertex.VertexConsumer;
 import com.mojang.math.Vector3f;
@@ -15,6 +16,7 @@ import software.bernie.geckolib3.geo.render.built.GeoBone;
 import software.bernie.geckolib3.renderers.geo.GeoEntityRenderer;
 
 import javax.annotation.Nullable;
+import javax.imageio.ImageTranscoder;
 
 public class LiyoteRenderer extends GeoEntityRenderer<LiyoteEntity> {
 	private MultiBufferSource renderTypeBuffer;
@@ -23,7 +25,7 @@ public class LiyoteRenderer extends GeoEntityRenderer<LiyoteEntity> {
 	public LiyoteRenderer(EntityRendererProvider.Context mgr) {
 		super(mgr, new SimpleGeoModel<>(CroodaceousMod.ID, "liyote"));
 	}
-	
+
 	@Override
 	public void renderRecursively(GeoBone bone, PoseStack stack, VertexConsumer bufferIn, int packedLightIn, int packedOverlayIn, float red, float green, float blue, float alpha) {
 		if (bone.name.equals("snout")) {

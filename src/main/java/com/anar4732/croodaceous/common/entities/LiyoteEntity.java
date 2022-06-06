@@ -1,5 +1,7 @@
-package com.anar4732.croodaceous;
+package com.anar4732.croodaceous.common.entities;
 
+import com.anar4732.croodaceous.registry.CEEntities;
+import com.anar4732.croodaceous.registry.CEItems;
 import net.minecraft.core.particles.ItemParticleOption;
 import net.minecraft.core.particles.ParticleTypes;
 import net.minecraft.server.level.ServerLevel;
@@ -28,7 +30,7 @@ import java.util.UUID;
 
 public class LiyoteEntity extends Wolf implements IAnimatable {
 	private final AnimationFactory animationFactory = new AnimationFactory(this);
-	
+
 	private int eatingTicks = 0;
 	private ItemStack eatingItem = ItemStack.EMPTY;
 	
@@ -73,27 +75,27 @@ public class LiyoteEntity extends Wolf implements IAnimatable {
 				return InteractionResult.SUCCESS;
 			}
 			
-			if (!(item instanceof DyeItem) && item != Items.BONE) {
+			if (!item.equals(CEItems.RAMU_EGG.get())) {
 				InteractionResult interactionresult = super.mobInteract(pPlayer, pHand);
 				if ((!interactionresult.consumesAction() || this.isBaby()) && this.isOwnedBy(pPlayer)) {
 					this.setOrderedToSit(!this.isOrderedToSit());
 					this.jumping = false;
 					this.navigation.stop();
-					this.setTarget((LivingEntity) null);
+					this.setTarget(null);
 					return InteractionResult.SUCCESS;
 				}
-				
+
 				return interactionresult;
 			}
-		} else if (itemstack.is(Items.DIAMOND) && !this.isAngry()) {
+		} else if (itemstack.is(CEItems.RAMU_EGG.get()) && !this.isAngry()) {
 			if (!pPlayer.getAbilities().instabuild) {
 				itemstack.shrink(1);
 			}
 			
-			if (this.random.nextInt(3) == 0 && !net.minecraftforge.event.ForgeEventFactory.onAnimalTame(this, pPlayer)) {
+			if (this.random.nextInt(2) == 0 && !net.minecraftforge.event.ForgeEventFactory.onAnimalTame(this, pPlayer)) {
 				this.tame(pPlayer);
 				this.navigation.stop();
-				this.setTarget((LivingEntity) null);
+				this.setTarget(null);
 				this.setOrderedToSit(true);
 				this.level.broadcastEntityEvent(this, (byte) 7);
 			} else {
@@ -145,7 +147,7 @@ public class LiyoteEntity extends Wolf implements IAnimatable {
 				Vec3 vec = pos.add(look.x, look.y, look.z);
 				ItemParticleOption type = new ItemParticleOption(ParticleTypes.ITEM, eatingItem);
 				for (int i = 0; i < 6; i++) {
-					level.addParticle(type, true, vec.x, vec.y, vec.z, -0.2F + random.nextFloat() / 2.5, random.nextFloat() / 5, -0.2F + random.nextFloat() / 2.5);
+					level.addParticle(type, true, vec.x, vec.y, vec.z, (-0.2F + random.nextFloat() / 2.5) * 0.4F, random.nextFloat() / 5, (-0.2F + random.nextFloat() / 2.5) * 0.4F);
 				}
 			}
 			if (eatingTicks % 5 == 0) {
@@ -176,7 +178,7 @@ public class LiyoteEntity extends Wolf implements IAnimatable {
 	
 	@Override
 	public Wolf getBreedOffspring(ServerLevel p_149088_, AgeableMob p_149089_) {
-		LiyoteEntity liyote = new LiyoteEntity(CroodaceousMod.ENTITY_LIYOTE.get(), level);
+		LiyoteEntity liyote = new LiyoteEntity(CEEntities.ENTITY_LIYOTE.get(), level);
 		UUID uuid = this.getOwnerUUID();
 		if (uuid != null) {
 			liyote.setOwnerUUID(uuid);
