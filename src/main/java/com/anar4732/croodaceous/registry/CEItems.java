@@ -27,5 +27,9 @@ public class CEItems {
     // Spawn Eggs
     public static final RegistryObject<Item> ITEM_LIYOTE_SPAWN_EGG =
             ITEMS.register("liyote_spawn_egg", () -> new ForgeSpawnEggItem(CEEntities.ENTITY_LIYOTE, 0xd2761d, 0x595c92, new Item.Properties().tab(TAB)));
-
+    
+    // Bearowl Spawn Egg
+    public static final RegistryObject<Item> ITEM_BEAROWL_SPAWN_EGG =
+            ITEMS.register("bearowl_spawn_egg", () -> new ForgeSpawnEggItem(CEEntities.ENTITY_BEAROWL, 0x000000, 0x000000, new Item.Properties().tab(TAB)));
+    
 }

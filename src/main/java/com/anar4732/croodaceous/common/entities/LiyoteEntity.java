@@ -59,10 +59,6 @@ public class LiyoteEntity extends Wolf implements IAnimatable {
 	public InteractionResult mobInteract(Player pPlayer, InteractionHand pHand) {
 		ItemStack itemstack = pPlayer.getItemInHand(pHand);
 		Item item = itemstack.getItem();
-		//		if (this.level.isClientSide) {
-		//			boolean flag = this.isOwnedBy(pPlayer) || this.isTame() || itemstack.is(Items.DIAMOND) && !this.isTame() && !this.isAngry();
-		//			return flag ? InteractionResult.CONSUME : InteractionResult.PASS;
-		//		} else {
 		if (this.isTame()) {
 			if (this.isFood(itemstack) && this.eatingItem.isEmpty()) {
 				if (!pPlayer.getAbilities().instabuild) {
@@ -70,7 +66,6 @@ public class LiyoteEntity extends Wolf implements IAnimatable {
 				}
 				
 				this.heal((float) itemstack.getFoodProperties(this).getNutrition());
-				//					this.gameEvent(GameEvent.MOB_INTERACT, this.eyeBlockPosition());
 				this.eatingItem = itemstack.copy();
 				return InteractionResult.SUCCESS;
 			}
@@ -108,7 +103,6 @@ public class LiyoteEntity extends Wolf implements IAnimatable {
 		}
 		
 		return super.mobInteract(pPlayer, pHand);
-		//		}
 	}
 	
 	private PlayState animControllerMain(AnimationEvent<?> e) {
@@ -154,7 +148,7 @@ public class LiyoteEntity extends Wolf implements IAnimatable {
 			if (eatingTicks >= 20 * 3) {
 				eatingItem = ItemStack.EMPTY;
 				eatingTicks = 0;
-				heal(4);
+//				heal(4); // @Cody We are doing this on "mobInteract"
 			}
 		}
 	}
