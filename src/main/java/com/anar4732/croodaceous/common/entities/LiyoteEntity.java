@@ -145,7 +145,7 @@ public class LiyoteEntity extends Wolf implements IAnimatable {
 				Vec3 vec = pos.add(look.x, look.y, look.z);
 				ItemParticleOption type = new ItemParticleOption(ParticleTypes.ITEM, eatingItem);
 				for (int i = 0; i < 6; i++) {
-					level.addParticle(type, true, vec.x, vec.y, vec.z, (-0.2F + random.nextFloat() / 2.5) * 0.4F, random.nextFloat() / 5, (-0.2F + random.nextFloat() / 2.5) * 0.4F);
+					level.addParticle(type, true, vec.x, vec.y + 0.4F, vec.z, (-0.2F + random.nextFloat() / 2.5) * 0.4F, random.nextFloat() / 5, (-0.2F + random.nextFloat() / 2.5) * 0.4F);
 				}
 			}
 			if (eatingTicks % 5 == 0) {
@@ -154,6 +154,7 @@ public class LiyoteEntity extends Wolf implements IAnimatable {
 			if (eatingTicks >= 20 * 3) {
 				eatingItem = ItemStack.EMPTY;
 				eatingTicks = 0;
+				heal(4);
 			}
 		}
 	}
