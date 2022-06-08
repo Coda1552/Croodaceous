@@ -91,13 +91,13 @@ public class BearowlEntity extends Animal implements IAnimatable {
 				this.goalSelector.disableControlFlag(Goal.Flag.JUMP);
 				this.goalSelector.disableControlFlag(Goal.Flag.MOVE);
 				this.goalSelector.disableControlFlag(Goal.Flag.LOOK);
-				this.goalSelector.disableControlFlag(Goal.Flag.TARGET);
+				this.targetSelector.disableControlFlag(Goal.Flag.TARGET);
 				sleeping = true;
 			} else {
 				this.goalSelector.enableControlFlag(Goal.Flag.JUMP);
 				this.goalSelector.enableControlFlag(Goal.Flag.MOVE);
 				this.goalSelector.enableControlFlag(Goal.Flag.LOOK);
-				this.goalSelector.enableControlFlag(Goal.Flag.TARGET);
+				this.targetSelector.enableControlFlag(Goal.Flag.TARGET);
 			}
 			if (wantsSleep() && !isBearowlSleeping() && this.getTarget() == null) {
 				this.getNavigation().moveTo(homePos.getX(), homePos.getY(), homePos.getZ(), 1.0D);
