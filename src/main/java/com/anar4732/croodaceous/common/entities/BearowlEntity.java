@@ -8,6 +8,7 @@ import net.minecraft.network.syncher.EntityDataSerializers;
 import net.minecraft.network.syncher.SynchedEntityData;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.DifficultyInstance;
+import net.minecraft.world.damagesource.DamageSource;
 import net.minecraft.world.entity.*;
 import net.minecraft.world.entity.ai.attributes.AttributeSupplier;
 import net.minecraft.world.entity.ai.attributes.Attributes;
@@ -22,6 +23,7 @@ import net.minecraft.world.level.Level;
 import net.minecraft.world.level.ServerLevelAccessor;
 import software.bernie.geckolib3.core.IAnimatable;
 import software.bernie.geckolib3.core.PlayState;
+import software.bernie.geckolib3.core.builder.AnimationBuilder;
 import software.bernie.geckolib3.core.controller.AnimationController;
 import software.bernie.geckolib3.core.event.predicate.AnimationEvent;
 import software.bernie.geckolib3.core.manager.AnimationData;
@@ -39,6 +41,7 @@ public class BearowlEntity extends Animal implements IAnimatable {
 		super(type, level);
 	}
 	
+	@Override
 	protected void registerGoals() {
 		this.goalSelector.addGoal(0, new MeleeAttackGoal(this, 1.0D, true));
 		this.goalSelector.addGoal(1, new WaterAvoidingRandomStrollGoal(this, 1.0D));
@@ -59,8 +62,13 @@ public class BearowlEntity extends Animal implements IAnimatable {
 	}
 	
 	private PlayState animControllerMain(AnimationEvent<?> e) {
-		// TODO: Implement
-//		e.getController().setAnimation(new AnimationBuilder().addAnimation("", true));
+		// TODO: Implement animations
+		// Debug only placeholder animations
+		if (sleeping) { // We use "sleeping" since its synced.
+			e.getController().setAnimation(new AnimationBuilder().addAnimation("animation.model.sleep", true));
+		} else {
+			e.getController().setAnimation(new AnimationBuilder().addAnimation("animation.model.idle", true));
+		}
 		return PlayState.CONTINUE;
 	}
 	
@@ -72,14 +80,6 @@ public class BearowlEntity extends Animal implements IAnimatable {
 	@Override
 	public AnimationFactory getFactory() {
 		return animationFactory;
-	}
-	
-	private boolean isBearowlSleeping() {
-		return wantsSleep() && isOnHomePos() || sleeping;
-	}
-	
-	private boolean wantsSleep() {
-		return this.level.isDay();
 	}
 	
 	@Override
@@ -99,16 +99,27 @@ public class BearowlEntity extends Animal implements IAnimatable {
 				this.goalSelector.enableControlFlag(Goal.Flag.LOOK);
 				this.goalSelector.enableControlFlag(Goal.Flag.TARGET);
 			}
-			if (wantsSleep() && !isBearowlSleeping()) {
+			if (wantsSleep() && !isBearowlSleeping() && this.getTarget() == null) {
 				this.getNavigation().moveTo(homePos.getX(), homePos.getY(), homePos.getZ(), 1.0D);
 			}
 			if (!wantsSleep()) {
 				this.sleeping = false;
 			}
+			if (this.tickCount == 1) {
+				this.setLastHurtByMob(null);
+			}
 			this.entityData.set(DATA_SLEEPING, this.sleeping); // Sync sleeping so sleep animation can work
 		} else {
 			this.sleeping = this.entityData.get(DATA_SLEEPING);
 		}
+	}
+	
+	private boolean isBearowlSleeping() {
+		return wantsSleep() && isOnHomePos() || sleeping;
+	}
+	
+	private boolean wantsSleep() {
+		return this.level.isDay() && this.getTarget() == null && this.getLastHurtByMobTimestamp() + 300 < this.tickCount;
 	}
 	
 	@Nullable
@@ -138,13 +149,26 @@ public class BearowlEntity extends Animal implements IAnimatable {
 	}
 	
 	private boolean isOnHomePos() {
-		return this.getOnPos().above().distSqr(this.homePos) < 4;
+		return this.getOnPos().above().distSqr(this.homePos) < 16;
 	}
 	
 	@Override
 	protected void defineSynchedData() {
 		super.defineSynchedData();
 		this.entityData.define(DATA_SLEEPING, false);
+	}
+	
+	@Override
+	public boolean hurt(DamageSource pSource, float pAmount) {
+		this.sleeping = false;
+		return super.hurt(pSource, pAmount);
+	}
+	
+	@Override
+	public void push(Entity pEntity) {
+		this.sleeping = false;
+		this.setLastHurtByMob(null);
+		super.push(pEntity);
 	}
 	
 	// TODO: Custom Sounds

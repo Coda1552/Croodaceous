@@ -1,0 +1,44 @@
+{
+	"format_version": "1.8.0",
+	"animations": {
+		"animation.model.sleep": {
+			"animation_length": 1.45833,
+			"bones": {
+				"bodycore": {
+					"position": [0, -6, 0]
+				},
+				"leftlegB": {
+					"rotation": [-48.91341, 26.61285, 14.88796]
+				},
+				"rightlegB": {
+					"rotation": [-54.65338, -7.80958, -13.32649]
+				},
+				"body": {
+					"position": [0, -8, 0]
+				},
+				"torso": {
+					"rotation": [0, 0, 0]
+				},
+				"neck": {
+					"rotation": [20.97367, -7.52419, -12.9149]
+				},
+				"leftarmB": {
+					"rotation": [-42.74723, 22.73775, 14.32326]
+				},
+				"rightarmB": {
+					"rotation": [-61.70217, -9.63955, -14.34642]
+				},
+				"tail": {
+					"rotation": [-19.01489, 0.75663, -6.31016]
+				},
+				"furleftD": {
+					"rotation": [60.01047, 7.99088, -43.00882]
+				}
+			}
+		},
+		"animation.model.idle": {
+			"loop": true
+		}
+	},
+	"geckolib_format_version": 2
+}
