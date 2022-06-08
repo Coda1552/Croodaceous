@@ -108,6 +108,9 @@ public class BearowlEntity extends Animal implements IAnimatable {
 			if (this.tickCount == 1) {
 				this.setLastHurtByMob(null);
 			}
+			if (this.getTarget() != null && this.getTarget().distanceTo(this) > 16F) {
+				this.setSprinting(true);
+			}
 			this.entityData.set(DATA_SLEEPING, this.sleeping); // Sync sleeping so sleep animation can work
 		} else {
 			this.sleeping = this.entityData.get(DATA_SLEEPING);
