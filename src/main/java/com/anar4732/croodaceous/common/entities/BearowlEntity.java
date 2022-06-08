@@ -50,8 +50,8 @@ public class BearowlEntity extends Animal implements IAnimatable {
 		return Monster.createMonsterAttributes()
 		              .add(Attributes.MAX_HEALTH, 80)
 					  .add(Attributes.MOVEMENT_SPEED, 0.25D)
-		              .add(Attributes.ATTACK_DAMAGE, 8) // @Cody feel free to edit those
-		              .add(Attributes.FOLLOW_RANGE, 128);
+		              .add(Attributes.ATTACK_DAMAGE, 8)
+		              .add(Attributes.FOLLOW_RANGE, 64);
 	}
 	
 	private boolean isTarget(LivingEntity livingEntity) {
