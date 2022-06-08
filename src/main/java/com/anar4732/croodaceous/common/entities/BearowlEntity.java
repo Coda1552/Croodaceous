@@ -48,7 +48,7 @@ public class BearowlEntity extends Monster implements IAnimatable {
 		              .add(Attributes.MAX_HEALTH, 80)
 					  .add(Attributes.MOVEMENT_SPEED, 0.25D)
 		              .add(Attributes.ATTACK_DAMAGE, 8) // @Cody feel free to edit those
-		              .add(Attributes.FOLLOW_RANGE, 16);
+		              .add(Attributes.FOLLOW_RANGE, 128);
 	}
 	
 	private boolean isTarget(LivingEntity livingEntity) {
