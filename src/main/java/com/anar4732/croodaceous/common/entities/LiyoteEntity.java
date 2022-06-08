@@ -65,7 +65,6 @@ public class LiyoteEntity extends Wolf implements IAnimatable {
 					itemstack.shrink(1);
 				}
 				
-				this.heal((float) itemstack.getFoodProperties(this).getNutrition());
 				this.eatingItem = itemstack.copy();
 				return InteractionResult.SUCCESS;
 			}
@@ -148,7 +147,7 @@ public class LiyoteEntity extends Wolf implements IAnimatable {
 			if (eatingTicks >= 20 * 3) {
 				eatingItem = ItemStack.EMPTY;
 				eatingTicks = 0;
-//				heal(4); // @Cody We are doing this on "mobInteract"
+				heal(4); // TODO - heart particles when done healing
 			}
 		}
 	}
