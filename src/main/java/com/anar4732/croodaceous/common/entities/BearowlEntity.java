@@ -39,6 +39,7 @@ public class BearowlEntity extends Animal implements IAnimatable {
 	
 	public BearowlEntity(EntityType<? extends BearowlEntity> type, Level level) {
 		super(type, level);
+		maxUpStep = 1.1F;
 	}
 	
 	@Override
@@ -118,11 +119,11 @@ public class BearowlEntity extends Animal implements IAnimatable {
 			this.sleeping = this.entityData.get(DATA_SLEEPING);
 		}
 	}
-	
+
 	private boolean isBearowlSleeping() {
 		return wantsSleep() && isOnHomePos() || sleeping;
 	}
-	
+
 	private boolean wantsSleep() {
 		return this.level.isDay() && this.getTarget() == null && this.getLastHurtByMobTimestamp() + 300 < this.tickCount;
 	}
