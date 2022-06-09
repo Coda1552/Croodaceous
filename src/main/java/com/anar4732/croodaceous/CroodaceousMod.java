@@ -1,10 +1,11 @@
 package com.anar4732.croodaceous;
 
-import com.anar4732.croodaceous.client.render.LiyoteRenderer;
+import com.anar4732.croodaceous.registry.CEBlocks;
 import com.anar4732.croodaceous.registry.CEEntities;
 import com.anar4732.croodaceous.registry.CEItems;
 import com.mojang.logging.LogUtils;
-import net.minecraft.client.renderer.entity.EntityRenderers;
+import net.minecraft.client.renderer.ItemBlockRenderTypes;
+import net.minecraft.client.renderer.RenderType;
 import net.minecraftforge.eventbus.api.IEventBus;
 import net.minecraftforge.fml.common.Mod;
 import net.minecraftforge.fml.event.lifecycle.FMLClientSetupEvent;
@@ -25,6 +26,7 @@ public class CroodaceousMod {
 		bus.addListener(CEEntities::registerRenderers);
 		CEEntities.ENTITIES.register(bus);
 		CEItems.ITEMS.register(bus);
+		CEBlocks.BLOCKS.register(bus);
 		
 //		MinecraftForge.EVENT_BUS.register(this);
 	}
@@ -34,7 +36,7 @@ public class CroodaceousMod {
 	}
 	
 	private void clientSetup(final FMLClientSetupEvent e) {
-
+		ItemBlockRenderTypes.setRenderLayer(CEBlocks.RAMU_NEST.get(), RenderType.cutout());
 	}
 	
 }

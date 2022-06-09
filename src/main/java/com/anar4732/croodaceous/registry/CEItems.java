@@ -2,6 +2,7 @@ package com.anar4732.croodaceous.registry;
 
 import com.anar4732.croodaceous.CroodaceousMod;
 import net.minecraft.world.food.FoodProperties;
+import net.minecraft.world.item.BlockItem;
 import net.minecraft.world.item.CreativeModeTab;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
@@ -29,5 +30,9 @@ public class CEItems {
             ITEMS.register("liyote_spawn_egg", () -> new ForgeSpawnEggItem(CEEntities.ENTITY_LIYOTE, 0xd2761d, 0x595c92, new Item.Properties().tab(TAB)));
     public static final RegistryObject<Item> ITEM_BEAROWL_SPAWN_EGG =
             ITEMS.register("bearowl_spawn_egg", () -> new ForgeSpawnEggItem(CEEntities.ENTITY_BEAROWL, 0x463830, 0x8c867b, new Item.Properties().tab(TAB)));
+    
+    // Block Items
+    public static final RegistryObject<Item> RAMU_NEST =
+            ITEMS.register("ramu_nest", () -> new BlockItem(CEBlocks.RAMU_NEST.get() , new Item.Properties().tab(TAB)));
     
 }
