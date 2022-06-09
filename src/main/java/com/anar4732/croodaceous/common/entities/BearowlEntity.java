@@ -143,6 +143,7 @@ public class BearowlEntity extends Animal implements IAnimatable {
 	public void readAdditionalSaveData(CompoundTag pCompound) {
 		super.readAdditionalSaveData(pCompound);
 		this.homePos = new BlockPos(pCompound.getInt("HomePosX"), pCompound.getInt("HomePosY"), pCompound.getInt("HomePosZ"));
+		this.sleeping = pCompound.getBoolean("Sleeping");
 	}
 	
 	@Override
@@ -151,6 +152,7 @@ public class BearowlEntity extends Animal implements IAnimatable {
 		pCompound.putInt("HomePosX", this.homePos.getX());
 		pCompound.putInt("HomePosY", this.homePos.getY());
 		pCompound.putInt("HomePosZ", this.homePos.getZ());
+		pCompound.putBoolean("Sleeping", this.sleeping);
 	}
 	
 	private boolean isOnHomePos() {
