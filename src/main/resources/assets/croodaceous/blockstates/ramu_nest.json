@@ -1,0 +1,10 @@
+{
+  "variants": {
+    "with_egg=false": {
+      "model": "croodaceous:block/ramu_nest"
+    },
+    "with_egg=true": {
+      "model": "croodaceous:block/ramu_nest_with_egg"
+    }
+  }
+}
