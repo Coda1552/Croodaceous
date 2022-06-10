@@ -39,7 +39,6 @@ public class BearowlEntity extends Animal implements IAnimatable {
 	
 	public BearowlEntity(EntityType<? extends BearowlEntity> type, Level level) {
 		super(type, level);
-		maxUpStep = 1.1F;
 	}
 	
 	@Override
@@ -72,7 +71,7 @@ public class BearowlEntity extends Animal implements IAnimatable {
 		}
 		return PlayState.CONTINUE;
 	}
-	
+
 	@Override
 	public void registerControllers(AnimationData data) {
 		data.addAnimationController(new AnimationController<>(this, "controller", 2F, this::animControllerMain));
@@ -118,6 +117,11 @@ public class BearowlEntity extends Animal implements IAnimatable {
 		} else {
 			this.sleeping = this.entityData.get(DATA_SLEEPING);
 		}
+	}
+
+	@Override
+	public float getStepHeight() {
+		return 1.1F;
 	}
 
 	private boolean isBearowlSleeping() {
