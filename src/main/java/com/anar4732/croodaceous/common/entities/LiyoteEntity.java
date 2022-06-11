@@ -147,7 +147,8 @@ public class LiyoteEntity extends Wolf implements IAnimatable {
 			if (eatingTicks >= 20 * 3) {
 				eatingItem = ItemStack.EMPTY;
 				eatingTicks = 0;
-				heal(4); // TODO - heart particles when done healing
+				this.level.broadcastEntityEvent(this, (byte) 18);
+				heal(4);
 			}
 		}
 	}
