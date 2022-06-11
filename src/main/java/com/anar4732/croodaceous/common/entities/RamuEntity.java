@@ -4,6 +4,7 @@ import com.anar4732.croodaceous.common.blocks.RamuNestBlock;
 import com.anar4732.croodaceous.registry.CEBlocks;
 import com.anar4732.croodaceous.registry.CEEntities;
 import com.anar4732.croodaceous.registry.CEItems;
+import com.anar4732.croodaceous.registry.CEPointOfInterestTypes;
 import net.minecraft.commands.arguments.EntityAnchorArgument;
 import net.minecraft.core.BlockPos;
 import net.minecraft.nbt.CompoundTag;
@@ -26,6 +27,8 @@ import net.minecraft.world.entity.ai.goal.RandomLookAroundGoal;
 import net.minecraft.world.entity.ai.goal.WaterAvoidingRandomStrollGoal;
 import net.minecraft.world.entity.ai.goal.target.HurtByTargetGoal;
 import net.minecraft.world.entity.ai.goal.target.NearestAttackableTargetGoal;
+import net.minecraft.world.entity.ai.village.poi.PoiManager;
+import net.minecraft.world.entity.ai.village.poi.PoiType;
 import net.minecraft.world.entity.animal.Animal;
 import net.minecraft.world.entity.monster.Monster;
 import net.minecraft.world.entity.player.Player;
@@ -44,6 +47,7 @@ import software.bernie.geckolib3.core.manager.AnimationData;
 import software.bernie.geckolib3.core.manager.AnimationFactory;
 
 import javax.annotation.Nullable;
+import java.util.Optional;
 
 public class RamuEntity extends Animal implements IAnimatable {
 	private static final EntityDataAccessor<Boolean> DATA_SITTING = SynchedEntityData.defineId(RamuEntity.class, EntityDataSerializers.BOOLEAN);
@@ -155,11 +159,26 @@ public class RamuEntity extends Animal implements IAnimatable {
 					this.level.setBlock(nestPos, CEBlocks.RAMU_NEST.get().defaultBlockState().setValue(RamuNestBlock.WITH_EGG, true), 3);
 				}
 			}
-
+			if (nestPos == null) {
+				nestPos = findNest();
+			}
 			this.entityData.set(DATA_SITTING, this.sitting);
 		} else {
 			this.sitting = this.entityData.get(DATA_SITTING);
 		}
+	}
+	
+	private BlockPos findNest() {
+		if (level.isClientSide) {
+			return null;
+		}
+		PoiManager poiManager = ((ServerLevel) level).getPoiManager();
+		PoiType pt = CEPointOfInterestTypes.RAMU_NEST.get();
+		Optional<BlockPos> poi = poiManager.findClosest(pt.getPredicate(), this.getOnPos(), 32, PoiManager.Occupancy.HAS_SPACE);
+		if (poi.isPresent()) {
+			poiManager.take(pt.getPredicate(), (p) -> true, poi.get(), 32);
+		}
+		return poi.orElse(null);
 	}
 	
 	@Override
@@ -179,7 +198,7 @@ public class RamuEntity extends Animal implements IAnimatable {
 		return InteractionResult.SUCCESS;
 	}
 		
-		private boolean isSitting() {
+	private boolean isSitting() {
 		return wantsSit() && isNearNest();
 	}
 
@@ -191,6 +210,11 @@ public class RamuEntity extends Animal implements IAnimatable {
 	public SpawnGroupData finalizeSpawn(ServerLevelAccessor pLevel, DifficultyInstance pDifficulty, MobSpawnType pReason, @Nullable SpawnGroupData pSpawnData, @Nullable CompoundTag pDataTag) {
 		this.nestPos = this.getOnPos().above();
 		pLevel.setBlock(nestPos, CEBlocks.RAMU_NEST.get().defaultBlockState().setValue(RamuNestBlock.WITH_EGG, this.random.nextBoolean()), 3);
+		if (!level.isClientSide) {
+			PoiType pt = CEPointOfInterestTypes.RAMU_NEST.get();
+			PoiManager poiManager = ((ServerLevel) level).getPoiManager();
+			poiManager.take(pt.getPredicate(), (p) -> true, nestPos, 32);
+		}
 		return super.finalizeSpawn(pLevel, pDifficulty, pReason, pSpawnData, pDataTag);
 	}
 
@@ -251,4 +275,19 @@ public class RamuEntity extends Animal implements IAnimatable {
 		super.push(pEntity);
 	}
 	
+	public BlockPos getNestPos() {
+		return nestPos;
+	}
+	
+	public void setNestPos(BlockPos nestPos) {
+		this.nestPos = nestPos;
+	}
+	
+	@Override
+	protected void tickDeath() {
+		if (!level.isClientSide && this.deathTime == 0) {
+			((ServerLevel) level).getPoiManager().release(nestPos);
+		}
+		super.tickDeath();
+	}
 }

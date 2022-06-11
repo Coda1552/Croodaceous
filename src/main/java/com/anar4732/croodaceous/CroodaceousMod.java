@@ -3,6 +3,7 @@ package com.anar4732.croodaceous;
 import com.anar4732.croodaceous.registry.CEBlocks;
 import com.anar4732.croodaceous.registry.CEEntities;
 import com.anar4732.croodaceous.registry.CEItems;
+import com.anar4732.croodaceous.registry.CEPointOfInterestTypes;
 import com.mojang.logging.LogUtils;
 import net.minecraft.client.renderer.ItemBlockRenderTypes;
 import net.minecraft.client.renderer.RenderType;
@@ -27,6 +28,7 @@ public class CroodaceousMod {
 		CEEntities.ENTITIES.register(bus);
 		CEItems.ITEMS.register(bus);
 		CEBlocks.BLOCKS.register(bus);
+		CEPointOfInterestTypes.POIS.register(bus);
 		
 //		MinecraftForge.EVENT_BUS.register(this);
 	}

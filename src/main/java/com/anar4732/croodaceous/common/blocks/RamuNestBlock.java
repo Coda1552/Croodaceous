@@ -1,8 +1,10 @@
 package com.anar4732.croodaceous.common.blocks;
 
+import com.anar4732.croodaceous.common.entities.RamuEntity;
 import com.anar4732.croodaceous.registry.CEItems;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
+import net.minecraft.server.level.ServerLevel;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.sounds.SoundSource;
 import net.minecraft.world.InteractionHand;
@@ -19,6 +21,7 @@ import net.minecraft.world.level.block.state.StateDefinition;
 import net.minecraft.world.level.block.state.properties.BooleanProperty;
 import net.minecraft.world.level.material.Material;
 import net.minecraft.world.level.material.MaterialColor;
+import net.minecraft.world.phys.AABB;
 import net.minecraft.world.phys.BlockHitResult;
 import net.minecraft.world.phys.shapes.CollisionContext;
 import net.minecraft.world.phys.shapes.VoxelShape;
@@ -73,6 +76,19 @@ public class RamuNestBlock extends Block {
 	@Override
 	public boolean skipRendering(BlockState pState, BlockState pAdjacentBlockState, Direction pSide) {
 		return false;
+	}
+	
+	@Override
+	public void onRemove(BlockState pState, Level pLevel, BlockPos pPos, BlockState pNewState, boolean pIsMoving) {
+		pLevel.getEntitiesOfClass(RamuEntity.class, new AABB(pPos).inflate(64)).forEach(e -> {
+			if (e.getNestPos().equals(pPos)) {
+				e.setNestPos(null);
+			}
+			if (!pLevel.isClientSide) {
+				((ServerLevel) pLevel).getPoiManager().release(pPos);
+			}
+		});
+		super.onRemove(pState, pLevel, pPos, pNewState, pIsMoving);
 	}
 
 }
