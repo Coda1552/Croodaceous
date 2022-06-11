@@ -35,8 +35,11 @@ public class CroodaceousMod {
 //		MinecraftForge.EVENT_BUS.register(this);
 	}
 	
+	/**
+	 * Set a breakpoint {@link net.minecraft.Util#doPause(String) here} to debug any crash in the IDE
+	 */
 	private void setup(final FMLCommonSetupEvent event) {
-		SharedConstants.IS_RUNNING_IN_IDE = !FMLEnvironment.production; // Set a breakpoint to Utils.doPause() to debug any crash in the IDE
+		SharedConstants.IS_RUNNING_IN_IDE = !FMLEnvironment.production;
 	}
 	
 	private void clientSetup(final FMLClientSetupEvent e) {
