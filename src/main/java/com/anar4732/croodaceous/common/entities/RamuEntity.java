@@ -122,7 +122,12 @@ public class RamuEntity extends Animal implements IAnimatable {
 	public AnimationFactory getFactory() {
 		return animationFactory;
 	}
-	
+
+	@Override
+	public float getStepHeight() {
+		return 1.1F;
+	}
+
 	@Override
 	public void tick() {
 		super.tick();
