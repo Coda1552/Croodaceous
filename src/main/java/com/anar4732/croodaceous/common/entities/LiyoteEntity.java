@@ -1,15 +1,25 @@
 package com.anar4732.croodaceous.common.entities;
 
+import com.anar4732.croodaceous.common.blocks.RamuNestBlock;
+import com.anar4732.croodaceous.registry.CEBlocks;
 import com.anar4732.croodaceous.registry.CEEntities;
 import com.anar4732.croodaceous.registry.CEItems;
+import com.anar4732.croodaceous.registry.CEPointOfInterestTypes;
+import net.minecraft.core.BlockPos;
 import net.minecraft.core.particles.ItemParticleOption;
 import net.minecraft.core.particles.ParticleTypes;
+import net.minecraft.nbt.CompoundTag;
+import net.minecraft.network.syncher.EntityDataAccessor;
+import net.minecraft.network.syncher.EntityDataSerializers;
+import net.minecraft.network.syncher.SynchedEntityData;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.InteractionResult;
+import net.minecraft.world.damagesource.DamageSource;
 import net.minecraft.world.entity.*;
 import net.minecraft.world.entity.ai.goal.AvoidEntityGoal;
+import net.minecraft.world.entity.ai.village.poi.PoiManager;
 import net.minecraft.world.entity.animal.Wolf;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.DyeItem;
@@ -29,10 +39,11 @@ import software.bernie.geckolib3.core.manager.AnimationFactory;
 import java.util.UUID;
 
 public class LiyoteEntity extends Wolf implements IAnimatable {
+	private static final EntityDataAccessor<ItemStack> DATA_EI = SynchedEntityData.defineId(LiyoteEntity.class, EntityDataSerializers.ITEM_STACK);
 	private final AnimationFactory animationFactory = new AnimationFactory(this);
-
 	private int eatingTicks = 0;
 	private ItemStack eatingItem = ItemStack.EMPTY;
+	private BlockPos targetNest;
 	
 	public LiyoteEntity(EntityType<? extends LiyoteEntity> type, Level level) {
 		super(type, level);
@@ -49,6 +60,12 @@ public class LiyoteEntity extends Wolf implements IAnimatable {
 			@Override
 			public boolean canUse() {
 				return super.canUse() && !((LiyoteEntity) mob).isTame();
+			}
+		});
+		this.goalSelector.addGoal(12, new AvoidEntityGoal<>(this, RamuEntity.class, 10.0F, 1.0D, 1.2D) {
+			@Override
+			public boolean canUse() {
+				return eatingItem.getItem() == CEItems.RAMU_EGG.get() && super.canUse();
 			}
 		});
 		super.registerGoals();
@@ -130,7 +147,7 @@ public class LiyoteEntity extends Wolf implements IAnimatable {
 	@Override
 	public void tick() {
 		super.tick();
-		if (!eatingItem.isEmpty()) {
+		if (!eatingItem.isEmpty() && eatingItem.getItem() != CEItems.RAMU_EGG.get()) {
 			eatingTicks++;
 			if (eatingTicks % 5 == 0 && level.isClientSide) {
 				Vec3 look = getRenderViewVector();
@@ -150,6 +167,26 @@ public class LiyoteEntity extends Wolf implements IAnimatable {
 				this.level.broadcastEntityEvent(this, (byte) 18);
 				heal(4);
 			}
+		}
+		if (!this.level.isClientSide && !this.isInSittingPose() && eatingItem.isEmpty() && this.random.nextInt(1200) == 0) {
+			PoiManager poiManager = ((ServerLevel) level).getPoiManager();
+			poiManager.findClosest(CEPointOfInterestTypes.RAMU_NEST.get().getPredicate(), p -> this.level.getBlockState(p).getValue(RamuNestBlock.WITH_EGG), this.getOnPos(), 32, PoiManager.Occupancy.ANY).ifPresent(p -> {
+				targetNest = p;
+			});
+		}
+		if (targetNest != null && !this.isInSittingPose()) {
+			if (canReachTargetNest()) {
+				this.level.setBlock(targetNest, CEBlocks.RAMU_NEST.get().defaultBlockState().setValue(RamuNestBlock.WITH_EGG, false), 3);
+				this.targetNest = null;
+				this.eatingItem = new ItemStack(CEItems.RAMU_EGG.get());
+			} else {
+				this.getNavigation().moveTo(targetNest.getX(), targetNest.getY(), targetNest.getZ(), 1.0D);
+			}
+		}
+		if (this.level.isClientSide) {
+			eatingItem = this.entityData.get(DATA_EI);
+		} else {
+			this.entityData.set(DATA_EI, eatingItem);
 		}
 	}
 	
@@ -177,8 +214,49 @@ public class LiyoteEntity extends Wolf implements IAnimatable {
 			liyote.setOwnerUUID(uuid);
 			liyote.setTame(true);
 		}
-		
 		return liyote;
+	}
+	
+	@Override
+	public boolean hurt(DamageSource pSource, float pAmount) {
+		if (eatingItem.getItem() == CEItems.RAMU_EGG.get()) {
+			this.spawnAtLocation(eatingItem.copy());
+			this.eatingItem = ItemStack.EMPTY;
+		}
+		return super.hurt(pSource, pAmount);
+	}
+	
+	@Override
+	public void addAdditionalSaveData(CompoundTag pCompound) {
+		super.addAdditionalSaveData(pCompound);
+		pCompound.put("eatingItem", eatingItem.save(new CompoundTag()));
+		pCompound.putInt("eatingTicks", eatingTicks);
+		if (targetNest != null) {
+			pCompound.putLong("targetNest", targetNest.asLong());
+		}
+	}
+	
+	@Override
+	public void readAdditionalSaveData(CompoundTag pCompound) {
+		super.readAdditionalSaveData(pCompound);
+		eatingItem = ItemStack.of(pCompound.getCompound("eatingItem"));
+		eatingTicks = pCompound.getInt("eatingTicks");
+		if (pCompound.contains("targetNest")) {
+			targetNest = BlockPos.of(pCompound.getLong("targetNest"));
+		}
+	}
+	
+	private boolean canReachTargetNest() {
+		if (targetNest == null) {
+			return false;
+		}
+		return this.getOnPos().above().distSqr(this.targetNest) < 4;
+	}
+	
+	@Override
+	protected void defineSynchedData() {
+		super.defineSynchedData();
+		this.entityData.define(DATA_EI, ItemStack.EMPTY);
 	}
 	
 }

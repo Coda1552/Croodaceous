@@ -5,6 +5,7 @@ import com.anar4732.croodaceous.registry.CEBlocks;
 import com.anar4732.croodaceous.registry.CEEntities;
 import com.anar4732.croodaceous.registry.CEItems;
 import com.anar4732.croodaceous.registry.CEPointOfInterestTypes;
+import net.minecraft.advancements.CriteriaTriggers;
 import net.minecraft.commands.arguments.EntityAnchorArgument;
 import net.minecraft.core.BlockPos;
 import net.minecraft.nbt.CompoundTag;
@@ -12,8 +13,10 @@ import net.minecraft.network.syncher.EntityDataAccessor;
 import net.minecraft.network.syncher.EntityDataSerializers;
 import net.minecraft.network.syncher.SynchedEntityData;
 import net.minecraft.server.level.ServerLevel;
+import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.sounds.SoundSource;
+import net.minecraft.util.Mth;
 import net.minecraft.world.DifficultyInstance;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.InteractionResult;
@@ -30,10 +33,12 @@ import net.minecraft.world.entity.ai.goal.target.NearestAttackableTargetGoal;
 import net.minecraft.world.entity.ai.village.poi.PoiManager;
 import net.minecraft.world.entity.ai.village.poi.PoiType;
 import net.minecraft.world.entity.animal.Animal;
+import net.minecraft.world.entity.item.ItemEntity;
 import net.minecraft.world.entity.monster.Monster;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
+import net.minecraft.world.item.enchantment.EnchantmentHelper;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.ServerLevelAccessor;
 import net.minecraft.world.level.block.Blocks;
@@ -51,6 +56,8 @@ import java.util.Optional;
 
 public class RamuEntity extends Animal implements IAnimatable {
 	private static final EntityDataAccessor<Boolean> DATA_SITTING = SynchedEntityData.defineId(RamuEntity.class, EntityDataSerializers.BOOLEAN);
+	private static final EntityDataAccessor<Integer> DATA_SST = SynchedEntityData.defineId(RamuEntity.class, EntityDataSerializers.INT);
+	private static final int CHARGE_START_TIME = 60;
 	private final AnimationFactory animationFactory = new AnimationFactory(this);
 	private BlockPos nestPos;
 	private boolean sitting;
@@ -75,7 +82,7 @@ public class RamuEntity extends Animal implements IAnimatable {
 		return Monster.createMonsterAttributes()
 		              .add(Attributes.MAX_HEALTH, 20)
 					  .add(Attributes.MOVEMENT_SPEED, 0.25D)
-		              .add(Attributes.ATTACK_DAMAGE, 3)
+		              .add(Attributes.ATTACK_DAMAGE, 4)
 		              .add(Attributes.FOLLOW_RANGE, 16);
 	}
 	
@@ -90,13 +97,11 @@ public class RamuEntity extends Animal implements IAnimatable {
 	}
 	
 	private PlayState animControllerMain(AnimationEvent<?> e) {
-		if (e.isMoving()) {
+		if (this.sprintStartTimestemp != 0 && this.sprintStartTimestemp + CHARGE_START_TIME > this.tickCount) {
+			e.getController().setAnimation(new AnimationBuilder().addAnimation("animation.ramu.charge_start", true));
+		} else if (e.isMoving()) {
 			if (this.isSprinting()) {
-				if (this.sprintStartTimestemp + 81 > this.tickCount) {
-					e.getController().setAnimation(new AnimationBuilder().addAnimation("animation.ramu.charge_start", true));
-				} else {
-					e.getController().setAnimation(new AnimationBuilder().addAnimation("animation.ramu.charge", true));
-				}
+				e.getController().setAnimation(new AnimationBuilder().addAnimation("animation.ramu.charge", true));
 			} else {
 				e.getController().setAnimation(new AnimationBuilder().addAnimation("animation.ramu.walk", true));
 			}
@@ -135,10 +140,11 @@ public class RamuEntity extends Animal implements IAnimatable {
 			if (((wantsSit() && !isSitting()) || willLayEgg) && nestPos != null && this.getTarget() == null) {
 				this.getNavigation().moveTo(nestPos.getX(), nestPos.getY(), nestPos.getZ(), 1.0D);
 			}
-			if (this.getTarget() != null && this.getTarget().getMainHandItem().getItem() == CEItems.RAMU_EGG.get() && !sitting) {
+			if (!sitting && this.getTarget() != null && (this.getTarget().getMainHandItem().getItem() == CEItems.RAMU_EGG.get() || this.getTarget().getLastHurtMob() == this)) {
 				if (sprintStartTimestemp == 0) {
 					sprintStartTimestemp = this.tickCount;
-				} else if (this.sprintStartTimestemp + 81 > this.tickCount) {
+					playSound(SoundEvents.CHICKEN_AMBIENT, 1.0F, 1.0F); // TODO: Add sound
+				} else if (this.sprintStartTimestemp + CHARGE_START_TIME > this.tickCount) {
 					this.getNavigation().stop();
 					this.lookAt(EntityAnchorArgument.Anchor.EYES, this.getTarget().getPosition(1F));
 				} else {
@@ -152,33 +158,41 @@ public class RamuEntity extends Animal implements IAnimatable {
 				this.wantsSit = this.random.nextBoolean();
 			}
 			if (willLayEgg && isOnNest()) {
-				willLayEgg = false;
-				if (this.level.getBlockState(nestPos).getValue(RamuNestBlock.WITH_EGG)) {
-					this.spawnAtLocation(CEItems.RAMU_EGG.get());
-				} else {
+				if (!hasEggOnNest()) {
 					this.level.setBlock(nestPos, CEBlocks.RAMU_NEST.get().defaultBlockState().setValue(RamuNestBlock.WITH_EGG, true), 3);
+					willLayEgg = false;
 				}
 			}
-			if (nestPos == null) {
-				nestPos = findNest();
+			if (nestPos == null && !level.isClientSide) {
+				findNest();
+			}
+			if (!sitting && !willLayEgg && nestPos != null && !hasEggOnNest() && (this.getTarget() == null || this.getTarget() instanceof LivingEntity)) {
+				this.level.getEntitiesOfClass(ItemEntity.class, this.getBoundingBox().inflate(8F), e -> e.getItem().getItem() == CEItems.RAMU_EGG.get()).stream().findFirst().ifPresent(e -> {
+					BlockPos pos = e.getOnPos();
+					this.getNavigation().moveTo(pos.getX(), pos.getY(), pos.getZ(), 1.0D);
+				});
 			}
 			this.entityData.set(DATA_SITTING, this.sitting);
+			this.entityData.set(DATA_SST, this.sprintStartTimestemp);
 		} else {
 			this.sitting = this.entityData.get(DATA_SITTING);
+			this.sprintStartTimestemp = this.entityData.get(DATA_SST);
 		}
 	}
 	
-	private BlockPos findNest() {
-		if (level.isClientSide) {
-			return null;
-		}
+	private boolean hasEggOnNest() {
+		return this.level.getBlockState(nestPos).getValue(RamuNestBlock.WITH_EGG);
+	}
+	
+	private void findNest() {
 		PoiManager poiManager = ((ServerLevel) level).getPoiManager();
 		PoiType pt = CEPointOfInterestTypes.RAMU_NEST.get();
 		Optional<BlockPos> poi = poiManager.findClosest(pt.getPredicate(), this.getOnPos(), 32, PoiManager.Occupancy.HAS_SPACE);
 		if (poi.isPresent()) {
+			nestPos = poi.get();
 			poiManager.take(pt.getPredicate(), (p) -> true, poi.get(), 32);
+			this.getNavigation().moveTo(nestPos.getX(), nestPos.getY(), nestPos.getZ(), 1.0D);
 		}
-		return poi.orElse(null);
 	}
 	
 	@Override
@@ -260,6 +274,7 @@ public class RamuEntity extends Animal implements IAnimatable {
 	protected void defineSynchedData() {
 		super.defineSynchedData();
 		this.entityData.define(DATA_SITTING, false);
+		this.entityData.define(DATA_SST, 0);
 	}
 	
 	@Override
@@ -290,4 +305,44 @@ public class RamuEntity extends Animal implements IAnimatable {
 		}
 		super.tickDeath();
 	}
+	
+	@Override
+	public boolean doHurtTarget(Entity pEntity) {
+		boolean b = super.doHurtTarget(pEntity);
+		if (this.isSprinting() && pEntity instanceof LivingEntity livingEntity && b) {
+			float f1 = 5.0F; // Ram knockback
+			livingEntity.knockback(f1 * 0.5F, Mth.sin(this.getYRot() * ((float)Math.PI / 180F)), -Mth.cos(this.getYRot() * ((float)Math.PI / 180F)));
+		}
+		return b;
+	}
+	
+	@Override
+	public boolean canTakeItem(ItemStack pItemstack) {
+		return pItemstack.getItem() == CEItems.RAMU_EGG.get() && !willLayEgg;
+	}
+	
+	@Override
+	public boolean wantsToPickUp(ItemStack pStack) {
+		return canTakeItem(pStack);
+	}
+
+	@Override
+	public void onItemPickup(ItemEntity pItem) {
+		if (canTakeItem(pItem.getItem())) {
+			willLayEgg = true;
+		}
+	}
+	
+	@Override
+	public boolean canPickUpLoot() {
+		return true;
+	}
+	
+	@Override
+	protected void setItemSlotAndDropWhenKilled(EquipmentSlot p_21469_, ItemStack p_21470_) {
+		if (p_21470_.getItem() == CEItems.RAMU_EGG.get()) {
+			this.willLayEgg = true;
+		}
+	}
+	
 }
