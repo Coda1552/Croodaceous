@@ -2,6 +2,7 @@ package com.anar4732.croodaceous.registry;
 
 import com.anar4732.croodaceous.CroodaceousMod;
 import com.anar4732.croodaceous.client.render.LiyoteRenderer;
+import com.anar4732.croodaceous.client.render.RamuRenderer;
 import com.anar4732.croodaceous.client.render.SimpleGeoRenderer;
 import com.anar4732.croodaceous.common.entities.BearowlEntity;
 import com.anar4732.croodaceous.common.entities.LiyoteEntity;
@@ -48,7 +49,7 @@ public class CEEntities {
     public static void registerRenderers(final FMLClientSetupEvent e) {
         EntityRenderers.register(CEEntities.ENTITY_LIYOTE.get(), LiyoteRenderer::new);
         EntityRenderers.register(CEEntities.ENTITY_BEAROWL.get(), mgr -> new SimpleGeoRenderer<>(mgr, CroodaceousMod.ID, "bearowl"));
-        EntityRenderers.register(CEEntities.ENTITY_RAMU.get(), mgr -> new SimpleGeoRenderer<>(mgr, CroodaceousMod.ID, "ramu"));
+        EntityRenderers.register(CEEntities.ENTITY_RAMU.get(), RamuRenderer::new);
     }
     
 }

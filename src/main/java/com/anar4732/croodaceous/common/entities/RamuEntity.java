@@ -5,7 +5,6 @@ import com.anar4732.croodaceous.registry.CEBlocks;
 import com.anar4732.croodaceous.registry.CEEntities;
 import com.anar4732.croodaceous.registry.CEItems;
 import com.anar4732.croodaceous.registry.CEPointOfInterestTypes;
-import net.minecraft.advancements.CriteriaTriggers;
 import net.minecraft.commands.arguments.EntityAnchorArgument;
 import net.minecraft.core.BlockPos;
 import net.minecraft.nbt.CompoundTag;
@@ -13,9 +12,7 @@ import net.minecraft.network.syncher.EntityDataAccessor;
 import net.minecraft.network.syncher.EntityDataSerializers;
 import net.minecraft.network.syncher.SynchedEntityData;
 import net.minecraft.server.level.ServerLevel;
-import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.sounds.SoundEvents;
-import net.minecraft.sounds.SoundSource;
 import net.minecraft.util.Mth;
 import net.minecraft.world.DifficultyInstance;
 import net.minecraft.world.InteractionHand;
@@ -38,10 +35,8 @@ import net.minecraft.world.entity.monster.Monster;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
-import net.minecraft.world.item.enchantment.EnchantmentHelper;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.ServerLevelAccessor;
-import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.phys.Vec3;
 import software.bernie.geckolib3.core.IAnimatable;
 import software.bernie.geckolib3.core.PlayState;
@@ -56,6 +51,7 @@ import java.util.Optional;
 
 public class RamuEntity extends Animal implements IAnimatable {
 	private static final EntityDataAccessor<Boolean> DATA_SITTING = SynchedEntityData.defineId(RamuEntity.class, EntityDataSerializers.BOOLEAN);
+	private static final EntityDataAccessor<Boolean> DATA_CE = SynchedEntityData.defineId(RamuEntity.class, EntityDataSerializers.BOOLEAN);
 	private static final EntityDataAccessor<Integer> DATA_SST = SynchedEntityData.defineId(RamuEntity.class, EntityDataSerializers.INT);
 	private static final int CHARGE_START_TIME = 60;
 	private final AnimationFactory animationFactory = new AnimationFactory(this);
@@ -64,6 +60,7 @@ public class RamuEntity extends Animal implements IAnimatable {
 	private boolean wantsSit;
 	private int sprintStartTimestemp;
 	private boolean willLayEgg;
+	private boolean carryingEgg;
 	
 	public RamuEntity(EntityType<? extends RamuEntity> type, Level level) {
 		super(type, level);
@@ -132,6 +129,9 @@ public class RamuEntity extends Animal implements IAnimatable {
 	public void tick() {
 		super.tick();
 		if (!level.isClientSide) {
+			if (nestPos != null && level.getBlockState(nestPos).getBlock() != CEBlocks.RAMU_NEST.get()) {
+				nestPos = null;
+			}
 			if (this.isSitting()) {
 				this.getNavigation().stop();
 				this.goalSelector.disableControlFlag(Goal.Flag.JUMP);
@@ -159,6 +159,9 @@ public class RamuEntity extends Animal implements IAnimatable {
 				this.setSprinting(false);
 				sprintStartTimestemp = 0;
 			}
+			if (this.getTarget() instanceof LiyoteEntity && this.getTarget().getHealth() <= 5F) {
+				this.setTarget(null);
+			}
 			if (this.tickCount % 1200 == 0) {
 				this.wantsSit = this.random.nextBoolean();
 			}
@@ -166,6 +169,7 @@ public class RamuEntity extends Animal implements IAnimatable {
 				if (!hasEggOnNest()) {
 					this.level.setBlock(nestPos, CEBlocks.RAMU_NEST.get().defaultBlockState().setValue(RamuNestBlock.WITH_EGG, true), 3);
 					willLayEgg = false;
+					carryingEgg = false;
 				}
 			}
 			if (nestPos == null && !level.isClientSide) {
@@ -177,11 +181,16 @@ public class RamuEntity extends Animal implements IAnimatable {
 					this.getNavigation().moveTo(pos.getX(), pos.getY(), pos.getZ(), 1.0D);
 				});
 			}
+			if (!sitting && !willLayEgg && nestPos != null && this.getTarget() == null && this.nestPos.distSqr(this.getOnPos()) > 2300) {
+				this.getNavigation().moveTo(nestPos.getX(), nestPos.getY(), nestPos.getZ(), 1.0D);
+			}
 			this.entityData.set(DATA_SITTING, this.sitting);
 			this.entityData.set(DATA_SST, this.sprintStartTimestemp);
+			this.entityData.set(DATA_CE, this.carryingEgg);
 		} else {
 			this.sitting = this.entityData.get(DATA_SITTING);
 			this.sprintStartTimestemp = this.entityData.get(DATA_SST);
+			this.carryingEgg = this.entityData.get(DATA_CE);
 		}
 	}
 	
@@ -228,11 +237,8 @@ public class RamuEntity extends Animal implements IAnimatable {
 	@Nullable
 	public SpawnGroupData finalizeSpawn(ServerLevelAccessor pLevel, DifficultyInstance pDifficulty, MobSpawnType pReason, @Nullable SpawnGroupData pSpawnData, @Nullable CompoundTag pDataTag) {
 		this.nestPos = this.getOnPos().above();
-		pLevel.setBlock(nestPos, CEBlocks.RAMU_NEST.get().defaultBlockState().setValue(RamuNestBlock.WITH_EGG, this.random.nextBoolean()), 3);
 		if (!level.isClientSide && pReason != MobSpawnType.SPAWN_EGG) {
-			PoiType pt = CEPointOfInterestTypes.RAMU_NEST.get();
-			PoiManager poiManager = ((ServerLevel) level).getPoiManager();
-			poiManager.take(pt.getPredicate(), (p) -> true, nestPos, 32);
+			pLevel.setBlock(nestPos, CEBlocks.RAMU_NEST.get().defaultBlockState().setValue(RamuNestBlock.WITH_EGG, this.random.nextBoolean()), 3);
 		}
 		return super.finalizeSpawn(pLevel, pDifficulty, pReason, pSpawnData, pDataTag);
 	}
@@ -280,6 +286,7 @@ public class RamuEntity extends Animal implements IAnimatable {
 		super.defineSynchedData();
 		this.entityData.define(DATA_SITTING, false);
 		this.entityData.define(DATA_SST, 0);
+		this.entityData.define(DATA_CE, false);
 	}
 	
 	@Override
@@ -333,9 +340,7 @@ public class RamuEntity extends Animal implements IAnimatable {
 
 	@Override
 	public void onItemPickup(ItemEntity pItem) {
-		if (canTakeItem(pItem.getItem())) {
-			willLayEgg = true;
-		}
+		super.onItemPickup(pItem);
 	}
 	
 	@Override
@@ -347,7 +352,12 @@ public class RamuEntity extends Animal implements IAnimatable {
 	protected void setItemSlotAndDropWhenKilled(EquipmentSlot p_21469_, ItemStack p_21470_) {
 		if (p_21470_.getItem() == CEItems.RAMU_EGG.get()) {
 			this.willLayEgg = true;
+			this.carryingEgg = true;
 		}
+	}
+	
+	public boolean carriesEgg() {
+		return carryingEgg;
 	}
 	
 }

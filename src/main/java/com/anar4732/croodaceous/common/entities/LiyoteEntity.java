@@ -168,7 +168,7 @@ public class LiyoteEntity extends Wolf implements IAnimatable {
 				heal(4);
 			}
 		}
-		if (!this.level.isClientSide && !this.isInSittingPose() && eatingItem.isEmpty() && this.random.nextInt(1200) == 0) {
+		if (!this.level.isClientSide && !this.isInSittingPose() && eatingItem.isEmpty() && this.getHealth() > 5F && this.random.nextInt(1200) == 0) {
 			PoiManager poiManager = ((ServerLevel) level).getPoiManager();
 			poiManager.findClosest(CEPointOfInterestTypes.RAMU_NEST.get().getPredicate(), p -> this.level.getBlockState(p).getValue(RamuNestBlock.WITH_EGG), this.getOnPos(), 32, PoiManager.Occupancy.ANY).ifPresent(p -> {
 				targetNest = p;

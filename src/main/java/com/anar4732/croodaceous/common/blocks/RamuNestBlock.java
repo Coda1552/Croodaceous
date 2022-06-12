@@ -4,6 +4,7 @@ import com.anar4732.croodaceous.common.entities.RamuEntity;
 import com.anar4732.croodaceous.registry.CEItems;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
+import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.sounds.SoundSource;
@@ -21,10 +22,19 @@ import net.minecraft.world.level.block.state.StateDefinition;
 import net.minecraft.world.level.block.state.properties.BooleanProperty;
 import net.minecraft.world.level.material.Material;
 import net.minecraft.world.level.material.MaterialColor;
+import net.minecraft.world.level.storage.loot.BuiltInLootTables;
+import net.minecraft.world.level.storage.loot.LootContext;
+import net.minecraft.world.level.storage.loot.LootTable;
+import net.minecraft.world.level.storage.loot.parameters.LootContextParamSets;
+import net.minecraft.world.level.storage.loot.parameters.LootContextParams;
 import net.minecraft.world.phys.AABB;
 import net.minecraft.world.phys.BlockHitResult;
 import net.minecraft.world.phys.shapes.CollisionContext;
 import net.minecraft.world.phys.shapes.VoxelShape;
+
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
 
 public class RamuNestBlock extends Block {
 	private static final VoxelShape SHAPE = Block.box(0D, 0D, 0D, 16.0D, 8.0D, 16.0D);
@@ -90,5 +100,15 @@ public class RamuNestBlock extends Block {
 		});
 		super.onRemove(pState, pLevel, pPos, pNewState, pIsMoving);
 	}
-
+	
+	@Override
+	public List<ItemStack> getDrops(BlockState pState, LootContext.Builder pBuilder) {
+		ArrayList<ItemStack> drops = new ArrayList<>();
+		if (pState.getValue(WITH_EGG)) {
+			drops.add(new ItemStack(CEItems.RAMU_EGG.get()));
+		}
+		drops.add(new ItemStack(CEItems.RAMU_NEST.get()));
+		return drops;
+	}
+	
 }
