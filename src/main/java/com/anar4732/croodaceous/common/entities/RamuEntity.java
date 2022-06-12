@@ -229,7 +229,7 @@ public class RamuEntity extends Animal implements IAnimatable {
 	public SpawnGroupData finalizeSpawn(ServerLevelAccessor pLevel, DifficultyInstance pDifficulty, MobSpawnType pReason, @Nullable SpawnGroupData pSpawnData, @Nullable CompoundTag pDataTag) {
 		this.nestPos = this.getOnPos().above();
 		pLevel.setBlock(nestPos, CEBlocks.RAMU_NEST.get().defaultBlockState().setValue(RamuNestBlock.WITH_EGG, this.random.nextBoolean()), 3);
-		if (!level.isClientSide) {
+		if (!level.isClientSide && pReason != MobSpawnType.SPAWN_EGG) {
 			PoiType pt = CEPointOfInterestTypes.RAMU_NEST.get();
 			PoiManager poiManager = ((ServerLevel) level).getPoiManager();
 			poiManager.take(pt.getPredicate(), (p) -> true, nestPos, 32);
