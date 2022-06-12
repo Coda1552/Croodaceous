@@ -300,7 +300,7 @@ public class RamuEntity extends Animal implements IAnimatable {
 	
 	@Override
 	protected void tickDeath() {
-		if (!level.isClientSide && this.deathTime == 0) {
+		if (!level.isClientSide && this.deathTime == 0 && nestPos != null) {
 			((ServerLevel) level).getPoiManager().release(nestPos);
 		}
 		super.tickDeath();
