@@ -81,7 +81,7 @@ public class RamuNestBlock extends Block {
 	@Override
 	public void onRemove(BlockState pState, Level pLevel, BlockPos pPos, BlockState pNewState, boolean pIsMoving) {
 		pLevel.getEntitiesOfClass(RamuEntity.class, new AABB(pPos).inflate(64)).forEach(e -> {
-			if (e.getNestPos().equals(pPos)) {
+			if (e.getNestPos() != null && e.getNestPos().equals(pPos)) {
 				e.setNestPos(null);
 			}
 			if (!pLevel.isClientSide) {
