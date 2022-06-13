@@ -16,6 +16,7 @@ import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.item.ItemStack;
 import software.bernie.geckolib3.geo.render.built.GeoBone;
 import software.bernie.geckolib3.renderers.geo.GeoEntityRenderer;
+import software.bernie.geckolib3.util.RenderUtils;
 
 import javax.annotation.Nullable;
 
@@ -34,8 +35,13 @@ public class RamuRenderer extends GeoEntityRenderer<RamuEntity> {
 		if (bone.name.equals("head")) {
 			if (animatable.carriesEgg()) {
 				stack.pushPose();
+				RenderUtils.translate(bone, stack);
+				RenderUtils.moveToPivot(bone, stack);
+				RenderUtils.rotate(bone, stack);
+				RenderUtils.scale(bone, stack);
+				RenderUtils.moveBackFromPivot(bone, stack);
 				stack.mulPose(Vector3f.XP.rotation(130));
-				stack.translate(0, 0.2, 2.15);
+				stack.translate(0, 0.1, 2.3);
 				Minecraft.getInstance().getItemRenderer().renderStatic(egg, ItemTransforms.TransformType.GROUND, packedLightIn, packedOverlayIn, stack, renderTypeBuffer, 0);
 				RenderType type = getRenderType(animatable, 1F, stack, renderTypeBuffer, null, packedLightIn, getTextureLocation(animatable));
 				bufferIn = renderTypeBuffer.getBuffer(type);
