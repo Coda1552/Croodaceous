@@ -58,7 +58,7 @@ public class BearowlEntity extends Animal implements IAnimatable {
 	}
 	
 	private boolean isTarget(LivingEntity livingEntity) {
-		return livingEntity.getBbWidth() < 2 && livingEntity.getBbHeight() < 2;
+		return livingEntity.getBbWidth() <= 2 && livingEntity.getBbHeight() <= 2;
 	}
 	
 	private PlayState animControllerMain(AnimationEvent<?> e) {
