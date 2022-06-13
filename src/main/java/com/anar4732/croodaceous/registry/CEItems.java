@@ -31,7 +31,7 @@ public class CEItems {
     public static final RegistryObject<Item> ITEM_BEAROWL_SPAWN_EGG =
             ITEMS.register("bearowl_spawn_egg", () -> new ForgeSpawnEggItem(CEEntities.ENTITY_BEAROWL, 0x463830, 0x8c867b, new Item.Properties().tab(TAB)));
     public static final RegistryObject<Item> ITEM_RAMU_SPAWN_EGG =
-            ITEMS.register("ramu_spawn_egg", () -> new ForgeSpawnEggItem(CEEntities.ENTITY_RAMU, 0x000000, 0x000000, new Item.Properties().tab(TAB)));
+            ITEMS.register("ramu_spawn_egg", () -> new ForgeSpawnEggItem(CEEntities.ENTITY_RAMU, 0x222522, 0xb18444, new Item.Properties().tab(TAB)));
     
     // Block Items
     public static final RegistryObject<Item> RAMU_NEST =
