@@ -5,14 +5,12 @@ import com.anar4732.croodaceous.registry.CEBlocks;
 import com.anar4732.croodaceous.registry.CEEntities;
 import com.anar4732.croodaceous.registry.CEItems;
 import com.anar4732.croodaceous.registry.CEPointOfInterestTypes;
-import net.minecraft.commands.arguments.EntityAnchorArgument;
 import net.minecraft.core.BlockPos;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.syncher.EntityDataAccessor;
 import net.minecraft.network.syncher.EntityDataSerializers;
 import net.minecraft.network.syncher.SynchedEntityData;
 import net.minecraft.server.level.ServerLevel;
-import net.minecraft.sounds.SoundEvents;
 import net.minecraft.util.Mth;
 import net.minecraft.world.DifficultyInstance;
 import net.minecraft.world.InteractionHand;
@@ -52,13 +50,10 @@ import java.util.Optional;
 public class RamuEntity extends Animal implements IAnimatable {
 	private static final EntityDataAccessor<Boolean> DATA_SITTING = SynchedEntityData.defineId(RamuEntity.class, EntityDataSerializers.BOOLEAN);
 	private static final EntityDataAccessor<Boolean> DATA_CE = SynchedEntityData.defineId(RamuEntity.class, EntityDataSerializers.BOOLEAN);
-	private static final EntityDataAccessor<Integer> DATA_SST = SynchedEntityData.defineId(RamuEntity.class, EntityDataSerializers.INT);
-	private static final int CHARGE_START_TIME = 60;
 	private final AnimationFactory animationFactory = new AnimationFactory(this);
 	private BlockPos nestPos;
 	private boolean sitting;
 	private boolean wantsSit;
-	private int sprintStartTimestemp;
 	private boolean willLayEgg;
 	private boolean carryingEgg;
 	
@@ -94,9 +89,7 @@ public class RamuEntity extends Animal implements IAnimatable {
 	}
 	
 	private PlayState animControllerMain(AnimationEvent<?> e) {
-		if (this.sprintStartTimestemp != 0 && this.sprintStartTimestemp + CHARGE_START_TIME > this.tickCount) {
-			e.getController().setAnimation(new AnimationBuilder().addAnimation("animation.ramu.charge_start", true));
-		} else if (e.isMoving()) {
+		if (e.isMoving()) {
 			if (this.isSprinting()) {
 				e.getController().setAnimation(new AnimationBuilder().addAnimation("animation.ramu.charge", true));
 			} else {
@@ -146,18 +139,9 @@ public class RamuEntity extends Animal implements IAnimatable {
 				this.getNavigation().moveTo(nestPos.getX(), nestPos.getY(), nestPos.getZ(), 1.0D);
 			}
 			if (!sitting && this.getTarget() != null && (this.getTarget().getMainHandItem().getItem() == CEItems.RAMU_EGG.get() || this.getTarget().getLastHurtMob() == this)) {
-				if (sprintStartTimestemp == 0) {
-					sprintStartTimestemp = this.tickCount;
-					playSound(SoundEvents.CHICKEN_AMBIENT, 1.0F, 1.0F); // TODO: Add sound
-				} else if (this.sprintStartTimestemp + CHARGE_START_TIME > this.tickCount) {
-					this.getNavigation().stop();
-					this.lookAt(EntityAnchorArgument.Anchor.EYES, this.getTarget().getPosition(1F));
-				} else {
-					this.setSprinting(true);
-				}
+				this.setSprinting(true);
 			} else  {
 				this.setSprinting(false);
-				sprintStartTimestemp = 0;
 			}
 			if (this.getTarget() instanceof LiyoteEntity && this.getTarget().getHealth() <= 5F) {
 				this.setTarget(null);
@@ -185,11 +169,9 @@ public class RamuEntity extends Animal implements IAnimatable {
 				this.getNavigation().moveTo(nestPos.getX(), nestPos.getY(), nestPos.getZ(), 1.0D);
 			}
 			this.entityData.set(DATA_SITTING, this.sitting);
-			this.entityData.set(DATA_SST, this.sprintStartTimestemp);
 			this.entityData.set(DATA_CE, this.carryingEgg);
 		} else {
 			this.sitting = this.entityData.get(DATA_SITTING);
-			this.sprintStartTimestemp = this.entityData.get(DATA_SST);
 			this.carryingEgg = this.entityData.get(DATA_CE);
 		}
 	}
@@ -285,7 +267,6 @@ public class RamuEntity extends Animal implements IAnimatable {
 	protected void defineSynchedData() {
 		super.defineSynchedData();
 		this.entityData.define(DATA_SITTING, false);
-		this.entityData.define(DATA_SST, 0);
 		this.entityData.define(DATA_CE, false);
 	}
 	
