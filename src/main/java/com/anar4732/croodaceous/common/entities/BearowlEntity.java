@@ -8,6 +8,7 @@ import net.minecraft.network.syncher.EntityDataSerializers;
 import net.minecraft.network.syncher.SynchedEntityData;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.DifficultyInstance;
+import net.minecraft.world.InteractionHand;
 import net.minecraft.world.damagesource.DamageSource;
 import net.minecraft.world.entity.*;
 import net.minecraft.world.entity.ai.attributes.AttributeSupplier;
@@ -33,9 +34,13 @@ import javax.annotation.Nullable;
 
 public class BearowlEntity extends Animal implements IAnimatable {
 	private static final EntityDataAccessor<Boolean> DATA_SLEEPING = SynchedEntityData.defineId(BearowlEntity.class, EntityDataSerializers.BOOLEAN);
+	private static final EntityDataAccessor<Boolean> DATA_ROARING = SynchedEntityData.defineId(BearowlEntity.class, EntityDataSerializers.BOOLEAN);
 	private final AnimationFactory animationFactory = new AnimationFactory(this);
 	private BlockPos homePos;
 	private boolean sleeping;
+	private boolean roaring;
+	private int attackAnimationAttr;
+	private int roarTicks;
 	
 	public BearowlEntity(EntityType<? extends BearowlEntity> type, Level level) {
 		super(type, level);
@@ -62,12 +67,29 @@ public class BearowlEntity extends Animal implements IAnimatable {
 	}
 	
 	private PlayState animControllerMain(AnimationEvent<?> e) {
-		// TODO: Implement animations
-		// Debug only placeholder animations
-		if (sleeping) { // We use "sleeping" since its synced.
-			e.getController().setAnimation(new AnimationBuilder().addAnimation("animation.model.sleep", true));
+		if (this.swingTime > 0) {
+			if (attackAnimationAttr == 0) {
+				e.getController().setAnimation(new AnimationBuilder().addAnimation("animation.bearowl.swipe_right", true));
+			} else {
+				e.getController().setAnimation(new AnimationBuilder().addAnimation("animation.bearowl.swipe_left", true));
+			}
+			return PlayState.CONTINUE;
 		} else {
-			e.getController().setAnimation(new AnimationBuilder().addAnimation("animation.model.idle", true));
+			attackAnimationAttr = random.nextInt(2);
+		}
+		
+		if (this.roaring) {
+			e.getController().setAnimation(new AnimationBuilder().addAnimation("animation.bearowl.roar", true));
+		} else if (e.isMoving()) {
+			if (this.isSprinting()) {
+				e.getController().setAnimation(new AnimationBuilder().addAnimation("animation.bearowl.run", true));
+			} else {
+				e.getController().setAnimation(new AnimationBuilder().addAnimation("animation.bearowl.walk", true));
+			}
+		} else if (sleeping) {
+			e.getController().setAnimation(new AnimationBuilder().addAnimation("animation.bearowl.sleep", true));
+		} else {
+			e.getController().setAnimation(new AnimationBuilder().addAnimation("animation.bearowl.idle", true));
 		}
 		return PlayState.CONTINUE;
 	}
@@ -85,6 +107,7 @@ public class BearowlEntity extends Animal implements IAnimatable {
 	@Override
 	public void tick() {
 		super.tick();
+		updateSwingTime();
 		if (!level.isClientSide) {
 			if (this.isBearowlSleeping()) {
 				this.getNavigation().stop();
@@ -109,13 +132,28 @@ public class BearowlEntity extends Animal implements IAnimatable {
 				this.setLastHurtByMob(null);
 			}
 			if (this.getTarget() != null && this.getTarget().distanceTo(this) > 16F) {
-				this.setSprinting(true);
+				if (roarTicks < 40) {
+					this.roaring = true;
+					this.setSprinting(false);
+					this.goalSelector.disableControlFlag(Goal.Flag.MOVE);
+					this.getNavigation().stop();
+					roarTicks++;
+				} else {
+					this.roaring = false;
+					this.setSprinting(true);
+					this.goalSelector.enableControlFlag(Goal.Flag.MOVE);
+				}
 			} else if (this.getTarget() == null || sleeping) {
+				this.goalSelector.enableControlFlag(Goal.Flag.MOVE);
 				this.setSprinting(false);
+				this.roaring = false;
+				roarTicks = 0;
 			}
-			this.entityData.set(DATA_SLEEPING, this.sleeping); // Sync sleeping so sleep animation can work
+			this.entityData.set(DATA_SLEEPING, this.sleeping);
+			this.entityData.set(DATA_ROARING, this.roaring);
 		} else {
 			this.sleeping = this.entityData.get(DATA_SLEEPING);
+			this.roaring = this.entityData.get(DATA_ROARING);
 		}
 	}
 
@@ -168,6 +206,7 @@ public class BearowlEntity extends Animal implements IAnimatable {
 	protected void defineSynchedData() {
 		super.defineSynchedData();
 		this.entityData.define(DATA_SLEEPING, false);
+		this.entityData.define(DATA_ROARING, false);
 	}
 	
 	@Override
@@ -181,6 +220,16 @@ public class BearowlEntity extends Animal implements IAnimatable {
 		this.sleeping = false;
 		this.setLastHurtByMob(null);
 		super.push(pEntity);
+	}
+	
+	@Override
+	public void swing(InteractionHand pHand) {
+		this.swing(pHand, false);
+	}
+	
+	@Override
+	public int getCurrentSwingDuration() {
+		return 20;
 	}
 	
 	// TODO: Custom Sounds

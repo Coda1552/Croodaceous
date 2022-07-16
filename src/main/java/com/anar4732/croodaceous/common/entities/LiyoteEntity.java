@@ -123,7 +123,13 @@ public class LiyoteEntity extends Wolf implements IAnimatable {
 	
 	private PlayState animControllerMain(AnimationEvent<?> e) {
 		if (!eatingItem.isEmpty()) {
-			e.getController().setAnimation(new AnimationBuilder().addAnimation("animation.liyote.eat", true));
+			if (e.isMoving()) {
+				e.getController().setAnimation(new AnimationBuilder().addAnimation("animation.liyote.walk_eat", true));
+			} else if (isInSittingPose()) {
+				e.getController().setAnimation(new AnimationBuilder().addAnimation("animation.liyote.sitting_eat", true));
+			} else {
+				e.getController().setAnimation(new AnimationBuilder().addAnimation("animation.liyote.idle_eat", true));
+			}
 		} else if (e.isMoving()) {
 			e.getController().setAnimation(new AnimationBuilder().addAnimation("animation.liyote.walk", true));
 		} else if (isInSittingPose()) {
