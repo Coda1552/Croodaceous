@@ -18,7 +18,7 @@
 					"rotation": [131.66302, 0, 0]
 				},
 				"leftfoot": {
-					"rotation": [-38, 0, 0],
+					"rotation": [-38.66871, -9.82019, 7.77221],
 					"position": [0, 3, -3]
 				},
 				"rightleg": {
@@ -28,7 +28,7 @@
 					"rotation": [131.66302, 0, 0]
 				},
 				"rightfoot": {
-					"rotation": [-38, 0, 0],
+					"rotation": [-38.66871, 9.82019, -7.77221],
 					"position": [0, 3, -3]
 				},
 				"body": {
@@ -101,6 +101,9 @@
 						"4.5": [51.30055, "41.6683+Math.sin((query.anim_time + 1.4) * 360) * -100", "65.5+Math.sin((query.anim_time + 1.4) * 360) * -25"],
 						"5.5": ["51.3005+Math.sin((query.anim_time + 1.4) * 180) * 1", 41.6683, "65.5+Math.sin((query.anim_time + 1.4) * 180) * 1"]
 					}
+				},
+				"root": {
+					"position": [0, -16, 0]
 				}
 			}
 		},

@@ -63,7 +63,7 @@ public class BearowlEntity extends Animal implements IAnimatable {
 	}
 	
 	private boolean isTarget(LivingEntity livingEntity) {
-		return livingEntity.getBbWidth() <= 2 && livingEntity.getBbHeight() <= 2;
+		return livingEntity.getBbWidth() <= 2 && livingEntity.getBbHeight() <= 2 && !(livingEntity instanceof BearowlEntity);
 	}
 	
 	private PlayState animControllerMain(AnimationEvent<?> e) {
@@ -109,6 +109,13 @@ public class BearowlEntity extends Animal implements IAnimatable {
 		super.tick();
 		updateSwingTime();
 		if (!level.isClientSide) {
+			if (isSprinting()) {
+				setSpeed(0.5F);
+			}
+			else {
+				setSpeed(0.25F);
+			}
+
 			if (this.isBearowlSleeping()) {
 				this.getNavigation().stop();
 				this.goalSelector.disableControlFlag(Goal.Flag.JUMP);

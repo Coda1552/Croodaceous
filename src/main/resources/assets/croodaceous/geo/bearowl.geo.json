@@ -12,12 +12,12 @@
 			},
 			"bones": [
 				{
-					"name": "bodycore",
+					"name": "root",
 					"pivot": [0, 0, -14]
 				},
 				{
 					"name": "legscore",
-					"parent": "bodycore",
+					"parent": "root",
 					"pivot": [0, 30, 21]
 				},
 				{
@@ -82,7 +82,7 @@
 				},
 				{
 					"name": "body",
-					"parent": "bodycore",
+					"parent": "root",
 					"pivot": [0, 30, 21],
 					"cubes": [
 						{"origin": [-12, 17, -3], "size": [24, 28, 31], "uv": [0, 61]}
