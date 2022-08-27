@@ -1,6 +1,7 @@
 package com.anar4732.croodaceous.common.entities;
 
 import com.anar4732.croodaceous.common.blocks.RamuNestBlock;
+import com.anar4732.croodaceous.common.entities.goal.StealItemFromPlayerGoal;
 import com.anar4732.croodaceous.registry.CEBlocks;
 import com.anar4732.croodaceous.registry.CEEntities;
 import com.anar4732.croodaceous.registry.CEItems;
@@ -21,6 +22,7 @@ import net.minecraft.world.entity.*;
 import net.minecraft.world.entity.ai.goal.AvoidEntityGoal;
 import net.minecraft.world.entity.ai.village.poi.PoiManager;
 import net.minecraft.world.entity.animal.Wolf;
+import net.minecraft.world.entity.item.ItemEntity;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.DyeItem;
 import net.minecraft.world.item.Item;
@@ -48,6 +50,7 @@ public class LiyoteEntity extends Wolf implements IAnimatable {
 	
 	public LiyoteEntity(EntityType<? extends LiyoteEntity> type, Level level) {
 		super(type, level);
+		this.setDropChance(EquipmentSlot.MAINHAND, 1F);
 	}
 	
 	@Override
@@ -69,6 +72,7 @@ public class LiyoteEntity extends Wolf implements IAnimatable {
 				return eatingItem.getItem() == CEItems.RAMU_EGG.get() && super.canUse();
 			}
 		});
+		this.goalSelector.addGoal(13, new StealItemFromPlayerGoal(this, 100));
 		super.registerGoals();
 		this.targetSelector.removeAllGoals();
 	}
@@ -123,7 +127,7 @@ public class LiyoteEntity extends Wolf implements IAnimatable {
 	}
 	
 	private PlayState animControllerMain(AnimationEvent<?> e) {
-		if (!eatingItem.isEmpty()) {
+		if (!eatingItem.isEmpty() && this.isFood(eatingItem)) {
 			if (e.isMoving()) {
 				e.getController().setAnimation(new AnimationBuilder().addAnimation("animation.liyote.walk_eat", true));
 			} else if (isInSittingPose()) {
@@ -154,7 +158,7 @@ public class LiyoteEntity extends Wolf implements IAnimatable {
 	@Override
 	public void tick() {
 		super.tick();
-		if (!eatingItem.isEmpty() && eatingItem.getItem() != CEItems.RAMU_EGG.get()) {
+		if (!eatingItem.isEmpty() && this.isFood(eatingItem)) {
 			eatingTicks++;
 			if (eatingTicks % 5 == 0 && level.isClientSide) {
 				Vec3 look = getRenderViewVector();
@@ -264,6 +268,41 @@ public class LiyoteEntity extends Wolf implements IAnimatable {
 	protected void defineSynchedData() {
 		super.defineSynchedData();
 		this.entityData.define(DATA_EI, ItemStack.EMPTY);
+	}
+	
+	@Override
+	public boolean canTakeItem(ItemStack pItemstack) {
+		return eatingItem.isEmpty() || (eatingItem.getItem() != CEItems.RAMU_EGG.get() && pItemstack.getItem() == CEItems.RAMU_EGG.get());
+	}
+	
+	@Override
+	public boolean wantsToPickUp(ItemStack pStack) {
+		return canTakeItem(pStack);
+	}
+	
+	@Override
+	public void onItemPickup(ItemEntity pItem) {
+		super.onItemPickup(pItem);
+	}
+	
+	@Override
+	public boolean canPickUpLoot() {
+		return true;
+	}
+	
+	@Override
+	public boolean equipItemIfPossible(ItemStack p_21541_) {
+		if (this.canHoldItem(p_21541_)) {
+			if (!eatingItem.isEmpty()) {
+				this.spawnAtLocation(eatingItem);
+			}
+			
+			eatingItem = p_21541_.copy();
+			this.equipEventAndSound(p_21541_);
+			return true;
+		} else {
+			return false;
+		}
 	}
 	
 }
