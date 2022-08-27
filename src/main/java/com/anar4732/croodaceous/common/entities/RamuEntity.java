@@ -61,12 +61,12 @@ public class RamuEntity extends Animal implements IAnimatable {
 	
 	@Override
 	protected void registerGoals() {
-		this.goalSelector.addGoal(0, new MeleeAttackGoal(this, 1.0D, true));
-		this.goalSelector.addGoal(1, new RamuBreedGoal(this, 1.0D));
-		this.goalSelector.addGoal(2, new WaterAvoidingRandomStrollGoal(this, 1.0D));
-		this.goalSelector.addGoal(3, new RandomLookAroundGoal(this));
-		this.targetSelector.addGoal(0, new NearestAttackableTargetGoal<>(this, LivingEntity.class, 10, true, false, this::isTarget));
-		this.targetSelector.addGoal(1, new HurtByTargetGoal(this));
+		this.goalSelector.addGoal(1, new MeleeAttackGoal(this, 1.0D, true));
+		this.goalSelector.addGoal(2, new RamuBreedGoal(this, 1.0D));
+		this.goalSelector.addGoal(3, new WaterAvoidingRandomStrollGoal(this, 1.0D));
+		this.goalSelector.addGoal(4, new RandomLookAroundGoal(this));
+		this.targetSelector.addGoal(1, new NearestAttackableTargetGoal<>(this, LivingEntity.class, 10, false, false, this::isTarget));
+		this.targetSelector.addGoal(2, new HurtByTargetGoal(this));
 	}
 	
 	public static AttributeSupplier.Builder createAttributes() {
@@ -84,8 +84,7 @@ public class RamuEntity extends Animal implements IAnimatable {
 		if (nestPos == null) {
 			return livingEntity.getMainHandItem().getItem() == CEItems.RAMU_EGG.get();
 		}
-		return livingEntity.getPosition(1F).distanceTo(new Vec3(nestPos.getX(), nestPos.getY(), nestPos.getZ())) < 4 || livingEntity.getMainHandItem()
-		                                                                                                                            .getItem() == CEItems.RAMU_EGG.get();
+		return livingEntity.getPosition(1F).distanceTo(new Vec3(nestPos.getX(), nestPos.getY(), nestPos.getZ())) < 4 || livingEntity.getMainHandItem().getItem() == CEItems.RAMU_EGG.get();
 	}
 	
 	private PlayState animControllerMain(AnimationEvent<?> e) {
@@ -122,6 +121,7 @@ public class RamuEntity extends Animal implements IAnimatable {
 	public void tick() {
 		super.tick();
 		if (!level.isClientSide) {
+			System.out.println(this.getTarget());
 			if (nestPos != null && level.getBlockState(nestPos).getBlock() != CEBlocks.RAMU_NEST.get()) {
 				nestPos = null;
 			}
@@ -138,8 +138,7 @@ public class RamuEntity extends Animal implements IAnimatable {
 			if (((wantsSit() && !isSitting()) || willLayEgg) && nestPos != null && this.getTarget() == null) {
 				this.getNavigation().moveTo(nestPos.getX(), nestPos.getY(), nestPos.getZ(), 1.0D);
 			}
-			if (!sitting && this.getTarget() != null && (this.getTarget().getMainHandItem().getItem() == CEItems.RAMU_EGG.get() || this.getTarget()
-			                                                                                                                           .getLastHurtMob() == this)) {
+			if (!sitting && this.getTarget() != null && (this.getTarget().getMainHandItem().getItem() == CEItems.RAMU_EGG.get() || this.getTarget().getLastHurtMob() == this)) {
 				this.setSprinting(true);
 			} else {
 				this.setSprinting(false);
@@ -157,20 +156,24 @@ public class RamuEntity extends Animal implements IAnimatable {
 					carryingEgg = false;
 				}
 			}
-			if (nestPos == null && !level.isClientSide) {
+			if (nestPos == null) {
 				findNest();
 			}
-			if (!sitting && !willLayEgg && nestPos != null && !hasEggOnNest() && (this.getTarget() == null || this.getTarget() instanceof LivingEntity)) {
+			if (!sitting && !willLayEgg && nestPos != null && !hasEggOnNest()) {
 				this.level.getEntitiesOfClass(ItemEntity.class, this.getBoundingBox().inflate(8F), e -> e.getItem().getItem() == CEItems.RAMU_EGG.get())
 				          .stream()
 				          .findFirst()
 				          .ifPresent(e -> {
 					          BlockPos pos = e.getOnPos();
+							  this.setTarget(null);
 					          this.getNavigation().moveTo(pos.getX(), pos.getY(), pos.getZ(), 1.0D);
 				          });
 			}
 			if (!sitting && !willLayEgg && nestPos != null && this.getTarget() == null && this.nestPos.distSqr(this.getOnPos()) > 2300) {
 				this.getNavigation().moveTo(nestPos.getX(), nestPos.getY(), nestPos.getZ(), 1.0D);
+			}
+			if (this.getTarget() != null && nestPos != null && this.getTarget().getPosition(1F).distanceTo(new Vec3(nestPos.getX(), nestPos.getY(), nestPos.getZ())) > 4 && this.getTarget().getMainHandItem().getItem() != CEItems.RAMU_EGG.get()) {
+				this.setTarget(null);
 			}
 			if (breadCooldown > 0) {
 				breadCooldown--;
