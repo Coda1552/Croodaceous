@@ -248,6 +248,7 @@ public class RamuEntity extends Animal implements IAnimatable {
 		super.readAdditionalSaveData(pCompound);
 		this.nestPos = new BlockPos(pCompound.getInt("NestPosX"), pCompound.getInt("NestPosY"), pCompound.getInt("NestPosZ"));
 		this.sitting = pCompound.getBoolean("Sitting");
+		this.breadCooldown = pCompound.getInt("BreadCooldown");
 	}
 	
 	@Override
@@ -259,6 +260,7 @@ public class RamuEntity extends Animal implements IAnimatable {
 			pCompound.putInt("NestPosZ", nestPos.getZ());
 		}
 		pCompound.putBoolean("Sitting", this.sitting);
+		pCompound.putInt("BreadCooldown", this.breadCooldown);
 	}
 	
 	private boolean isNearNest() {
@@ -355,7 +357,6 @@ public class RamuEntity extends Animal implements IAnimatable {
 	
 	
 	private static class RamuBreedGoal extends BreedGoal {
-		
 		public RamuBreedGoal(Animal pAnimal, double pSpeedModifier) {
 			super(pAnimal, pSpeedModifier);
 		}
