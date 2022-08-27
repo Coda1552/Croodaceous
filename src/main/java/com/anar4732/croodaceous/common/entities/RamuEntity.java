@@ -19,10 +19,7 @@ import net.minecraft.world.damagesource.DamageSource;
 import net.minecraft.world.entity.*;
 import net.minecraft.world.entity.ai.attributes.AttributeSupplier;
 import net.minecraft.world.entity.ai.attributes.Attributes;
-import net.minecraft.world.entity.ai.goal.Goal;
-import net.minecraft.world.entity.ai.goal.MeleeAttackGoal;
-import net.minecraft.world.entity.ai.goal.RandomLookAroundGoal;
-import net.minecraft.world.entity.ai.goal.WaterAvoidingRandomStrollGoal;
+import net.minecraft.world.entity.ai.goal.*;
 import net.minecraft.world.entity.ai.goal.target.HurtByTargetGoal;
 import net.minecraft.world.entity.ai.goal.target.NearestAttackableTargetGoal;
 import net.minecraft.world.entity.ai.village.poi.PoiManager;
@@ -56,6 +53,7 @@ public class RamuEntity extends Animal implements IAnimatable {
 	private boolean wantsSit;
 	private boolean willLayEgg;
 	private boolean carryingEgg;
+	private int breadCooldown;
 	
 	public RamuEntity(EntityType<? extends RamuEntity> type, Level level) {
 		super(type, level);
@@ -64,8 +62,9 @@ public class RamuEntity extends Animal implements IAnimatable {
 	@Override
 	protected void registerGoals() {
 		this.goalSelector.addGoal(0, new MeleeAttackGoal(this, 1.0D, true));
-		this.goalSelector.addGoal(1, new WaterAvoidingRandomStrollGoal(this, 1.0D));
-		this.goalSelector.addGoal(2, new RandomLookAroundGoal(this));
+		this.goalSelector.addGoal(1, new RamuBreedGoal(this, 1.0D));
+		this.goalSelector.addGoal(2, new WaterAvoidingRandomStrollGoal(this, 1.0D));
+		this.goalSelector.addGoal(3, new RandomLookAroundGoal(this));
 		this.targetSelector.addGoal(0, new NearestAttackableTargetGoal<>(this, LivingEntity.class, 10, true, false, this::isTarget));
 		this.targetSelector.addGoal(1, new HurtByTargetGoal(this));
 	}
@@ -73,7 +72,7 @@ public class RamuEntity extends Animal implements IAnimatable {
 	public static AttributeSupplier.Builder createAttributes() {
 		return Monster.createMonsterAttributes()
 		              .add(Attributes.MAX_HEALTH, 20)
-					  .add(Attributes.MOVEMENT_SPEED, 0.25D)
+		              .add(Attributes.MOVEMENT_SPEED, 0.25D)
 		              .add(Attributes.ATTACK_DAMAGE, 4)
 		              .add(Attributes.FOLLOW_RANGE, 16);
 	}
@@ -85,7 +84,8 @@ public class RamuEntity extends Animal implements IAnimatable {
 		if (nestPos == null) {
 			return livingEntity.getMainHandItem().getItem() == CEItems.RAMU_EGG.get();
 		}
-		return livingEntity.getPosition(1F).distanceTo(new Vec3(nestPos.getX(), nestPos.getY(), nestPos.getZ())) < 4 || livingEntity.getMainHandItem().getItem() == CEItems.RAMU_EGG.get();
+		return livingEntity.getPosition(1F).distanceTo(new Vec3(nestPos.getX(), nestPos.getY(), nestPos.getZ())) < 4 || livingEntity.getMainHandItem()
+		                                                                                                                            .getItem() == CEItems.RAMU_EGG.get();
 	}
 	
 	private PlayState animControllerMain(AnimationEvent<?> e) {
@@ -102,7 +102,7 @@ public class RamuEntity extends Animal implements IAnimatable {
 		}
 		return PlayState.CONTINUE;
 	}
-
+	
 	@Override
 	public void registerControllers(AnimationData data) {
 		data.addAnimationController(new AnimationController<>(this, "controller", 2F, this::animControllerMain));
@@ -112,12 +112,12 @@ public class RamuEntity extends Animal implements IAnimatable {
 	public AnimationFactory getFactory() {
 		return animationFactory;
 	}
-
+	
 	@Override
 	public float getStepHeight() {
 		return 1.1F;
 	}
-
+	
 	@Override
 	public void tick() {
 		super.tick();
@@ -138,9 +138,10 @@ public class RamuEntity extends Animal implements IAnimatable {
 			if (((wantsSit() && !isSitting()) || willLayEgg) && nestPos != null && this.getTarget() == null) {
 				this.getNavigation().moveTo(nestPos.getX(), nestPos.getY(), nestPos.getZ(), 1.0D);
 			}
-			if (!sitting && this.getTarget() != null && (this.getTarget().getMainHandItem().getItem() == CEItems.RAMU_EGG.get() || this.getTarget().getLastHurtMob() == this)) {
+			if (!sitting && this.getTarget() != null && (this.getTarget().getMainHandItem().getItem() == CEItems.RAMU_EGG.get() || this.getTarget()
+			                                                                                                                           .getLastHurtMob() == this)) {
 				this.setSprinting(true);
-			} else  {
+			} else {
 				this.setSprinting(false);
 			}
 			if (this.getTarget() instanceof LiyoteEntity && this.getTarget().getHealth() <= 5F) {
@@ -160,13 +161,19 @@ public class RamuEntity extends Animal implements IAnimatable {
 				findNest();
 			}
 			if (!sitting && !willLayEgg && nestPos != null && !hasEggOnNest() && (this.getTarget() == null || this.getTarget() instanceof LivingEntity)) {
-				this.level.getEntitiesOfClass(ItemEntity.class, this.getBoundingBox().inflate(8F), e -> e.getItem().getItem() == CEItems.RAMU_EGG.get()).stream().findFirst().ifPresent(e -> {
-					BlockPos pos = e.getOnPos();
-					this.getNavigation().moveTo(pos.getX(), pos.getY(), pos.getZ(), 1.0D);
-				});
+				this.level.getEntitiesOfClass(ItemEntity.class, this.getBoundingBox().inflate(8F), e -> e.getItem().getItem() == CEItems.RAMU_EGG.get())
+				          .stream()
+				          .findFirst()
+				          .ifPresent(e -> {
+					          BlockPos pos = e.getOnPos();
+					          this.getNavigation().moveTo(pos.getX(), pos.getY(), pos.getZ(), 1.0D);
+				          });
 			}
 			if (!sitting && !willLayEgg && nestPos != null && this.getTarget() == null && this.nestPos.distSqr(this.getOnPos()) > 2300) {
 				this.getNavigation().moveTo(nestPos.getX(), nestPos.getY(), nestPos.getZ(), 1.0D);
+			}
+			if (breadCooldown > 0) {
+				breadCooldown--;
 			}
 			this.entityData.set(DATA_SITTING, this.sitting);
 			this.entityData.set(DATA_CE, this.carryingEgg);
@@ -198,20 +205,25 @@ public class RamuEntity extends Animal implements IAnimatable {
 		}
 		ItemStack itemStack = pPlayer.getMainHandItem();
 		if (itemStack.getItem() == Items.MELON || itemStack.getItem() == Items.PUMPKIN) {
-			if (nestPos != null && !willLayEgg) {
+			if (nestPos != null && !willLayEgg && breadCooldown == 0) {
 				itemStack.shrink(1);
-				willLayEgg = true;
-				this.level.broadcastEntityEvent(this, (byte) 18);
+				this.setInLove(pPlayer);
 				return InteractionResult.CONSUME_PARTIAL;
 			}
 		}
 		return InteractionResult.SUCCESS;
 	}
-		
+	
+	@Override
+	public void spawnChildFromBreeding(ServerLevel p_27564_, Animal p_27565_) {
+		willLayEgg = true;
+		breadCooldown = 2 * 60 * 20;
+	}
+	
 	private boolean isSitting() {
 		return wantsSit() && isNearNest();
 	}
-
+	
 	private boolean wantsSit() {
 		return this.getTarget() == null && wantsSit;
 	}
@@ -224,13 +236,13 @@ public class RamuEntity extends Animal implements IAnimatable {
 		}
 		return super.finalizeSpawn(pLevel, pDifficulty, pReason, pSpawnData, pDataTag);
 	}
-
+	
 	@Nullable
 	@Override
 	public AgeableMob getBreedOffspring(ServerLevel p_146743_, AgeableMob p_146744_) {
 		return CEEntities.ENTITY_RAMU.get().create(p_146743_);
 	}
-
+	
 	@Override
 	public void readAdditionalSaveData(CompoundTag pCompound) {
 		super.readAdditionalSaveData(pCompound);
@@ -304,7 +316,7 @@ public class RamuEntity extends Animal implements IAnimatable {
 		boolean b = super.doHurtTarget(pEntity);
 		if (this.isSprinting() && pEntity instanceof LivingEntity livingEntity && b) {
 			float f1 = 5.0F; // Ram knockback
-			livingEntity.knockback(f1 * 0.5F, Mth.sin(this.getYRot() * ((float)Math.PI / 180F)), -Mth.cos(this.getYRot() * ((float)Math.PI / 180F)));
+			livingEntity.knockback(f1 * 0.5F, Mth.sin(this.getYRot() * ((float) Math.PI / 180F)), -Mth.cos(this.getYRot() * ((float) Math.PI / 180F)));
 		}
 		return b;
 	}
@@ -318,7 +330,7 @@ public class RamuEntity extends Animal implements IAnimatable {
 	public boolean wantsToPickUp(ItemStack pStack) {
 		return canTakeItem(pStack);
 	}
-
+	
 	@Override
 	public void onItemPickup(ItemEntity pItem) {
 		super.onItemPickup(pItem);
@@ -341,4 +353,17 @@ public class RamuEntity extends Animal implements IAnimatable {
 		return carryingEgg;
 	}
 	
+	
+	private static class RamuBreedGoal extends BreedGoal {
+		
+		public RamuBreedGoal(Animal pAnimal, double pSpeedModifier) {
+			super(pAnimal, pSpeedModifier);
+		}
+		
+		@Override
+		protected void breed() {
+			super.breed();
+			this.animal.setInLoveTime(0);
+		}
+	}
 }
