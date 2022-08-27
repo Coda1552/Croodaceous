@@ -109,13 +109,6 @@ public class BearowlEntity extends Animal implements IAnimatable {
 		super.tick();
 		updateSwingTime();
 		if (!level.isClientSide) {
-			if (isSprinting()) {
-				setSpeed(0.5F);
-			}
-			else {
-				setSpeed(0.25F);
-			}
-
 			if (this.isBearowlSleeping()) {
 				this.getNavigation().stop();
 				this.goalSelector.disableControlFlag(Goal.Flag.JUMP);
@@ -169,7 +162,7 @@ public class BearowlEntity extends Animal implements IAnimatable {
 		return 1.1F;
 	}
 
-	private boolean isBearowlSleeping() {
+	public boolean isBearowlSleeping() {
 		return wantsSleep() && isOnHomePos() || sleeping;
 	}
 
@@ -206,7 +199,7 @@ public class BearowlEntity extends Animal implements IAnimatable {
 	}
 	
 	private boolean isOnHomePos() {
-		return this.getOnPos().above().distSqr(this.homePos) < 16;
+		return this.homePos != null && this.getOnPos().above().distSqr(this.homePos) < 16;
 	}
 	
 	@Override
