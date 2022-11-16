@@ -53,6 +53,7 @@ public class BearowlEntity extends Animal implements IAnimatable {
 		this.goalSelector.addGoal(1, new WaterAvoidingRandomStrollGoal(this, 1.0D));
 		this.goalSelector.addGoal(2, new RandomLookAroundGoal(this));
 		this.targetSelector.addGoal(0, new NearestAttackableTargetGoal<>(this, LivingEntity.class, 10, true, false, this::isTarget));
+		this.targetSelector.addGoal(1, new NearestAttackableTargetGoal<>(this, BearowlEntity.class, 10000, false, false, e -> true));
 	}
 	
 	public static AttributeSupplier.Builder createAttributes() {
@@ -115,13 +116,6 @@ public class BearowlEntity extends Animal implements IAnimatable {
 		super.tick();
 		updateSwingTime();
 		if (!level.isClientSide) {
-			if (isSprinting()) {
-				setSpeed(0.5F);
-			}
-			else {
-				setSpeed(0.25F);
-			}
-
 			if (this.isBearowlSleeping()) {
 				this.getNavigation().stop();
 				this.goalSelector.disableControlFlag(Goal.Flag.JUMP);
@@ -175,7 +169,7 @@ public class BearowlEntity extends Animal implements IAnimatable {
 		return 1.1F;
 	}
 
-	private boolean isBearowlSleeping() {
+	public boolean isBearowlSleeping() {
 		return wantsSleep() && isOnHomePos() || sleeping;
 	}
 
@@ -217,7 +211,7 @@ public class BearowlEntity extends Animal implements IAnimatable {
 	}
 	
 	private boolean isOnHomePos() {
-		return this.getOnPos().above().distSqr(this.homePos) < 16;
+		return this.homePos != null && this.getOnPos().above().distSqr(this.homePos) < 16;
 	}
 	
 	@Override
@@ -230,6 +224,10 @@ public class BearowlEntity extends Animal implements IAnimatable {
 	@Override
 	public boolean hurt(DamageSource pSource, float pAmount) {
 		this.sleeping = false;
+		if (pSource.getEntity() instanceof BearowlEntity) {
+			this.knockback(0.5F, pSource.getEntity().getX() - this.getX(), pSource.getEntity().getZ() - this.getZ());
+			return false;
+		}
 		return super.hurt(pSource, pAmount);
 	}
 	
