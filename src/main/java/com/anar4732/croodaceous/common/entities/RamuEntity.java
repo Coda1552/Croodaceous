@@ -47,6 +47,7 @@ import software.bernie.geckolib3.core.manager.AnimationFactory;
 import javax.annotation.Nullable;
 import java.util.Optional;
 
+// TODO - ramus need to breed in order to lay an egg. rn only one ramu needs to be fed a melon for an egg
 public class RamuEntity extends Animal implements IAnimatable {
 	private static final EntityDataAccessor<Boolean> DATA_SITTING = SynchedEntityData.defineId(RamuEntity.class, EntityDataSerializers.BOOLEAN);
 	private static final EntityDataAccessor<Boolean> DATA_CE = SynchedEntityData.defineId(RamuEntity.class, EntityDataSerializers.BOOLEAN);
@@ -207,7 +208,7 @@ public class RamuEntity extends Animal implements IAnimatable {
 		}
 		return InteractionResult.SUCCESS;
 	}
-		
+
 	private boolean isSitting() {
 		return wantsSit() && isNearNest();
 	}
@@ -218,10 +219,10 @@ public class RamuEntity extends Animal implements IAnimatable {
 	
 	@Nullable
 	public SpawnGroupData finalizeSpawn(ServerLevelAccessor pLevel, DifficultyInstance pDifficulty, MobSpawnType pReason, @Nullable SpawnGroupData pSpawnData, @Nullable CompoundTag pDataTag) {
-		this.nestPos = this.getOnPos().above();
+		/*this.nestPos = this.getOnPos().above();
 		if (!level.isClientSide && pReason != MobSpawnType.SPAWN_EGG) {
 			pLevel.setBlock(nestPos, CEBlocks.RAMU_NEST.get().defaultBlockState().setValue(RamuNestBlock.WITH_EGG, this.random.nextBoolean()), 3);
-		}
+		}*/
 		return super.finalizeSpawn(pLevel, pDifficulty, pReason, pSpawnData, pDataTag);
 	}
 
@@ -303,8 +304,8 @@ public class RamuEntity extends Animal implements IAnimatable {
 	public boolean doHurtTarget(Entity pEntity) {
 		boolean b = super.doHurtTarget(pEntity);
 		if (this.isSprinting() && pEntity instanceof LivingEntity livingEntity && b) {
-			float f1 = 5.0F; // Ram knockback
-			livingEntity.knockback(f1 * 0.5F, Mth.sin(this.getYRot() * ((float)Math.PI / 180F)), -Mth.cos(this.getYRot() * ((float)Math.PI / 180F)));
+			float f1 = 2.5F; // Ram knockback
+			livingEntity.knockback(f1, Mth.sin(this.getYRot() * ((float)Math.PI / 180F)), -Mth.cos(this.getYRot() * ((float)Math.PI / 180F)));
 		}
 		return b;
 	}

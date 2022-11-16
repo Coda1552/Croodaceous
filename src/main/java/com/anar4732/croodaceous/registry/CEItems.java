@@ -12,14 +12,14 @@ import net.minecraftforge.registries.ForgeRegistries;
 import net.minecraftforge.registries.RegistryObject;
 
 public class CEItems {
-    public static final CreativeModeTab TAB = new CreativeModeTab(CroodaceousMod.ID) {
+    public static final CreativeModeTab TAB = new CreativeModeTab(CroodaceousMod.MOD_ID) {
         @Override
         public ItemStack makeIcon() {
             return new ItemStack(RAMU_EGG.get());
         }
     };
 
-    public static final DeferredRegister<Item> ITEMS = DeferredRegister.create(ForgeRegistries.ITEMS, CroodaceousMod.ID);
+    public static final DeferredRegister<Item> ITEMS = DeferredRegister.create(ForgeRegistries.ITEMS, CroodaceousMod.MOD_ID);
 
     // Food
     public static final RegistryObject<Item> RAMU_EGG =

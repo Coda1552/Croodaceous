@@ -44,7 +44,6 @@ public class SimpleGeoModel<T extends LivingEntity & IAnimatable> extends Animat
             root.setScaleX(0.5F);
             root.setScaleY(0.5F);
             root.setScaleZ(0.5F);
-            // root.setPositionY(-2F);
         }
     }
 }

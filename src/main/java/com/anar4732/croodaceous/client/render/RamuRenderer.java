@@ -27,7 +27,7 @@ public class RamuRenderer extends GeoEntityRenderer<RamuEntity> {
 	private static final ItemStack egg = new ItemStack(CEItems.RAMU_EGG.get());
 	
 	public RamuRenderer(EntityRendererProvider.Context mgr) {
-		super(mgr, new SimpleGeoModel<>(CroodaceousMod.ID, "ramu"));
+		super(mgr, new SimpleGeoModel<>(CroodaceousMod.MOD_ID, "ramu"));
 	}
 
 	@Override

@@ -38,11 +38,11 @@ public class BearowlEntity extends Animal implements IAnimatable {
 	private static final EntityDataAccessor<Boolean> DATA_ROARING = SynchedEntityData.defineId(BearowlEntity.class, EntityDataSerializers.BOOLEAN);
 	private final AnimationFactory animationFactory = new AnimationFactory(this);
 	private BlockPos homePos;
-	private boolean sleeping;
 	private boolean roaring;
 	private int attackAnimationAttr;
 	private int roarTicks;
-	
+	public boolean sleeping;
+
 	public BearowlEntity(EntityType<? extends BearowlEntity> type, Level level) {
 		super(type, level);
 	}
@@ -182,7 +182,12 @@ public class BearowlEntity extends Animal implements IAnimatable {
 	private boolean wantsSleep() {
 		return this.level.isDay() && this.getTarget() == null && this.getLastHurtByMobTimestamp() + 300 < this.tickCount;
 	}
-	
+
+	@Override
+	protected float tickHeadTurn(float p_21538_, float p_21539_) {
+		return sleeping ? 0.0F : super.tickHeadTurn(p_21538_, p_21539_);
+	}
+
 	@Nullable
 	public SpawnGroupData finalizeSpawn(ServerLevelAccessor pLevel, DifficultyInstance pDifficulty, MobSpawnType pReason, @Nullable SpawnGroupData pSpawnData, @Nullable CompoundTag pDataTag) {
 		this.homePos = this.getOnPos().above();

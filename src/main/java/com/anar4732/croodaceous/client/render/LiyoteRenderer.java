@@ -22,7 +22,7 @@ public class LiyoteRenderer extends GeoEntityRenderer<LiyoteEntity> {
 	private LiyoteEntity animatable;
 	
 	public LiyoteRenderer(EntityRendererProvider.Context mgr) {
-		super(mgr, new SimpleGeoModel<>(CroodaceousMod.ID, "liyote"));
+		super(mgr, new SimpleGeoModel<>(CroodaceousMod.MOD_ID, "liyote"));
 	}
 
 	@Override
