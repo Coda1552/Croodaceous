@@ -38,7 +38,6 @@ import software.bernie.geckolib3.core.manager.AnimationFactory;
 
 import java.util.UUID;
 
-// todo - revert tame item back to ramu egg from turtle egg
 public class LiyoteEntity extends Wolf implements IAnimatable {
 	private static final EntityDataAccessor<ItemStack> DATA_EI = SynchedEntityData.defineId(LiyoteEntity.class, EntityDataSerializers.ITEM_STACK);
 	private final AnimationFactory animationFactory = new AnimationFactory(this);
@@ -97,7 +96,7 @@ public class LiyoteEntity extends Wolf implements IAnimatable {
 			}
 
 			return interactionresult;
-		} else if (itemstack.is(Items.TURTLE_EGG) && !this.isAngry()) {
+		} else if (itemstack.is(CEItems.RAMU_EGG.get()) && !this.isAngry()) {
 			if (!pPlayer.getAbilities().instabuild) {
 				itemstack.shrink(1);
 			}

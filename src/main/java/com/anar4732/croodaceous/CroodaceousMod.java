@@ -38,8 +38,6 @@ public class CroodaceousMod {
 		bus.addListener(CEEntities::registerAttributes);
 		bus.addListener(CEEntities::registerRenderers);
 
-		forgeBus.addListener(this::addSpawns);
-
 		CEEntities.ENTITIES.register(bus);
 		CEItems.ITEMS.register(bus);
 		CEBlocks.BLOCKS.register(bus);
@@ -55,12 +53,6 @@ public class CroodaceousMod {
 		SharedConstants.IS_RUNNING_IN_IDE = !FMLEnvironment.production;
 	}
 
-	private void addSpawns(final BiomeLoadingEvent event) {
-		if (event.getCategory().equals(Biome.BiomeCategory.MESA)) {
-			event.getSpawns().getSpawner(MobCategory.CREATURE).add(new MobSpawnSettings.SpawnerData(CEEntities.ENTITY_LIYOTE.get(), 1, 3, 5));
-		}
-	}
-	
 	private void clientSetup(final FMLClientSetupEvent e) {
 		ItemBlockRenderTypes.setRenderLayer(CEBlocks.RAMU_NEST.get(), RenderType.cutout());
 	}
