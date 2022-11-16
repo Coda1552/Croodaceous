@@ -21,6 +21,7 @@ import net.minecraft.world.entity.ai.goal.target.NearestAttackableTargetGoal;
 import net.minecraft.world.entity.animal.Animal;
 import net.minecraft.world.entity.monster.Monster;
 import net.minecraft.world.level.Level;
+import net.minecraft.world.level.LevelAccessor;
 import net.minecraft.world.level.ServerLevelAccessor;
 import software.bernie.geckolib3.core.IAnimatable;
 import software.bernie.geckolib3.core.PlayState;
@@ -61,7 +62,12 @@ public class BearowlEntity extends Animal implements IAnimatable {
 		              .add(Attributes.ATTACK_DAMAGE, 8)
 		              .add(Attributes.FOLLOW_RANGE, 64);
 	}
-	
+
+	@Override
+	public boolean checkSpawnRules(LevelAccessor pLevel, MobSpawnType pSpawnReason) {
+		return pLevel.getBlockState(this.getOnPos().below()).getFluidState().isEmpty();
+	}
+
 	private boolean isTarget(LivingEntity livingEntity) {
 		return livingEntity.getBbWidth() <= 2 && livingEntity.getBbHeight() <= 2 && !(livingEntity instanceof BearowlEntity);
 	}
