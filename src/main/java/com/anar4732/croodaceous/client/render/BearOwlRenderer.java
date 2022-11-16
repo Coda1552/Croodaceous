@@ -1,6 +1,6 @@
 package com.anar4732.croodaceous.client.render;
 
-import com.anar4732.croodaceous.client.model.BearOwlModel;
+import com.anar4732.croodaceous.client.model.BearowlModel;
 import com.anar4732.croodaceous.common.entities.BearowlEntity;
 import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.blaze3d.vertex.VertexConsumer;
@@ -15,7 +15,7 @@ import javax.annotation.Nullable;
 public class BearOwlRenderer extends GeoEntityRenderer<BearowlEntity> {
 
 	public BearOwlRenderer(EntityRendererProvider.Context mgr) {
-		super(mgr, new BearOwlModel());
+		super(mgr, new BearowlModel());
 	}
 
 	@Override
