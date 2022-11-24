@@ -1,17 +1,18 @@
-package com.anar4732.croodaceous;
+package coda.croodaceous;
 
-import com.anar4732.croodaceous.registry.CEBlocks;
-import com.anar4732.croodaceous.registry.CEEntities;
-import com.anar4732.croodaceous.registry.CEItems;
-import com.anar4732.croodaceous.registry.CEPointOfInterestTypes;
+import coda.croodaceous.common.entities.BearowlEntity;
+import coda.croodaceous.common.entities.LiyoteEntity;
+import coda.croodaceous.common.entities.RamuEntity;
+import coda.croodaceous.registry.CEBlocks;
+import coda.croodaceous.registry.CEEntities;
+import coda.croodaceous.registry.CEItems;
+import coda.croodaceous.registry.CEPoiTypes;
 import com.mojang.logging.LogUtils;
 import net.minecraft.SharedConstants;
-import net.minecraft.client.renderer.ItemBlockRenderTypes;
-import net.minecraft.client.renderer.RenderType;
 import net.minecraftforge.common.MinecraftForge;
+import net.minecraftforge.event.entity.EntityAttributeCreationEvent;
 import net.minecraftforge.eventbus.api.IEventBus;
 import net.minecraftforge.fml.common.Mod;
-import net.minecraftforge.fml.event.lifecycle.FMLClientSetupEvent;
 import net.minecraftforge.fml.event.lifecycle.FMLCommonSetupEvent;
 import net.minecraftforge.fml.javafmlmod.FMLJavaModLoadingContext;
 import net.minecraftforge.fml.loading.FMLEnvironment;
@@ -27,27 +28,24 @@ public class CroodaceousMod {
 		IEventBus forgeBus = MinecraftForge.EVENT_BUS;
 
 		bus.addListener(this::setup);
-		bus.addListener(this::clientSetup);
-		bus.addListener(CEEntities::registerAttributes);
-		bus.addListener(CEEntities::registerRenderers);
+		bus.addListener(this::registerAttributes);
 
 		CEEntities.ENTITIES.register(bus);
 		CEItems.ITEMS.register(bus);
 		CEBlocks.BLOCKS.register(bus);
-		CEPointOfInterestTypes.POIS.register(bus);
+		CEPoiTypes.POIS.register(bus);
 		
 //		MinecraftForge.EVENT_BUS.register(this);
 	}
 	
-	/**
-	 * Set a breakpoint {@link net.minecraft.Util#doPause(String) here} to debug any crash in the IDE
-	 */
 	private void setup(final FMLCommonSetupEvent event) {
 		SharedConstants.IS_RUNNING_IN_IDE = !FMLEnvironment.production;
 	}
 
-	private void clientSetup(final FMLClientSetupEvent e) {
-		ItemBlockRenderTypes.setRenderLayer(CEBlocks.RAMU_NEST.get(), RenderType.cutout());
+	private void registerAttributes(final EntityAttributeCreationEvent e) {
+		e.put(CEEntities.ENTITY_LIYOTE.get(), LiyoteEntity.createAttributes().build());
+		e.put(CEEntities.ENTITY_BEAROWL.get(), BearowlEntity.createAttributes().build());
+		e.put(CEEntities.ENTITY_RAMU.get(), RamuEntity.createAttributes().build());
 	}
 	
 }

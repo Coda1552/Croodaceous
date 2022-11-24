@@ -1,12 +1,12 @@
-package com.anar4732.croodaceous.registry;
+package coda.croodaceous.registry;
 
-import com.anar4732.croodaceous.CroodaceousMod;
-import com.anar4732.croodaceous.client.render.BearOwlRenderer;
-import com.anar4732.croodaceous.client.render.LiyoteRenderer;
-import com.anar4732.croodaceous.client.render.RamuRenderer;
-import com.anar4732.croodaceous.common.entities.BearowlEntity;
-import com.anar4732.croodaceous.common.entities.LiyoteEntity;
-import com.anar4732.croodaceous.common.entities.RamuEntity;
+import coda.croodaceous.common.entities.RamuEntity;
+import coda.croodaceous.CroodaceousMod;
+import coda.croodaceous.client.render.BearOwlRenderer;
+import coda.croodaceous.client.render.LiyoteRenderer;
+import coda.croodaceous.client.render.RamuRenderer;
+import coda.croodaceous.common.entities.BearowlEntity;
+import coda.croodaceous.common.entities.LiyoteEntity;
 import net.minecraft.client.renderer.entity.EntityRenderers;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.MobCategory;
@@ -17,7 +17,7 @@ import net.minecraftforge.registries.ForgeRegistries;
 import net.minecraftforge.registries.RegistryObject;
 
 public class CEEntities {
-    public static final DeferredRegister<EntityType<?>> ENTITIES = DeferredRegister.create(ForgeRegistries.ENTITIES, CroodaceousMod.MOD_ID);
+    public static final DeferredRegister<EntityType<?>> ENTITIES = DeferredRegister.create(ForgeRegistries.ENTITY_TYPES, CroodaceousMod.MOD_ID);
 
     public static final RegistryObject<EntityType<LiyoteEntity>> ENTITY_LIYOTE =
             ENTITIES.register("liyote", () -> EntityType.Builder.<LiyoteEntity>of(LiyoteEntity::new, MobCategory.CREATURE)
@@ -39,16 +39,4 @@ public class CEEntities {
                                                                  .setTrackingRange(16)
                                                                  .updateInterval(1)
                                                                  .build("ramu"));
-    
-    public static void registerAttributes(final EntityAttributeCreationEvent e) {
-        e.put(CEEntities.ENTITY_LIYOTE.get(), LiyoteEntity.createAttributes().build());
-        e.put(CEEntities.ENTITY_BEAROWL.get(), BearowlEntity.createAttributes().build());
-        e.put(CEEntities.ENTITY_RAMU.get(), RamuEntity.createAttributes().build());
-    }
-
-    public static void registerRenderers(final FMLClientSetupEvent e) {
-        EntityRenderers.register(CEEntities.ENTITY_LIYOTE.get(), LiyoteRenderer::new);
-        EntityRenderers.register(CEEntities.ENTITY_BEAROWL.get(), BearOwlRenderer::new);
-        EntityRenderers.register(CEEntities.ENTITY_RAMU.get(), RamuRenderer::new);
-    }
 }

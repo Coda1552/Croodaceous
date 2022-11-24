@@ -1,4 +1,4 @@
-package com.anar4732.croodaceous.client.model;
+package coda.croodaceous.client.model;
 
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.entity.LivingEntity;
@@ -20,23 +20,23 @@ public class SimpleGeoModel<T extends LivingEntity & IAnimatable> extends Animat
     }
 
     @Override
-    public ResourceLocation getAnimationFileLocation(T entity) {
+    public ResourceLocation getAnimationResource(T entity) {
         return animation;
     }
 
     @Override
-    public ResourceLocation getModelLocation(T entity) {
+    public ResourceLocation getModelResource(T entity) {
         return model;
     }
 
     @Override
-    public ResourceLocation getTextureLocation(T entity) {
+    public ResourceLocation getTextureResource(T entity) {
         return texture;
     }
 
     @Override
-    public void setLivingAnimations(T entity, Integer uniqueID, @Nullable AnimationEvent customPredicate) {
-        super.setLivingAnimations(entity, uniqueID, customPredicate);
+    public void setCustomAnimations(T entity, int uniqueID, AnimationEvent customPredicate) {
+        super.setCustomAnimations(entity, uniqueID, customPredicate);
 
         IBone root = getAnimationProcessor().getBone("root");
 

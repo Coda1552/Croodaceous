@@ -1,4 +1,4 @@
-package com.anar4732.croodaceous.common.entities.goal;
+package coda.croodaceous.common.entities.goal;
 
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.util.Mth;

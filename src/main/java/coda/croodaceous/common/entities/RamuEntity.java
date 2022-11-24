@@ -1,10 +1,10 @@
-package com.anar4732.croodaceous.common.entities;
+package coda.croodaceous.common.entities;
 
-import com.anar4732.croodaceous.common.blocks.RamuNestBlock;
-import com.anar4732.croodaceous.registry.CEBlocks;
-import com.anar4732.croodaceous.registry.CEEntities;
-import com.anar4732.croodaceous.registry.CEItems;
-import com.anar4732.croodaceous.registry.CEPointOfInterestTypes;
+import coda.croodaceous.registry.CEBlocks;
+import coda.croodaceous.common.blocks.RamuNestBlock;
+import coda.croodaceous.registry.CEEntities;
+import coda.croodaceous.registry.CEItems;
+import coda.croodaceous.registry.CEPoiTypes;
 import net.minecraft.core.BlockPos;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.syncher.EntityDataAccessor;
@@ -36,10 +36,12 @@ import net.minecraft.world.phys.Vec3;
 import software.bernie.geckolib3.core.IAnimatable;
 import software.bernie.geckolib3.core.PlayState;
 import software.bernie.geckolib3.core.builder.AnimationBuilder;
+import software.bernie.geckolib3.core.builder.ILoopType;
 import software.bernie.geckolib3.core.controller.AnimationController;
 import software.bernie.geckolib3.core.event.predicate.AnimationEvent;
 import software.bernie.geckolib3.core.manager.AnimationData;
 import software.bernie.geckolib3.core.manager.AnimationFactory;
+import software.bernie.geckolib3.util.GeckoLibUtil;
 
 import javax.annotation.Nullable;
 import java.util.Optional;
@@ -47,7 +49,6 @@ import java.util.Optional;
 public class RamuEntity extends Animal implements IAnimatable {
 	private static final EntityDataAccessor<Boolean> DATA_SITTING = SynchedEntityData.defineId(RamuEntity.class, EntityDataSerializers.BOOLEAN);
 	private static final EntityDataAccessor<Boolean> DATA_CE = SynchedEntityData.defineId(RamuEntity.class, EntityDataSerializers.BOOLEAN);
-	private final AnimationFactory animationFactory = new AnimationFactory(this);
 	private BlockPos nestPos;
 	private boolean sitting;
 	private boolean wantsSit;
@@ -90,14 +91,14 @@ public class RamuEntity extends Animal implements IAnimatable {
 	private PlayState animControllerMain(AnimationEvent<?> e) {
 		if (e.isMoving()) {
 			if (this.isSprinting()) {
-				e.getController().setAnimation(new AnimationBuilder().addAnimation("animation.ramu.charge", true));
+				e.getController().setAnimation(new AnimationBuilder().addAnimation("animation.ramu.charge", ILoopType.EDefaultLoopTypes.LOOP));
 			} else {
-				e.getController().setAnimation(new AnimationBuilder().addAnimation("animation.ramu.walk", true));
+				e.getController().setAnimation(new AnimationBuilder().addAnimation("animation.ramu.walk", ILoopType.EDefaultLoopTypes.LOOP));
 			}
 		} else if (sitting) {
-			e.getController().setAnimation(new AnimationBuilder().addAnimation("animation.ramu.sit", true));
+			e.getController().setAnimation(new AnimationBuilder().addAnimation("animation.ramu.sit", ILoopType.EDefaultLoopTypes.LOOP));
 		} else {
-			e.getController().setAnimation(new AnimationBuilder().addAnimation("animation.ramu.idle", true));
+			e.getController().setAnimation(new AnimationBuilder().addAnimation("animation.ramu.idle", ILoopType.EDefaultLoopTypes.LOOP));
 		}
 		return PlayState.CONTINUE;
 	}
@@ -109,7 +110,7 @@ public class RamuEntity extends Animal implements IAnimatable {
 	
 	@Override
 	public AnimationFactory getFactory() {
-		return animationFactory;
+		return GeckoLibUtil.createFactory(this);
 	}
 
 	@Override
@@ -191,11 +192,19 @@ public class RamuEntity extends Animal implements IAnimatable {
 	
 	private void findNest() {
 		PoiManager poiManager = ((ServerLevel) level).getPoiManager();
-		PoiType pt = CEPointOfInterestTypes.RAMU_NEST.get();
-		Optional<BlockPos> poi = poiManager.findClosest(pt.getPredicate(), this.getOnPos(), 32, PoiManager.Occupancy.HAS_SPACE);
+		PoiType pt = CEPoiTypes.RAMU_NEST.get();
+		Optional<BlockPos> poi = poiManager.findClosest(e -> {
+			assert CEPoiTypes.RAMU_NEST.getKey() != null;
+
+			return e.is(CEPoiTypes.RAMU_NEST.getKey());
+		}, this.getOnPos(), 32, PoiManager.Occupancy.HAS_SPACE);
 		if (poi.isPresent()) {
 			nestPos = poi.get();
-			poiManager.take(pt.getPredicate(), (p) -> true, poi.get(), 32);
+			poiManager.take(e -> {
+				assert CEPoiTypes.RAMU_NEST.getKey() != null;
+
+				return e.is(CEPoiTypes.RAMU_NEST.getKey());
+			}, (p, blockPos) -> true, poi.get(), 32);
 			this.getNavigation().moveTo(nestPos.getX(), nestPos.getY(), nestPos.getZ(), 1.0D);
 		}
 	}

@@ -1,11 +1,11 @@
-package com.anar4732.croodaceous.common.entities;
+package coda.croodaceous.common.entities;
 
-import com.anar4732.croodaceous.common.blocks.RamuNestBlock;
-import com.anar4732.croodaceous.common.entities.goal.StealItemFromPlayerGoal;
-import com.anar4732.croodaceous.registry.CEBlocks;
-import com.anar4732.croodaceous.registry.CEEntities;
-import com.anar4732.croodaceous.registry.CEItems;
-import com.anar4732.croodaceous.registry.CEPointOfInterestTypes;
+import coda.croodaceous.common.entities.goal.StealItemFromPlayerGoal;
+import coda.croodaceous.registry.CEBlocks;
+import coda.croodaceous.registry.CEEntities;
+import coda.croodaceous.registry.CEItems;
+import coda.croodaceous.registry.CEPoiTypes;
+import coda.croodaceous.common.blocks.RamuNestBlock;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.particles.ItemParticleOption;
 import net.minecraft.core.particles.ParticleTypes;
@@ -13,6 +13,7 @@ import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.syncher.EntityDataAccessor;
 import net.minecraft.network.syncher.EntityDataSerializers;
 import net.minecraft.network.syncher.SynchedEntityData;
+import net.minecraft.resources.ResourceKey;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.world.InteractionHand;
@@ -33,16 +34,17 @@ import net.minecraft.world.phys.Vec3;
 import software.bernie.geckolib3.core.IAnimatable;
 import software.bernie.geckolib3.core.PlayState;
 import software.bernie.geckolib3.core.builder.AnimationBuilder;
+import software.bernie.geckolib3.core.builder.ILoopType;
 import software.bernie.geckolib3.core.controller.AnimationController;
 import software.bernie.geckolib3.core.event.predicate.AnimationEvent;
 import software.bernie.geckolib3.core.manager.AnimationData;
 import software.bernie.geckolib3.core.manager.AnimationFactory;
+import software.bernie.geckolib3.util.GeckoLibUtil;
 
 import java.util.UUID;
 
 public class LiyoteEntity extends Wolf implements IAnimatable {
 	private static final EntityDataAccessor<ItemStack> DATA_EI = SynchedEntityData.defineId(LiyoteEntity.class, EntityDataSerializers.ITEM_STACK);
-	private final AnimationFactory animationFactory = new AnimationFactory(this);
 	private int eatingTicks = 0;
 	private ItemStack eatingItem = ItemStack.EMPTY;
 	private BlockPos targetNest;
@@ -51,7 +53,7 @@ public class LiyoteEntity extends Wolf implements IAnimatable {
 		super(type, level);
 		this.setDropChance(EquipmentSlot.MAINHAND, 1F);
 	}
-	
+
 	@Override
 	public void lookAt(Entity pEntity, float pMaxYawIncrease, float pMaxPitchIncrease) {
 		super.lookAt(pEntity, pMaxYawIncrease, pMaxPitchIncrease);
@@ -128,18 +130,18 @@ public class LiyoteEntity extends Wolf implements IAnimatable {
 	private PlayState animControllerMain(AnimationEvent<?> e) {
 		if (!eatingItem.isEmpty() && this.isFood(eatingItem)) {
 			if (e.isMoving()) {
-				e.getController().setAnimation(new AnimationBuilder().addAnimation("animation.liyote.walk_eat", true));
+				e.getController().setAnimation(new AnimationBuilder().addAnimation("animation.liyote.walk_eat", ILoopType.EDefaultLoopTypes.LOOP));
 			} else if (isInSittingPose()) {
-				e.getController().setAnimation(new AnimationBuilder().addAnimation("animation.liyote.sitting_eat", true));
+				e.getController().setAnimation(new AnimationBuilder().addAnimation("animation.liyote.sitting_eat", ILoopType.EDefaultLoopTypes.LOOP));
 			} else {
-				e.getController().setAnimation(new AnimationBuilder().addAnimation("animation.liyote.idle_eat", true));
+				e.getController().setAnimation(new AnimationBuilder().addAnimation("animation.liyote.idle_eat", ILoopType.EDefaultLoopTypes.LOOP));
 			}
 		} else if (e.isMoving()) {
-			e.getController().setAnimation(new AnimationBuilder().addAnimation("animation.liyote.walk", true));
+			e.getController().setAnimation(new AnimationBuilder().addAnimation("animation.liyote.walk", ILoopType.EDefaultLoopTypes.LOOP));
 		} else if (isInSittingPose()) {
-			e.getController().setAnimation(new AnimationBuilder().addAnimation("animation.liyote.sitting", true));
+			e.getController().setAnimation(new AnimationBuilder().addAnimation("animation.liyote.sitting", ILoopType.EDefaultLoopTypes.LOOP));
 		} else {
-			e.getController().setAnimation(new AnimationBuilder().addAnimation("animation.liyote.idle", true));
+			e.getController().setAnimation(new AnimationBuilder().addAnimation("animation.liyote.idle", ILoopType.EDefaultLoopTypes.LOOP));
 		}
 		return PlayState.CONTINUE;
 	}
@@ -151,7 +153,7 @@ public class LiyoteEntity extends Wolf implements IAnimatable {
 	
 	@Override
 	public AnimationFactory getFactory() {
-		return animationFactory;
+		return GeckoLibUtil.createFactory(this);
 	}
 	
 	@Override
@@ -180,7 +182,11 @@ public class LiyoteEntity extends Wolf implements IAnimatable {
 		}
 		if (!this.level.isClientSide && !this.isInSittingPose() && eatingItem.isEmpty() && this.getHealth() > 5F && this.random.nextInt(1200) == 0) {
 			PoiManager poiManager = ((ServerLevel) level).getPoiManager();
-			poiManager.findClosest(CEPointOfInterestTypes.RAMU_NEST.get().getPredicate(), p -> this.level.getBlockState(p).getValue(RamuNestBlock.WITH_EGG), this.getOnPos(), 32, PoiManager.Occupancy.ANY).ifPresent(p -> {
+			poiManager.findClosest(p -> {
+				assert CEPoiTypes.RAMU_NEST.getKey() != null;
+
+				return p.is(CEPoiTypes.RAMU_NEST.getKey());
+			}, p -> this.level.getBlockState(p).getValue(RamuNestBlock.WITH_EGG), this.getOnPos(), 32, PoiManager.Occupancy.ANY).ifPresent(p -> {
 				targetNest = p;
 			});
 		}
@@ -297,7 +303,7 @@ public class LiyoteEntity extends Wolf implements IAnimatable {
 			}
 			
 			eatingItem = p_21541_.copy();
-			this.equipEventAndSound(p_21541_);
+			this.playEquipSound(p_21541_);
 			return true;
 		} else {
 			return false;

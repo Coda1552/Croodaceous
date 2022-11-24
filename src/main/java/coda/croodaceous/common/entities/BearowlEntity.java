@@ -1,6 +1,6 @@
-package com.anar4732.croodaceous.common.entities;
+package coda.croodaceous.common.entities;
 
-import com.anar4732.croodaceous.registry.CEEntities;
+import coda.croodaceous.registry.CEEntities;
 import net.minecraft.core.BlockPos;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.syncher.EntityDataAccessor;
@@ -26,17 +26,18 @@ import net.minecraft.world.level.ServerLevelAccessor;
 import software.bernie.geckolib3.core.IAnimatable;
 import software.bernie.geckolib3.core.PlayState;
 import software.bernie.geckolib3.core.builder.AnimationBuilder;
+import software.bernie.geckolib3.core.builder.ILoopType;
 import software.bernie.geckolib3.core.controller.AnimationController;
 import software.bernie.geckolib3.core.event.predicate.AnimationEvent;
 import software.bernie.geckolib3.core.manager.AnimationData;
 import software.bernie.geckolib3.core.manager.AnimationFactory;
+import software.bernie.geckolib3.util.GeckoLibUtil;
 
 import javax.annotation.Nullable;
 
 public class BearowlEntity extends Animal implements IAnimatable {
 	private static final EntityDataAccessor<Boolean> DATA_SLEEPING = SynchedEntityData.defineId(BearowlEntity.class, EntityDataSerializers.BOOLEAN);
 	private static final EntityDataAccessor<Boolean> DATA_ROARING = SynchedEntityData.defineId(BearowlEntity.class, EntityDataSerializers.BOOLEAN);
-	private final AnimationFactory animationFactory = new AnimationFactory(this);
 	private BlockPos homePos;
 	private boolean roaring;
 	private int attackAnimationAttr;
@@ -86,17 +87,17 @@ public class BearowlEntity extends Animal implements IAnimatable {
 		}
 		
 		if (this.roaring) {
-			e.getController().setAnimation(new AnimationBuilder().addAnimation("animation.bearowl.roar", true));
+			e.getController().setAnimation(new AnimationBuilder().addAnimation("animation.bearowl.roar", ILoopType.EDefaultLoopTypes.LOOP));
 		} else if (e.isMoving()) {
 			if (this.isSprinting()) {
-				e.getController().setAnimation(new AnimationBuilder().addAnimation("animation.bearowl.run", true));
+				e.getController().setAnimation(new AnimationBuilder().addAnimation("animation.bearowl.run", ILoopType.EDefaultLoopTypes.LOOP));
 			} else {
-				e.getController().setAnimation(new AnimationBuilder().addAnimation("animation.bearowl.walk", true));
+				e.getController().setAnimation(new AnimationBuilder().addAnimation("animation.bearowl.walk", ILoopType.EDefaultLoopTypes.LOOP));
 			}
 		} else if (sleeping) {
-			e.getController().setAnimation(new AnimationBuilder().addAnimation("animation.bearowl.sleep", true));
+			e.getController().setAnimation(new AnimationBuilder().addAnimation("animation.bearowl.sleep", ILoopType.EDefaultLoopTypes.LOOP));
 		} else {
-			e.getController().setAnimation(new AnimationBuilder().addAnimation("animation.bearowl.idle", true));
+			e.getController().setAnimation(new AnimationBuilder().addAnimation("animation.bearowl.idle", ILoopType.EDefaultLoopTypes.LOOP));
 		}
 		return PlayState.CONTINUE;
 	}
@@ -108,7 +109,7 @@ public class BearowlEntity extends Animal implements IAnimatable {
 	
 	@Override
 	public AnimationFactory getFactory() {
-		return animationFactory;
+		return GeckoLibUtil.createFactory(this);
 	}
 	
 	@Override
