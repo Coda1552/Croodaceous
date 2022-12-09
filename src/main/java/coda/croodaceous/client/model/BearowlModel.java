@@ -1,7 +1,7 @@
-package com.anar4732.croodaceous.client.model;
+package coda.croodaceous.client.model;
 
-import com.anar4732.croodaceous.CroodaceousMod;
-import com.anar4732.croodaceous.common.entities.BearowlEntity;
+import coda.croodaceous.CroodaceousMod;
+import coda.croodaceous.common.entities.BearowlEntity;
 import net.minecraft.resources.ResourceLocation;
 
 public class BearowlModel extends SimpleGeoModel<BearowlEntity> {

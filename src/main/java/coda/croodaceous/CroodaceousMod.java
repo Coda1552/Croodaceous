@@ -1,9 +1,9 @@
-package com.anar4732.croodaceous;
+package coda.croodaceous;
 
-import com.anar4732.croodaceous.registry.CEBlocks;
-import com.anar4732.croodaceous.registry.CEEntities;
-import com.anar4732.croodaceous.registry.CEItems;
-import com.anar4732.croodaceous.registry.CEPointOfInterestTypes;
+import coda.croodaceous.registry.CEBlocks;
+import coda.croodaceous.registry.CEItems;
+import coda.croodaceous.registry.CEPointOfInterestTypes;
+import coda.croodaceous.registry.CEEntities;
 import com.mojang.logging.LogUtils;
 import net.minecraft.SharedConstants;
 import net.minecraft.client.renderer.ItemBlockRenderTypes;

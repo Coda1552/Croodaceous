@@ -1,6 +1,6 @@
-package com.anar4732.croodaceous.common.entities;
+package coda.croodaceous.common.entities;
 
-import com.anar4732.croodaceous.registry.CEEntities;
+import coda.croodaceous.registry.CEEntities;
 import net.minecraft.core.BlockPos;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.syncher.EntityDataAccessor;

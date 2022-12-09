@@ -1,6 +1,6 @@
-package com.anar4732.croodaceous.registry;
+package coda.croodaceous.registry;
 
-import com.anar4732.croodaceous.CroodaceousMod;
+import coda.croodaceous.CroodaceousMod;
 import net.minecraft.world.entity.ai.village.poi.PoiType;
 import net.minecraftforge.registries.DeferredRegister;
 import net.minecraftforge.registries.ForgeRegistries;

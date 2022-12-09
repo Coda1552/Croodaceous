@@ -1,6 +1,6 @@
-package com.anar4732.croodaceous.registry;
+package coda.croodaceous.registry;
 
-import com.anar4732.croodaceous.CroodaceousMod;
+import coda.croodaceous.CroodaceousMod;
 import net.minecraft.world.food.FoodProperties;
 import net.minecraft.world.item.BlockItem;
 import net.minecraft.world.item.CreativeModeTab;

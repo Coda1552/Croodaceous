@@ -16,7 +16,7 @@ apply plugin: 'net.minecraftforge.gradle'
 apply plugin: 'org.parchmentmc.librarian.forgegradle'
 
 version = '1.0'
-group = 'com.anar4732.croodaceous'
+group = 'coda.croodaceous'
 archivesBaseName = 'Croodaceous'
 
 java.toolchain.languageVersion = JavaLanguageVersion.of(17)

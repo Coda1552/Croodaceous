@@ -1,9 +1,9 @@
-package com.anar4732.croodaceous.client.render;
+package coda.croodaceous.client.render;
 
-import com.anar4732.croodaceous.CroodaceousMod;
-import com.anar4732.croodaceous.client.model.SimpleGeoModel;
-import com.anar4732.croodaceous.common.entities.RamuEntity;
-import com.anar4732.croodaceous.registry.CEItems;
+import coda.croodaceous.CroodaceousMod;
+import coda.croodaceous.client.model.SimpleGeoModel;
+import coda.croodaceous.common.entities.RamuEntity;
+import coda.croodaceous.registry.CEItems;
 import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.blaze3d.vertex.VertexConsumer;
 import com.mojang.math.Vector3f;

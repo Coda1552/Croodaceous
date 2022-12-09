@@ -1,10 +1,10 @@
-package com.anar4732.croodaceous.common.entities;
+package coda.croodaceous.common.entities;
 
-import com.anar4732.croodaceous.common.blocks.RamuNestBlock;
-import com.anar4732.croodaceous.registry.CEBlocks;
-import com.anar4732.croodaceous.registry.CEEntities;
-import com.anar4732.croodaceous.registry.CEItems;
-import com.anar4732.croodaceous.registry.CEPointOfInterestTypes;
+import coda.croodaceous.common.blocks.RamuNestBlock;
+import coda.croodaceous.registry.CEBlocks;
+import coda.croodaceous.registry.CEEntities;
+import coda.croodaceous.registry.CEItems;
+import coda.croodaceous.registry.CEPointOfInterestTypes;
 import net.minecraft.core.BlockPos;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.syncher.EntityDataAccessor;

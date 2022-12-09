@@ -1,12 +1,12 @@
-package com.anar4732.croodaceous.registry;
+package coda.croodaceous.registry;
 
-import com.anar4732.croodaceous.CroodaceousMod;
-import com.anar4732.croodaceous.client.render.BearOwlRenderer;
-import com.anar4732.croodaceous.client.render.LiyoteRenderer;
-import com.anar4732.croodaceous.client.render.RamuRenderer;
-import com.anar4732.croodaceous.common.entities.BearowlEntity;
-import com.anar4732.croodaceous.common.entities.LiyoteEntity;
-import com.anar4732.croodaceous.common.entities.RamuEntity;
+import coda.croodaceous.CroodaceousMod;
+import coda.croodaceous.client.render.LiyoteRenderer;
+import coda.croodaceous.client.render.RamuRenderer;
+import coda.croodaceous.common.entities.BearowlEntity;
+import coda.croodaceous.common.entities.LiyoteEntity;
+import coda.croodaceous.common.entities.RamuEntity;
+import coda.croodaceous.client.render.BearOwlRenderer;
 import net.minecraft.client.renderer.entity.EntityRenderers;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.MobCategory;

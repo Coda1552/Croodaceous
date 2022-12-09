@@ -5,7 +5,7 @@ license="All rights reserved"
 modId="croodaceous" #mandatory
 version="${file.jarVersion}" #mandatory
 displayName="Croodaceous Era" #mandatory
-authors="anar4732, Coda1552" #optional
+authors="Coda, anar4732" #optional
 description='''
 
 '''

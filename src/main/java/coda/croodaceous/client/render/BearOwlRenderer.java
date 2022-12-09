@@ -1,7 +1,7 @@
-package com.anar4732.croodaceous.client.render;
+package coda.croodaceous.client.render;
 
-import com.anar4732.croodaceous.client.model.BearowlModel;
-import com.anar4732.croodaceous.common.entities.BearowlEntity;
+import coda.croodaceous.client.model.BearowlModel;
+import coda.croodaceous.common.entities.BearowlEntity;
 import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.blaze3d.vertex.VertexConsumer;
 import net.minecraft.client.renderer.MultiBufferSource;

@@ -1,7 +1,7 @@
-package com.anar4732.croodaceous.registry;
+package coda.croodaceous.registry;
 
-import com.anar4732.croodaceous.CroodaceousMod;
-import com.anar4732.croodaceous.common.blocks.RamuNestBlock;
+import coda.croodaceous.CroodaceousMod;
+import coda.croodaceous.common.blocks.RamuNestBlock;
 import net.minecraft.world.level.block.Block;
 import net.minecraftforge.registries.DeferredRegister;
 import net.minecraftforge.registries.ForgeRegistries;
