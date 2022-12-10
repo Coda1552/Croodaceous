@@ -38,11 +38,12 @@ import javax.annotation.Nullable;
 public class BearowlEntity extends Animal implements IAnimatable {
 	private static final EntityDataAccessor<Boolean> DATA_SLEEPING = SynchedEntityData.defineId(BearowlEntity.class, EntityDataSerializers.BOOLEAN);
 	private static final EntityDataAccessor<Boolean> DATA_ROARING = SynchedEntityData.defineId(BearowlEntity.class, EntityDataSerializers.BOOLEAN);
-	private BlockPos homePos;
+	private final AnimationFactory factory = GeckoLibUtil.createFactory(this);
 	private boolean roaring;
 	private int attackAnimationAttr;
 	private int roarTicks;
 	public boolean sleeping;
+	private BlockPos homePos;
 
 	public BearowlEntity(EntityType<? extends BearowlEntity> type, Level level) {
 		super(type, level);
@@ -77,9 +78,9 @@ public class BearowlEntity extends Animal implements IAnimatable {
 	private PlayState animControllerMain(AnimationEvent<?> e) {
 		if (this.swingTime > 0) {
 			if (attackAnimationAttr == 0) {
-				e.getController().setAnimation(new AnimationBuilder().addAnimation("animation.bearowl.swipe_right", true));
+				e.getController().setAnimation(new AnimationBuilder().addAnimation("animation.bearowl.swipe_right",  ILoopType.EDefaultLoopTypes.LOOP));
 			} else {
-				e.getController().setAnimation(new AnimationBuilder().addAnimation("animation.bearowl.swipe_left", true));
+				e.getController().setAnimation(new AnimationBuilder().addAnimation("animation.bearowl.swipe_left",  ILoopType.EDefaultLoopTypes.LOOP));
 			}
 			return PlayState.CONTINUE;
 		} else {
@@ -109,7 +110,7 @@ public class BearowlEntity extends Animal implements IAnimatable {
 	
 	@Override
 	public AnimationFactory getFactory() {
-		return GeckoLibUtil.createFactory(this);
+		return factory;
 	}
 	
 	@Override

@@ -45,10 +45,11 @@ import java.util.UUID;
 
 public class LiyoteEntity extends Wolf implements IAnimatable {
 	private static final EntityDataAccessor<ItemStack> DATA_EI = SynchedEntityData.defineId(LiyoteEntity.class, EntityDataSerializers.ITEM_STACK);
+	private final AnimationFactory factory = GeckoLibUtil.createFactory(this);
 	private int eatingTicks = 0;
 	private ItemStack eatingItem = ItemStack.EMPTY;
 	private BlockPos targetNest;
-	
+
 	public LiyoteEntity(EntityType<? extends LiyoteEntity> type, Level level) {
 		super(type, level);
 		this.setDropChance(EquipmentSlot.MAINHAND, 1F);
@@ -153,7 +154,7 @@ public class LiyoteEntity extends Wolf implements IAnimatable {
 	
 	@Override
 	public AnimationFactory getFactory() {
-		return GeckoLibUtil.createFactory(this);
+		return factory;
 	}
 	
 	@Override

@@ -35,11 +35,11 @@ public class RamuRenderer extends GeoEntityRenderer<RamuEntity> {
 		if (bone.name.equals("head")) {
 			if (animatable.carriesEgg()) {
 				stack.pushPose();
-				RenderUtils.translate(bone, stack);
-				RenderUtils.moveToPivot(bone, stack);
-				RenderUtils.rotate(bone, stack);
-				RenderUtils.scale(bone, stack);
-				RenderUtils.moveBackFromPivot(bone, stack);
+				RenderUtils.translateMatrixToBone(stack, bone);
+				RenderUtils.translateToPivotPoint(stack, bone);
+				RenderUtils.rotateMatrixAroundBone(stack, bone);
+				RenderUtils.scaleMatrixForBone(stack, bone);
+				RenderUtils.translateAwayFromPivotPoint(stack, bone);
 				stack.mulPose(Vector3f.XP.rotation(130));
 				stack.translate(0, 0.1, 2.3);
 				Minecraft.getInstance().getItemRenderer().renderStatic(egg, ItemTransforms.TransformType.GROUND, packedLightIn, packedOverlayIn, stack, renderTypeBuffer, 0);

@@ -49,12 +49,13 @@ import java.util.Optional;
 public class RamuEntity extends Animal implements IAnimatable {
 	private static final EntityDataAccessor<Boolean> DATA_SITTING = SynchedEntityData.defineId(RamuEntity.class, EntityDataSerializers.BOOLEAN);
 	private static final EntityDataAccessor<Boolean> DATA_CE = SynchedEntityData.defineId(RamuEntity.class, EntityDataSerializers.BOOLEAN);
-	private BlockPos nestPos;
+	private final AnimationFactory factory = GeckoLibUtil.createFactory(this);
 	private boolean sitting;
 	private boolean wantsSit;
 	private boolean willLayEgg;
 	private boolean carryingEgg;
 	private int breadCooldown;
+	private BlockPos nestPos;
 
 	public RamuEntity(EntityType<? extends RamuEntity> type, Level level) {
 		super(type, level);
@@ -110,7 +111,7 @@ public class RamuEntity extends Animal implements IAnimatable {
 	
 	@Override
 	public AnimationFactory getFactory() {
-		return GeckoLibUtil.createFactory(this);
+		return factory;
 	}
 
 	@Override
@@ -223,6 +224,15 @@ public class RamuEntity extends Animal implements IAnimatable {
 			}
 		}
 		return InteractionResult.SUCCESS;
+	}
+
+	@Override
+	protected void usePlayerItem(Player pPlayer, InteractionHand pHand, ItemStack pStack) {
+		if (pStack.is(Items.MELON) || pStack.is(Items.PUMPKIN)) {
+			pPlayer.setItemInHand(pHand, new ItemStack(Items.WATER_BUCKET));
+		} else {
+			super.usePlayerItem(pPlayer, pHand, pStack);
+		}
 	}
 
 	@Override
@@ -348,7 +358,7 @@ public class RamuEntity extends Animal implements IAnimatable {
 	public void onItemPickup(ItemEntity pItem) {
 		super.onItemPickup(pItem);
 	}
-	
+
 	@Override
 	public boolean canPickUpLoot() {
 		return true;
