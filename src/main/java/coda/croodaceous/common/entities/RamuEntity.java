@@ -73,10 +73,10 @@ public class RamuEntity extends Animal implements IAnimatable {
 	
 	public static AttributeSupplier.Builder createAttributes() {
 		return Monster.createMonsterAttributes()
-		              .add(Attributes.MAX_HEALTH, 20)
-		              .add(Attributes.MOVEMENT_SPEED, 0.25D)
-		              .add(Attributes.ATTACK_DAMAGE, 4)
-		              .add(Attributes.FOLLOW_RANGE, 16);
+				.add(Attributes.MAX_HEALTH, 20)
+				.add(Attributes.MOVEMENT_SPEED, 0.25D)
+				.add(Attributes.ATTACK_DAMAGE, 4)
+				.add(Attributes.FOLLOW_RANGE, 16);
 	}
 	
 	private boolean isTarget(LivingEntity livingEntity) {

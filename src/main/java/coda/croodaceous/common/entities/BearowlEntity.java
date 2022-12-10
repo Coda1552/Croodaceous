@@ -23,6 +23,7 @@ import net.minecraft.world.entity.monster.Monster;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.LevelAccessor;
 import net.minecraft.world.level.ServerLevelAccessor;
+import net.minecraft.world.phys.Vec3;
 import software.bernie.geckolib3.core.IAnimatable;
 import software.bernie.geckolib3.core.PlayState;
 import software.bernie.geckolib3.core.builder.AnimationBuilder;
@@ -60,10 +61,10 @@ public class BearowlEntity extends Animal implements IAnimatable {
 	
 	public static AttributeSupplier.Builder createAttributes() {
 		return Monster.createMonsterAttributes()
-		              .add(Attributes.MAX_HEALTH, 80)
-					  .add(Attributes.MOVEMENT_SPEED, 0.25D)
-		              .add(Attributes.ATTACK_DAMAGE, 8)
-		              .add(Attributes.FOLLOW_RANGE, 64);
+				.add(Attributes.MAX_HEALTH, 80)
+				.add(Attributes.MOVEMENT_SPEED, 0.25D)
+				.add(Attributes.ATTACK_DAMAGE, 8)
+				.add(Attributes.FOLLOW_RANGE, 64);
 	}
 
 	@Override
@@ -164,6 +165,15 @@ public class BearowlEntity extends Animal implements IAnimatable {
 			this.sleeping = this.entityData.get(DATA_SLEEPING);
 			this.roaring = this.entityData.get(DATA_ROARING);
 		}
+	}
+
+	@Override
+	public void travel(Vec3 pTravelVector) {
+		if (isSprinting()) {
+			float speedMod = (float) this.getMoveControl().getSpeedModifier();
+			setSpeed(speedMod + 0.15F);
+		}
+		super.travel(pTravelVector);
 	}
 
 	@Override
