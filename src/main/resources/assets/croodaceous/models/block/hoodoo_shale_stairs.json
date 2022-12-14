@@ -1,0 +1,8 @@
+{
+    "parent": "block/stairs",
+    "textures": {
+        "bottom": "croodaceous:block/hoodoo_shale",
+        "top": "croodaceous:block/hoodoo_shale",
+        "side": "croodaceous:block/hoodoo_shale"
+    }
+}

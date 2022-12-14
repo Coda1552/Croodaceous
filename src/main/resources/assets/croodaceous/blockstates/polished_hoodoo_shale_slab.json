@@ -1,0 +1,7 @@
+{
+    "variants": {
+        "type=bottom": { "model": "croodaceous:block/polished_hoodoo_shale_slab" },
+        "type=top": { "model": "croodaceous:block/polished_hoodoo_shale_slab_top" },
+        "type=double": { "model": "croodaceous:block/polished_hoodoo_shale" }
+    }
+}

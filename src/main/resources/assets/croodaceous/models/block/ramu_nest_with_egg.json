@@ -1,5 +1,5 @@
 {
-	"render_type": "cutout",
+	"credit": "Made with Blockbench",
 	"textures": {
 		"0": "croodaceous:block/ramu_nest_side",
 		"1": "croodaceous:block/ramu_nest_top",
@@ -147,5 +147,6 @@
 			"children": [0, 1, 2, 3, 4, 5, 6, 7, 8]
 		},
 		9
-	]
+	],
+	"render_type": "cutout"
 }

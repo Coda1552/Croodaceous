@@ -1,0 +1,8 @@
+{
+  "type": "minecraft:stonecutting",
+  "ingredient": {
+    "item": "croodaceous:smooth_desolate_sandstone"
+  },
+  "result": "croodaceous:smooth_desolate_sandstone_slab",
+  "count": 2
+}

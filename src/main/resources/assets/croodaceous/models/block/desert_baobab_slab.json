@@ -1,0 +1,8 @@
+{
+  "parent": "minecraft:block/slab",
+  "textures": {
+    "bottom": "croodaceous:block/desert_baobab_planks",
+    "top": "croodaceous:block/desert_baobab_planks",
+    "side": "croodaceous:block/desert_baobab_planks"
+  }
+}

@@ -1,0 +1,6 @@
+{
+  "parent": "block/fence_post",
+  "textures": {
+    "texture": "croodaceous:block/desert_baobab_planks"
+  }
+}

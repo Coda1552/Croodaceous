@@ -1,0 +1,6 @@
+{
+  "parent": "block/cube_all",
+  "textures": {
+    "all": "croodaceous:block/polished_hoodoo_shale"
+  }
+}

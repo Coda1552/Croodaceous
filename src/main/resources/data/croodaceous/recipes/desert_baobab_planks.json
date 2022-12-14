@@ -1,0 +1,13 @@
+{
+  "type": "minecraft:crafting_shapeless",
+  "group": "planks",
+  "ingredients": [
+    {
+      "tag": "croodaceous:desert_baobab_logs"
+    }
+  ],
+  "result": {
+    "item": "croodaceous:desert_baobab_planks",
+    "count": 4
+  }
+}

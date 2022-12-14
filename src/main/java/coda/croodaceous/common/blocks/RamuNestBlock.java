@@ -1,6 +1,7 @@
 package coda.croodaceous.common.blocks;
 
 import coda.croodaceous.common.entities.RamuEntity;
+import coda.croodaceous.registry.CEBlocks;
 import coda.croodaceous.registry.CEItems;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
@@ -101,7 +102,7 @@ public class RamuNestBlock extends Block {
 		if (pState.getValue(WITH_EGG)) {
 			drops.add(new ItemStack(CEItems.RAMU_EGG.get()));
 		}
-		drops.add(new ItemStack(CEItems.RAMU_NEST.get()));
+		drops.add(new ItemStack(CEBlocks.RAMU_NEST.get().asItem()));
 		return drops;
 	}
 	

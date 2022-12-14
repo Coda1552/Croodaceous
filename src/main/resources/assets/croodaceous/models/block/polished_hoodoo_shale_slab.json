@@ -1,0 +1,8 @@
+{
+    "parent": "block/slab",
+    "textures": {
+        "bottom": "croodaceous:block/polished_hoodoo_shale",
+        "top": "croodaceous:block/polished_hoodoo_shale",
+        "side": "croodaceous:block/polished_hoodoo_shale"
+    }
+}
