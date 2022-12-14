@@ -1,9 +1,6 @@
 package coda.croodaceous;
 
-import coda.croodaceous.registry.CEBlocks;
-import coda.croodaceous.registry.CEItems;
-import coda.croodaceous.registry.CEPointOfInterestTypes;
-import coda.croodaceous.registry.CEEntities;
+import coda.croodaceous.registry.*;
 import com.mojang.logging.LogUtils;
 import net.minecraft.SharedConstants;
 import net.minecraft.client.renderer.ItemBlockRenderTypes;
@@ -35,8 +32,7 @@ public class CroodaceousMod {
 		CEItems.ITEMS.register(bus);
 		CEBlocks.BLOCKS.register(bus);
 		CEPointOfInterestTypes.POIS.register(bus);
-		
-//		MinecraftForge.EVENT_BUS.register(this);
+		CEFeatures.FEATURES.register(bus);
 	}
 	
 	/**

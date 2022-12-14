@@ -1,0 +1,8 @@
+{
+    "parent": "block/cube_column",
+    "textures": {
+        "end": "croodaceous:block/hoodoo_shale_tiles",
+        "side": "croodaceous:block/chiseled_hoodoo_shale"
+    }
+}
+

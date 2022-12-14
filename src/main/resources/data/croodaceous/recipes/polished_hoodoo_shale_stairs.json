@@ -1,0 +1,17 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "pattern": [
+    "#  ",
+    "## ",
+    "###"
+  ],
+  "key": {
+    "#": {
+      "item": "croodaceous:polished_hoodoo_shale"
+    }
+  },
+  "result": {
+    "item": "croodaceous:polished_hoodoo_shale_stairs",
+    "count": 4
+  }
+}

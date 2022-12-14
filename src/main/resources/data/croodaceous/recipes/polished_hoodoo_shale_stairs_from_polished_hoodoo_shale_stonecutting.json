@@ -1,0 +1,8 @@
+{
+  "type": "minecraft:stonecutting",
+  "ingredient": {
+    "item": "croodaceous:polished_hoodoo_shale"
+  },
+  "result": "croodaceous:polished_hoodoo_shale_stairs",
+  "count": 1
+}

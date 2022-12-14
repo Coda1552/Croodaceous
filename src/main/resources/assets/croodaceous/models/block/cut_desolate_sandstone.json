@@ -1,0 +1,7 @@
+{
+    "parent": "block/cube_column",
+    "textures": {
+        "end": "croodaceous:block/desolate_sandstone_top",
+        "side": "croodaceous:block/cut_desolate_sandstone"
+    }
+}

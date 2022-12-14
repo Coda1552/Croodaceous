@@ -1,0 +1,6 @@
+{
+  "parent": "minecraft:block/button_pressed",
+  "textures": {
+    "texture": "croodaceous:block/desert_baobab_planks"
+  }
+}

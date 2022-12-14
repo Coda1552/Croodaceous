@@ -1,0 +1,19 @@
+{
+  "variants": {
+    "facing=east": {
+      "model": "croodaceous:block/desert_baobab_wall_branches",
+      "y": 90
+    },
+    "facing=north": {
+      "model": "croodaceous:block/desert_baobab_wall_branches"
+    },
+    "facing=south": {
+      "model": "croodaceous:block/desert_baobab_wall_branches",
+      "y": 180
+    },
+    "facing=west": {
+      "model": "croodaceous:block/desert_baobab_wall_branches",
+      "y": 270
+    }
+  }
+}

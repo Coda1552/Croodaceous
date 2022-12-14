@@ -1,0 +1,6 @@
+{
+  "parent": "minecraft:block/cross",
+  "textures": {
+    "cross": "croodaceous:block/desert_baobab_sapling"
+  }
+}

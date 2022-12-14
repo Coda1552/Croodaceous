@@ -1,0 +1,7 @@
+{
+  "parent": "minecraft:block/door_top_rh",
+  "textures": {
+    "top": "croodaceous:block/desert_baobab_door_top",
+    "bottom": "croodaceous:block/desert_baobab_door_bottom"
+  }
+}

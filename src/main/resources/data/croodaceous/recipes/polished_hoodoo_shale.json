@@ -1,0 +1,16 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "pattern": [
+    "SS",
+    "SS"
+  ],
+  "key": {
+    "S": {
+      "item": "croodaceous:hoodoo_shale"
+    }
+  },
+  "result": {
+    "item": "croodaceous:polished_hoodoo_shale",
+    "count": 4
+  }
+}

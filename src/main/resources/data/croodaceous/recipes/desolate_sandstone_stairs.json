@@ -1,0 +1,25 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "pattern": [
+    "#  ",
+    "## ",
+    "###"
+  ],
+  "key": {
+    "#": [
+      {
+        "item": "croodaceous:desolate_sandstone"
+      },
+      {
+        "item": "croodaceous:chiseled_desolate_sandstone"
+      },
+      {
+        "item": "croodaceous:cut_desolate_sandstone"
+      }
+    ]
+  },
+  "result": {
+    "item": "croodaceous:desolate_sandstone_stairs",
+    "count": 4
+  }
+}
