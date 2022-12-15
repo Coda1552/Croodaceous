@@ -437,7 +437,7 @@
         "then_run": {
           "type": "minecraft:block",
           "result_state": {
-            "Name": "croodaceous:desolate_sand"
+            "Name": "croodaceous:desolate_sandstone"
           }
         }
       }

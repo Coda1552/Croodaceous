@@ -1,10 +1,7 @@
 package coda.croodaceous.registry;
 
 import coda.croodaceous.CroodaceousMod;
-import coda.croodaceous.common.blocks.BaobabSaplingBlock;
-import coda.croodaceous.common.blocks.BranchesBlock;
-import coda.croodaceous.common.blocks.BranchesWallBlock;
-import coda.croodaceous.common.blocks.RamuNestBlock;
+import coda.croodaceous.common.blocks.*;
 import net.minecraft.world.item.BlockItem;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.level.block.*;
@@ -43,7 +40,7 @@ public class CEBlocks {
     public static final RegistryObject<Block> DESERT_BAOBAB_WALL_BRANCHES = BLOCKS.register("desert_baobab_wall_branches", () -> new BranchesWallBlock(BlockBehaviour.Properties.of(Material.PLANT, MaterialColor.COLOR_BROWN).sound(SoundType.GRASS).noCollission().instabreak()));
 
     // Croodaceous Sand
-    public static final RegistryObject<Block> DESOLATE_SAND = register("desolate_sand", () -> new SandBlock(0xe7ba8a, BlockBehaviour.Properties.of(Material.SAND).strength(0.5f).sound(SoundType.SAND)));
+    public static final RegistryObject<Block> DESOLATE_SAND = register("desolate_sand", () -> new CESandBlock(0xe7ba8a, BlockBehaviour.Properties.of(Material.SAND).strength(0.5f).sound(SoundType.SAND)));
     public static final RegistryObject<Block> DESOLATE_SANDSTONE = register("desolate_sandstone", () -> new Block(BlockBehaviour.Properties.of(Material.STONE, MaterialColor.SAND).strength(1.2f).requiresCorrectToolForDrops()));
     public static final RegistryObject<Block> CHISELED_DESOLATE_SANDSTONE = register("chiseled_desolate_sandstone", () -> new Block(BlockBehaviour.Properties.of(Material.STONE, MaterialColor.SAND).strength(1.2f).requiresCorrectToolForDrops()));
     public static final RegistryObject<Block> CUT_DESOLATE_SANDSTONE = register("cut_desolate_sandstone", () -> new Block(BlockBehaviour.Properties.of(Material.STONE, MaterialColor.SAND).strength(1.2f).requiresCorrectToolForDrops()));
