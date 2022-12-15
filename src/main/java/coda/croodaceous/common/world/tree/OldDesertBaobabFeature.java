@@ -49,13 +49,13 @@ public class OldDesertBaobabFeature extends Feature<NoneFeatureConfiguration> {
     @Override
     public boolean place(FeaturePlaceContext<NoneFeatureConfiguration> pContext) {
         WorldGenLevel iSeedReader = pContext.level();
-        ChunkGenerator chunkGenerator = pContext.chunkGenerator();
         RandomSource random = pContext.random();
         BlockPos blockPos = pContext.origin();
 
         ArrayList<Entry> filler = new ArrayList<>();
         ArrayList<Entry> leavesFiller = new ArrayList<>();
         int trunkHeight = minimumTrunkHeight + random.nextInt(trunkHeightExtra + 1);
+
         for (int i = 0; i < trunkHeight; i++) {
             for (int j = 0; j < 4; j++) {
                 int xOffset = j % 2;
@@ -170,7 +170,6 @@ public class OldDesertBaobabFeature extends Feature<NoneFeatureConfiguration> {
     }
 
     public static boolean canPlace(WorldGenLevel reader, BlockPos pos) {
-        //todo implement some more proper 'is outside of world' check, mekanism has one
         if (pos.getY() > reader.getMaxBuildHeight() || pos.getY() < 0) {
             return false;
         }

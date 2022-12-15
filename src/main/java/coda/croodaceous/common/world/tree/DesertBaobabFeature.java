@@ -50,7 +50,6 @@ public class DesertBaobabFeature extends Feature<NoneFeatureConfiguration> {
     @Override
     public boolean place(FeaturePlaceContext<NoneFeatureConfiguration> pContext) {
         WorldGenLevel iSeedReader = pContext.level();
-        ChunkGenerator chunkGenerator = pContext.chunkGenerator();
         RandomSource random = pContext.random();
         BlockPos blockPos = pContext.origin();
 
