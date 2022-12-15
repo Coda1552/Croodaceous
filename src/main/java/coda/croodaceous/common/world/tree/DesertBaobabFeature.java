@@ -7,6 +7,7 @@ import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.util.RandomSource;
 import net.minecraft.world.level.WorldGenLevel;
+import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.RotatedPillarBlock;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.chunk.ChunkGenerator;
@@ -28,16 +29,16 @@ public class DesertBaobabFeature extends Feature<NoneFeatureConfiguration> {
     //NOTE all random values below have 1 added to them when randomizing, the values determine the maximum possible output, not number of outputs
 
     //trunk placement
-    public static int minimumTrunkHeight = 4;
-    public static int trunkHeightExtra = 1;
+    public static int minimumTrunkHeight = 5;
+    public static int trunkHeightExtra = 2;
 
     //branches on the trunk placement
     public static int minimumBranchHeight = 2;
     public static int branchHeightExtra = 0;
 
     //thinner, 'top' trunk placement
-    public static int minimumTrunkTopHeight = 0;
-    public static int trunkTopHeightExtra = 0;
+    public static int minimumTrunkTopHeight = 2;
+    public static int trunkTopHeightExtra = 1;
 
     //branches on the top trunk placement
     public static int minimumTopBranchHeight = 1;
@@ -56,56 +57,50 @@ public class DesertBaobabFeature extends Feature<NoneFeatureConfiguration> {
         ArrayList<Entry> filler = new ArrayList<>();
         ArrayList<Entry> leavesFiller = new ArrayList<>();
         int trunkHeight = minimumTrunkHeight + random.nextInt(trunkHeightExtra + 1);
-        for (int i = 0; i < trunkHeight; i++) {
+
+        for (int i = minimumTrunkHeight; i <= trunkHeight; i++) {
             for (int j = 0; j < 4; j++) {
-                int xOffset = j % 2;
-                int zOffset = j / 2;
-                BlockPos trunkPos = blockPos.offset(xOffset, i, zOffset);
+                BlockPos trunkPos = blockPos.offset(0, i, 0);
                 if (i == 0 && !canGrowTree(iSeedReader, trunkPos)) {
                     return false;
                 }
-                boolean success = makeSlice(filler, iSeedReader, trunkPos, 1);
+                boolean success = makeOddSlice(filler, iSeedReader, trunkPos, 2);
                 if (!success) {
                     return false;
                 }
-                if (i == trunkHeight - 1) {
-                    BlockPos branchPos = trunkPos.relative(DIRECTIONS[j].getOpposite(), 3);
-                    success = makeBranch(filler, leavesFiller, iSeedReader, branchPos, minimumBranchHeight + random.nextInt(branchHeightExtra + 1));
+/*                if (i == trunkHeight - 1) {
+                    success = makeUpperPartialOddSlice(filler, iSeedReader, trunkPos, 1);
                     if (!success) {
                         return false;
                     }
-                    BlockPos secondBranchPos = branchPos.relative(SECOND_DIRECTIONS[j], 2);
-                    success = makeBranch(filler, leavesFiller, iSeedReader, secondBranchPos, minimumBranchHeight + random.nextInt(branchHeightExtra + 1));
-                    if (!success) {
-                        return false;
-                    }
-                }
+                }*/
             }
         }
-        // int trunkTopHeight = minimumTrunkTopHeight + random.nextInt(trunkTopHeightExtra + 1);
-        int trunkTopHeight = 1;
+
+        int trunkTopHeight = minimumTrunkTopHeight + random.nextInt(trunkTopHeightExtra + 1);
 
         for (int i = 0; i < trunkTopHeight; i++) {
             int yOffset = trunkHeight + i;
+
             for (int j = 0; j < 4; j++) {
-                int xOffset = j % 2;
-                int zOffset = j / 2;
-                BlockPos trunkTopPos = blockPos.offset(xOffset, yOffset, zOffset);
+                BlockPos trunkTopPos = blockPos.offset(0, yOffset, 0);
 
                 if (!canPlace(iSeedReader, trunkTopPos)) {
                     return false;
                 }
                 filler.add(new Entry(trunkTopPos, trunk));
+
                 if (i == trunkTopHeight - 1) {
                     int branchHeight = minimumTopBranchHeight + random.nextInt(topBranchHeightExtra + 1);
 
-                    boolean success = makeBranch(filler, leavesFiller, iSeedReader, trunkTopPos.relative(DIRECTIONS[j]).above(), branchHeight);
+                    boolean success = makeOddTopSlice(filler, iSeedReader, trunkTopPos.below(1), branchHeight);
                     if (!success) {
                         return false;
                     }
                 }
             }
         }
+
         fill(iSeedReader, filler, false);
         fill(iSeedReader, leavesFiller, true);
         return false;
@@ -131,9 +126,9 @@ public class DesertBaobabFeature extends Feature<NoneFeatureConfiguration> {
         return true;
     }
     
-    public static boolean makeSlice(ArrayList<Entry> filler, WorldGenLevel reader, BlockPos pos, int sliceSize) {
-        for (int x = -sliceSize; x <= sliceSize; x++) {
-            for (int z = -sliceSize; z <= sliceSize; z++) {
+    public static boolean makeOddSlice(ArrayList<Entry> filler, WorldGenLevel reader, BlockPos pos, int sliceSize) {
+        for (int x = 0; x <= sliceSize; x++) {
+            for (int z = 0; z <= sliceSize; z++) {
                 if (Math.abs(x) == sliceSize && Math.abs(z) == sliceSize) {
                     continue;
                 }
@@ -142,11 +137,43 @@ public class DesertBaobabFeature extends Feature<NoneFeatureConfiguration> {
                     return false;
                 }
                 filler.add(new Entry(slicePos, trunk));
+                filler.add(new Entry(slicePos.south(2).east(2), trunk));
             }
         }
         return true;
     }
-    
+
+    public static boolean makeUpperPartialOddSlice(ArrayList<Entry> filler, WorldGenLevel reader, BlockPos pos, int sliceSize) {
+
+        filler.add(new Entry(pos, trunk));
+
+        filler.add(new Entry(pos.east(1), trunk));
+        filler.add(new Entry(pos.south(1), trunk));
+        filler.add(new Entry(pos.west(1), trunk));
+        filler.add(new Entry(pos.north(1), trunk));
+
+        return true;
+    }
+
+    public static boolean makeOddTopSlice(ArrayList<Entry> filler, WorldGenLevel reader, BlockPos pos, int sliceSize) {
+        for (int x = 0; x <= sliceSize; x++) {
+            for (int z = 0; z <= sliceSize; z++) {
+                if (Math.abs(x) == sliceSize && Math.abs(z) == sliceSize) {
+                    continue;
+                }
+                BlockPos slicePos = new BlockPos(pos).offset(x, 0, z);
+                if (!canPlace(reader, slicePos)) {
+                    return false;
+                }
+                filler.add(new Entry(pos.south(1).east(1), Blocks.AIR.defaultBlockState()));
+                filler.add(new Entry(pos.south(1).west(1), Blocks.AIR.defaultBlockState()));
+                filler.add(new Entry(pos.north(1).east(1), Blocks.AIR.defaultBlockState()));
+                filler.add(new Entry(pos.north(1).west(1), Blocks.AIR.defaultBlockState()));
+            }
+        }
+        return true;
+    }
+
     public static void fill(WorldGenLevel reader, ArrayList<Entry> filler, boolean careful) {
         for (Entry entry : filler) {
             if (careful && !canPlace(reader, entry.pos)) {
