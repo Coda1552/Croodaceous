@@ -31,7 +31,7 @@ public class BaobabSaplingBlock extends SaplingBlock {
             if (!net.minecraftforge.event.ForgeEventFactory.saplingGrowTree(world, rand, pos)) {
                 return;
             }
-            CEFeatures.DESERT_BAOBAB.get().place(NoneFeatureConfiguration.INSTANCE, world, world.getChunkSource().getGenerator(), rand, pos);
+            CEFeatures.THE_OTHER_ONE.get().place(NoneFeatureConfiguration.INSTANCE, world, world.getChunkSource().getGenerator(), rand, pos);
         }
     }
 }
