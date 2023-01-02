@@ -9,6 +9,7 @@ import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.RotatedPillarBlock;
 import net.minecraft.world.level.block.SlabBlock;
 import net.minecraft.world.level.block.state.BlockState;
+import net.minecraft.world.level.block.state.properties.BlockStateProperties;
 import net.minecraft.world.level.block.state.properties.SlabType;
 import net.minecraft.world.level.chunk.ChunkGenerator;
 import net.minecraft.world.level.levelgen.feature.Feature;
@@ -23,7 +24,7 @@ import java.util.function.Function;
 
 public class CoolerTreeFeature extends Feature<NoneFeatureConfiguration> {
     private static final Function<Direction.Axis, BlockState> WOOD = (axis) -> Blocks.STRIPPED_BIRCH_LOG.defaultBlockState().setValue(RotatedPillarBlock.AXIS, axis);
-    private static final Function<SlabType, BlockState> SLAB = (type) -> Blocks.BIRCH_SLAB.defaultBlockState().setValue(SlabBlock.TYPE, type);
+    private static final Function<Direction, BlockState> BRANCH_THING = (direction) -> Blocks.DEAD_BRAIN_CORAL_WALL_FAN.defaultBlockState().setValue(BlockStateProperties.WATERLOGGED, false).setValue(BlockStateProperties.HORIZONTAL_FACING, direction);
     private static final BlockState leaves = Blocks.BIRCH_LEAVES.defaultBlockState();
 
     public CoolerTreeFeature() {
@@ -131,12 +132,13 @@ public class CoolerTreeFeature extends Feature<NoneFeatureConfiguration> {
         BlockPos upperTrunkTop = upperTrunkBase.above(upperTrunkHeight-1);
         Direction splitOffDirection = directions[random.nextInt(directions.length)];
         BlockPos splitOffPos = upperTrunkTop.relative(splitOffDirection);
-        BlockPos splitOffSidePos = splitOffPos.relative(random.nextBoolean() ? splitOffDirection.getClockWise() : splitOffDirection.getCounterClockWise());
+        Direction splitOffBranchDirection = random.nextBoolean() ? splitOffDirection.getClockWise() : splitOffDirection.getCounterClockWise();
+        BlockPos splitOffSidePos = splitOffPos.relative(splitOffBranchDirection);
 
         if (!canPlace(iSeedReader, splitOffPos)) {
             return false;
         }
-        filler.add(new Entry(splitOffPos, SLAB.apply(SlabType.TOP)));
+        filler.add(new Entry(splitOffPos, BRANCH_THING.apply(splitOffBranchDirection.getOpposite())));
 
         if (!canPlace(iSeedReader, splitOffSidePos)) {
             return false;
@@ -160,7 +162,7 @@ public class CoolerTreeFeature extends Feature<NoneFeatureConfiguration> {
     public static void addBranches(List<Entry> filler, BlockPos pos) {
         Direction[] directions = new Direction[]{Direction.NORTH, Direction.WEST, Direction.SOUTH, Direction.EAST};
         for (Direction direction : directions) {
-            filler.add(new Entry(pos.relative(direction), SLAB.apply(SlabType.BOTTOM)));
+            filler.add(new Entry(pos.relative(direction), BRANCH_THING.apply(direction)));
         }
     }
 
