@@ -1,6 +1,5 @@
 package coda.croodaceous.common.world.tree;
 
-import coda.croodaceous.common.blocks.BranchesWallBlock;
 import coda.croodaceous.common.world.Entry;
 import coda.croodaceous.registry.CEBlocks;
 import net.minecraft.core.BlockPos;
@@ -10,39 +9,21 @@ import net.minecraft.world.level.WorldGenLevel;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.RotatedPillarBlock;
 import net.minecraft.world.level.block.state.BlockState;
+import net.minecraft.world.level.block.state.properties.BlockStateProperties;
 import net.minecraft.world.level.chunk.ChunkGenerator;
 import net.minecraft.world.level.levelgen.feature.Feature;
 import net.minecraft.world.level.levelgen.feature.FeaturePlaceContext;
 import net.minecraft.world.level.levelgen.feature.configurations.NoneFeatureConfiguration;
 
 import java.util.ArrayList;
-import java.util.Random;
+import java.util.Collections;
+import java.util.List;
+import java.util.function.Function;
 
 public class DesertBaobabFeature extends Feature<NoneFeatureConfiguration> {
-    private static final BlockState trunk = CEBlocks.DESERT_BAOBAB_LOG.get().defaultBlockState().setValue(RotatedPillarBlock.AXIS, Direction.Axis.Y);
-    private static final BlockState leaves = CEBlocks.DESERT_BAOBAB_WALL_BRANCHES.get().defaultBlockState();
-    private static final BlockState leavesTop = CEBlocks.DESERT_BAOBAB_BRANCHES.get().defaultBlockState();
-
-    public static final Direction[] DIRECTIONS = new Direction[]{Direction.WEST, Direction.NORTH, Direction.SOUTH, Direction.EAST};
-    public static final Direction[] SECOND_DIRECTIONS = new Direction[]{Direction.SOUTH, Direction.WEST, Direction.EAST, Direction.NORTH};
-
-    //NOTE all random values below have 1 added to them when randomizing, the values determine the maximum possible output, not number of outputs
-
-    //trunk placement
-    public static int minimumTrunkHeight = 5;
-    public static int trunkHeightExtra = 2;
-
-    //branches on the trunk placement
-    public static int minimumBranchHeight = 2;
-    public static int branchHeightExtra = 0;
-
-    //thinner, 'top' trunk placement
-    public static int minimumTrunkTopHeight = 2;
-    public static int trunkTopHeightExtra = 1;
-
-    //branches on the top trunk placement
-    public static int minimumTopBranchHeight = 1;
-    public static int topBranchHeightExtra = 0;
+    private static final Function<Direction.Axis, BlockState> WOOD = (axis) -> CEBlocks.DESERT_BAOBAB_LOG.get().defaultBlockState().setValue(RotatedPillarBlock.AXIS, axis);
+    private static final Function<Direction, BlockState> BRANCH_THING = (direction) -> CEBlocks.DESERT_BAOBAB_WALL_BRANCHES.get().defaultBlockState().setValue(BlockStateProperties.HORIZONTAL_FACING, direction);
+    private static final BlockState leaves = Blocks.BIRCH_LEAVES.defaultBlockState();
 
     public DesertBaobabFeature() {
         super(NoneFeatureConfiguration.CODEC);
@@ -51,149 +32,163 @@ public class DesertBaobabFeature extends Feature<NoneFeatureConfiguration> {
     @Override
     public boolean place(FeaturePlaceContext<NoneFeatureConfiguration> pContext) {
         WorldGenLevel iSeedReader = pContext.level();
+        ChunkGenerator chunkGenerator = pContext.chunkGenerator();
         RandomSource random = pContext.random();
         BlockPos blockPos = pContext.origin();
 
+        //these should really be hashmaps :sobbing:
         ArrayList<Entry> filler = new ArrayList<>();
+        ArrayList<Entry> branchFiller = new ArrayList<>();
         ArrayList<Entry> leavesFiller = new ArrayList<>();
-        int trunkHeight = minimumTrunkHeight + random.nextInt(trunkHeightExtra + 1);
 
-        for (int i = minimumTrunkHeight; i <= trunkHeight; i++) {
-            for (int j = 0; j < 4; j++) {
-                BlockPos trunkPos = blockPos.offset(0, i, 0);
-                if (i == 0 && !canGrowTree(iSeedReader, trunkPos)) {
-                    return false;
-                }
-                boolean success = makeOddSlice(filler, iSeedReader, trunkPos, 2);
-                if (!success) {
-                    return false;
-                }
-/*                if (i == trunkHeight - 1) {
-                    success = makeUpperPartialOddSlice(filler, iSeedReader, trunkPos, 1);
-                    if (!success) {
+        BlockState trunkLogState = WOOD.apply(Direction.Axis.Y);
+
+        int thickTrunkHeight = 3 + random.nextInt(2);
+        int maxBiggerSides = 2;
+        float biggerSideChance = 0.4f;
+        Direction[] directions = new Direction[]{Direction.NORTH, Direction.WEST, Direction.SOUTH, Direction.EAST};
+        for (Direction direction : directions) {
+            BlockState horizontalLogState = WOOD.apply(direction.getAxis());
+            BlockPos sideStartPos = blockPos.relative(direction, 2);
+            if (maxBiggerSides != 0 && random.nextFloat() < biggerSideChance) {
+                BlockPos sideEndPos = blockPos.relative(direction, 3);
+                int maxHeight = 1 + (random.nextFloat() < 0.25 ? 1 : 0);
+                for (int j = 0; j < thickTrunkHeight; j++) {
+                    BlockPos sideTrunkPos = sideStartPos.above(j);
+                    int height = Math.max(0, maxHeight - j);
+                    if (height != 0) {
+                        for (int k = -1; k <= 1; k++) {
+                            if (k != 0) {
+                                Direction next = direction.getClockWise();
+                                BlockPos pos = sideTrunkPos.relative(next, k);
+                                if (!canPlace(iSeedReader, pos)) {
+                                    return false;
+                                }
+                                filler.add(new Entry(pos, trunkLogState));
+                            }
+                        }
+                    }
+                    if (!canPlace(iSeedReader, sideTrunkPos)) {
                         return false;
                     }
-                }*/
-            }
-        }
-
-        int trunkTopHeight = minimumTrunkTopHeight + random.nextInt(trunkTopHeightExtra + 1);
-
-        for (int i = 0; i < trunkTopHeight; i++) {
-            int yOffset = trunkHeight + i;
-
-            for (int j = 0; j < 4; j++) {
-                BlockPos trunkTopPos = blockPos.offset(0, yOffset, 0);
-
-                if (!canPlace(iSeedReader, trunkTopPos)) {
+                    filler.add(new Entry(sideTrunkPos, trunkLogState));
+                }
+                if (!canPlace(iSeedReader, sideEndPos)) {
                     return false;
                 }
-                filler.add(new Entry(trunkTopPos, trunk));
-
-                if (i == trunkTopHeight - 1) {
-                    int branchHeight = minimumTopBranchHeight + random.nextInt(topBranchHeightExtra + 1);
-
-                    boolean success = makeOddTopSlice(filler, iSeedReader, trunkTopPos.below(1), branchHeight);
-                    if (!success) {
-                        return false;
-                    }
+                filler.add(new Entry(sideEndPos, horizontalLogState));
+                maxBiggerSides--;
+            } else {
+                if (!canPlace(iSeedReader, sideStartPos)) {
+                    return false;
                 }
+                filler.add(new Entry(sideStartPos, horizontalLogState));
             }
         }
+        for (int i = 0; i < 9; i++) {
+            int xOffset = (i / 3) - 1;
+            int zOffset = i % 3 - 1;
+            for (int j = 0; j < thickTrunkHeight; j++) {
+                BlockPos trunkPos = blockPos.offset(xOffset, j, zOffset);
+                if (!canPlace(iSeedReader, trunkPos)) {
+                    return false;
+                }
+                filler.add(new Entry(trunkPos, trunkLogState));
+            }
+        }
+        int upperTrunkHeight = 4 + random.nextInt(6);
+        BlockPos upperTrunkBase = blockPos.above(thickTrunkHeight);
+        for (int i = 0; i < upperTrunkHeight; i++) {
+            BlockPos woodPos = upperTrunkBase.above(i);
+            if (!canPlace(iSeedReader, woodPos)) {
+                return false;
+            }
+            filler.add(new Entry(woodPos, trunkLogState));
+            if (i != upperTrunkHeight - 1) {
+                addBranches(branchFiller, woodPos);
+            }
+        }
+        for (Direction direction : directions) {
+            BlockPos sideTrunkBase = upperTrunkBase.relative(direction);
+            int sideUpperTrunkHeight = Math.min(2 + random.nextInt(3), upperTrunkHeight - 3);
+            for (int i = 0; i < sideUpperTrunkHeight; i++) {
+                BlockPos woodPos = sideTrunkBase.above(i);
+                if (!canPlace(iSeedReader, woodPos)) {
+                    return false;
+                }
+                filler.add(new Entry(woodPos, trunkLogState));
+                addBranches(branchFiller, woodPos);
+            }
+            if (random.nextBoolean()) {
+                BlockPos woodPos = sideTrunkBase.relative(direction.getClockWise());
+                if (!canPlace(iSeedReader, woodPos)) {
+                    return false;
+                }
+                filler.add(new Entry(woodPos, trunkLogState));
+            }
+        }
+        BlockPos upperTrunkTop = upperTrunkBase.above(upperTrunkHeight-1);
+        Direction splitOffDirection = directions[random.nextInt(directions.length)];
+        BlockPos splitOffPos = upperTrunkTop.relative(splitOffDirection);
+        Direction splitOffBranchDirection = random.nextBoolean() ? splitOffDirection.getClockWise() : splitOffDirection.getCounterClockWise();
+        BlockPos splitOffSidePos = splitOffPos.relative(splitOffBranchDirection);
+
+        if (!canPlace(iSeedReader, splitOffPos)) {
+            return false;
+        }
+        filler.add(new Entry(splitOffPos, BRANCH_THING.apply(splitOffBranchDirection.getOpposite())));
+
+        if (!canPlace(iSeedReader, splitOffSidePos)) {
+            return false;
+        }
+        filler.add(new Entry(splitOffSidePos, trunkLogState));
+        makeLeafBlob(leavesFiller, random, upperTrunkTop.above());
+
 
         fill(iSeedReader, filler, false);
+
+        int maxAmountOfLeaves = 6 + random.nextInt(8);
+        Collections.shuffle(branchFiller);
+
+        fill(iSeedReader, branchFiller.subList(0, maxAmountOfLeaves), true);
+
         fill(iSeedReader, leavesFiller, true);
+
         return false;
     }
 
-
-    public static boolean makeBranch(ArrayList<Entry> filler, ArrayList<Entry> leavesFiller, WorldGenLevel reader, BlockPos pos, int height) {
-        for (int k = 0; k < height; k++) {
-            BlockPos branchPos = pos.above(k);
-            if (!canPlace(reader, branchPos)) {
-                return false;
-            }
-            filler.add(new Entry(branchPos, trunk));
-            if (k == height-1) {
-                for (Direction direction : DIRECTIONS) {
-                    BlockPos leavesPos =  branchPos.relative(direction);
-                    leavesFiller.add(new Entry(leavesPos, leaves.setValue(BranchesWallBlock.FACING, direction)));
-                }
-                leavesFiller.add(new Entry(branchPos.above(), leavesTop));
-    
-            }
+    public static void addBranches(List<Entry> filler, BlockPos pos) {
+        Direction[] directions = new Direction[]{Direction.NORTH, Direction.WEST, Direction.SOUTH, Direction.EAST};
+        for (Direction direction : directions) {
+            filler.add(new Entry(pos.relative(direction), BRANCH_THING.apply(direction)));
         }
-        return true;
     }
-    
-    public static boolean makeOddSlice(ArrayList<Entry> filler, WorldGenLevel reader, BlockPos pos, int sliceSize) {
-        for (int x = 0; x <= sliceSize; x++) {
-            for (int z = 0; z <= sliceSize; z++) {
-                if (Math.abs(x) == sliceSize && Math.abs(z) == sliceSize) {
+
+    public static void makeLeafBlob(List<Entry> filler, RandomSource rand, BlockPos pos) {
+        makeLeafSlice(filler, pos, 3);
+        makeLeafSlice(filler, pos.above(1), 2);
+    }
+
+    public static void makeLeafSlice(List<Entry> filler, BlockPos pos, int leavesSize) {
+        for (int x = -leavesSize; x <= leavesSize; x++) {
+            for (int z = -leavesSize; z <= leavesSize; z++) {
+                if (Math.abs(x) == leavesSize && Math.abs(z) == leavesSize) {
                     continue;
                 }
-                BlockPos slicePos = new BlockPos(pos).offset(x, 0, z);
-                if (!canPlace(reader, slicePos)) {
-                    return false;
-                }
-                filler.add(new Entry(slicePos, trunk));
-                filler.add(new Entry(slicePos.south(2).east(2), trunk));
+                BlockPos leavesPos = new BlockPos(pos).offset(x, 0, z);
+                filler.add(new Entry(leavesPos, leaves));
             }
         }
-        return true;
     }
 
-    public static boolean makeUpperPartialOddSlice(ArrayList<Entry> filler, WorldGenLevel reader, BlockPos pos, int sliceSize) {
 
-        filler.add(new Entry(pos, trunk));
-
-        filler.add(new Entry(pos.east(1), trunk));
-        filler.add(new Entry(pos.south(1), trunk));
-        filler.add(new Entry(pos.west(1), trunk));
-        filler.add(new Entry(pos.north(1), trunk));
-
-        return true;
-    }
-
-    public static boolean makeOddTopSlice(ArrayList<Entry> filler, WorldGenLevel reader, BlockPos pos, int sliceSize) {
-        for (int x = 0; x <= sliceSize; x++) {
-            for (int z = 0; z <= sliceSize; z++) {
-                if (Math.abs(x) == sliceSize && Math.abs(z) == sliceSize) {
-                    continue;
-                }
-                BlockPos slicePos = new BlockPos(pos).offset(x, 0, z);
-                if (!canPlace(reader, slicePos)) {
-                    return false;
-                }
-                filler.add(new Entry(pos.south(1).east(1), Blocks.AIR.defaultBlockState()));
-                filler.add(new Entry(pos.south(1).west(1), Blocks.AIR.defaultBlockState()));
-                filler.add(new Entry(pos.north(1).east(1), Blocks.AIR.defaultBlockState()));
-                filler.add(new Entry(pos.north(1).west(1), Blocks.AIR.defaultBlockState()));
-            }
-        }
-        return true;
-    }
-
-    public static void fill(WorldGenLevel reader, ArrayList<Entry> filler, boolean careful) {
+    public static void fill(WorldGenLevel reader, List<Entry> filler, boolean careful) {
         for (Entry entry : filler) {
             if (careful && !canPlace(reader, entry.pos)) {
                 continue;
             }
             reader.setBlock(entry.pos, entry.state, 3);
         }
-    }
-    
-    public static boolean canGrowTree(WorldGenLevel reader, BlockPos pos) {
-        if (!reader.getBlockState(pos.below()).getBlock().equals(CEBlocks.DESOLATE_SAND.get())) {
-            return false;
-        }
-        for (Direction direction : DIRECTIONS) {
-            BlockPos sandPos = pos.below().relative(direction);
-            if (!reader.getBlockState(sandPos).getBlock().equals(CEBlocks.DESOLATE_SAND.get())) {
-                return false;
-            }
-        }
-        return canPlace(reader, pos);
     }
 
     public static boolean canPlace(WorldGenLevel reader, BlockPos pos) {

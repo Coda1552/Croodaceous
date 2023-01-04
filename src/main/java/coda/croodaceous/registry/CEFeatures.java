@@ -3,7 +3,6 @@ package coda.croodaceous.registry;
 import coda.croodaceous.CroodaceousMod;
 import coda.croodaceous.common.world.tree.DesertBaobabFeature;
 import net.minecraft.world.level.levelgen.feature.Feature;
-import net.minecraft.world.level.levelgen.feature.configurations.NoneFeatureConfiguration;
 import net.minecraftforge.registries.DeferredRegister;
 import net.minecraftforge.registries.ForgeRegistries;
 import net.minecraftforge.registries.RegistryObject;
