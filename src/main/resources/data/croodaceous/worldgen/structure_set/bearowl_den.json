@@ -1,0 +1,17 @@
+{
+  "structures": [
+    {
+      "structure": "croodaceous:bearowl_den",
+      "weight": 1
+    }
+  ],
+  "placement": {
+    "type": "minecraft:random_spread",
+
+    "salt": 1694767081,
+
+    "spacing": 12,
+
+    "separation": 4
+  }
+}

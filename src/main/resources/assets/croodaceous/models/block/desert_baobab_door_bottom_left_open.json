@@ -1,0 +1,7 @@
+{
+  "parent": "minecraft:block/door_bottom_left_open",
+  "textures": {
+    "bottom": "croodaceous:block/desert_baobab_door_bottom",
+    "top": "croodaceous:block/desert_baobab_door_top"
+  }
+}
