@@ -28,7 +28,7 @@ import java.util.stream.Collectors;
 public class DesertBaobabFeature extends Feature<NoneFeatureConfiguration> {
     private static final Function<Direction.Axis, BlockState> WOOD = (axis) -> CEBlocks.DESERT_BAOBAB_LOG.get().defaultBlockState().setValue(RotatedPillarBlock.AXIS, axis);
     private static final Function<Direction, BlockState> BRANCH_THING = (direction) -> CEBlocks.DESERT_BAOBAB_WALL_BRANCHES.get().defaultBlockState().setValue(BlockStateProperties.HORIZONTAL_FACING, direction);
-    private static final BlockState leaves = Blocks.BIRCH_LEAVES.defaultBlockState();
+    private static final BlockState leaves = CEBlocks.DESERT_BAOBAB_LEAVES.get().defaultBlockState();
 
     public DesertBaobabFeature() {
         super(NoneFeatureConfiguration.CODEC);

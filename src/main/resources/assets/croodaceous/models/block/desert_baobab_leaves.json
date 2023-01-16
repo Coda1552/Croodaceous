@@ -1,0 +1,7 @@
+{
+  "parent": "minecraft:block/cube_all",
+  "textures": {
+    "all": "croodaceous:block/desert_baobab_leaves"
+  },
+  "render_type": "cutout"
+}
