@@ -261,7 +261,7 @@ public class RamuEntity extends Animal implements IAnimatable {
 	@Nullable
 	@Override
 	public AgeableMob getBreedOffspring(ServerLevel p_146743_, AgeableMob p_146744_) {
-		return CEEntities.ENTITY_RAMU.get().create(p_146743_);
+		return CEEntities.RAMU.get().create(p_146743_);
 	}
 
 	@Override

@@ -16,8 +16,8 @@ public class ClientEvents {
 
     @SubscribeEvent
     public static void clientSetup(final FMLClientSetupEvent e) {
-        EntityRenderers.register(CEEntities.ENTITY_LIYOTE.get(), LiyoteRenderer::new);
-        EntityRenderers.register(CEEntities.ENTITY_BEAROWL.get(), BearOwlRenderer::new);
-        EntityRenderers.register(CEEntities.ENTITY_RAMU.get(), RamuRenderer::new);
+        EntityRenderers.register(CEEntities.LIYOTE.get(), LiyoteRenderer::new);
+        EntityRenderers.register(CEEntities.BEAROWL.get(), BearOwlRenderer::new);
+        EntityRenderers.register(CEEntities.RAMU.get(), RamuRenderer::new);
     }
 }

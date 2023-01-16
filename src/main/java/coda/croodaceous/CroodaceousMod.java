@@ -5,14 +5,12 @@ import coda.croodaceous.common.entities.LiyoteEntity;
 import coda.croodaceous.common.entities.RamuEntity;
 import coda.croodaceous.registry.*;
 import com.mojang.logging.LogUtils;
-import net.minecraft.SharedConstants;
 import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.event.entity.EntityAttributeCreationEvent;
 import net.minecraftforge.eventbus.api.IEventBus;
 import net.minecraftforge.fml.common.Mod;
 import net.minecraftforge.fml.event.lifecycle.FMLCommonSetupEvent;
 import net.minecraftforge.fml.javafmlmod.FMLJavaModLoadingContext;
-import net.minecraftforge.fml.loading.FMLEnvironment;
 import org.slf4j.Logger;
 
 @Mod(CroodaceousMod.MOD_ID)
@@ -25,6 +23,7 @@ public class CroodaceousMod {
 		IEventBus forgeBus = MinecraftForge.EVENT_BUS;
 
 		bus.addListener(this::registerAttributes);
+		bus.addListener(this::commonSetup);
 
 		CEEntities.ENTITIES.register(bus);
 		CEItems.ITEMS.register(bus);
@@ -35,9 +34,16 @@ public class CroodaceousMod {
 	}
 	
 	private void registerAttributes(final EntityAttributeCreationEvent e) {
-		e.put(CEEntities.ENTITY_LIYOTE.get(), LiyoteEntity.createAttributes().build());
-		e.put(CEEntities.ENTITY_BEAROWL.get(), BearowlEntity.createAttributes().build());
-		e.put(CEEntities.ENTITY_RAMU.get(), RamuEntity.createAttributes().build());
+		e.put(CEEntities.LIYOTE.get(), LiyoteEntity.createAttributes().build());
+		e.put(CEEntities.BEAROWL.get(), BearowlEntity.createAttributes().build());
+		e.put(CEEntities.RAMU.get(), RamuEntity.createAttributes().build());
 	}
-	
+
+	private void commonSetup(final FMLCommonSetupEvent e) {
+		e.enqueueWork(() -> {
+			CEStructures.init();
+			CEStructurePieces.init();
+		});
+	}
+
 }

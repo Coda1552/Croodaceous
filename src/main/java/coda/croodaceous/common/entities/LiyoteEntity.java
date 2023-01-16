@@ -13,7 +13,6 @@ import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.syncher.EntityDataAccessor;
 import net.minecraft.network.syncher.EntityDataSerializers;
 import net.minecraft.network.syncher.SynchedEntityData;
-import net.minecraft.resources.ResourceKey;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.world.InteractionHand;
@@ -225,7 +224,7 @@ public class LiyoteEntity extends Wolf implements IAnimatable {
 	
 	@Override
 	public Wolf getBreedOffspring(ServerLevel p_149088_, AgeableMob p_149089_) {
-		LiyoteEntity liyote = new LiyoteEntity(CEEntities.ENTITY_LIYOTE.get(), level);
+		LiyoteEntity liyote = new LiyoteEntity(CEEntities.LIYOTE.get(), level);
 		UUID uuid = this.getOwnerUUID();
 		if (uuid != null) {
 			liyote.setOwnerUUID(uuid);

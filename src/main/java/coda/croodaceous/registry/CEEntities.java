@@ -19,21 +19,21 @@ import net.minecraftforge.registries.RegistryObject;
 public class CEEntities {
     public static final DeferredRegister<EntityType<?>> ENTITIES = DeferredRegister.create(ForgeRegistries.ENTITY_TYPES, CroodaceousMod.MOD_ID);
 
-    public static final RegistryObject<EntityType<LiyoteEntity>> ENTITY_LIYOTE =
+    public static final RegistryObject<EntityType<LiyoteEntity>> LIYOTE =
             ENTITIES.register("liyote", () -> EntityType.Builder.<LiyoteEntity>of(LiyoteEntity::new, MobCategory.CREATURE)
                     .sized(0.75F, 0.6F)
                     .setTrackingRange(16)
                     .updateInterval(1)
                     .build("liyote"));
     
-    public static final RegistryObject<EntityType<BearowlEntity>> ENTITY_BEAROWL =
+    public static final RegistryObject<EntityType<BearowlEntity>> BEAROWL =
             ENTITIES.register("bearowl", () -> EntityType.Builder.<BearowlEntity>of(BearowlEntity::new, MobCategory.CREATURE)
                     .sized(2.5F, 2.5F)
                     .setTrackingRange(16)
                     .updateInterval(1)
                     .build("bearowl"));
     
-    public static final RegistryObject<EntityType<RamuEntity>> ENTITY_RAMU =
+    public static final RegistryObject<EntityType<RamuEntity>> RAMU =
             ENTITIES.register("ramu", () -> EntityType.Builder.<RamuEntity>of(RamuEntity::new, MobCategory.CREATURE)
                                                                  .sized(1F, 2F)
                                                                  .setTrackingRange(16)

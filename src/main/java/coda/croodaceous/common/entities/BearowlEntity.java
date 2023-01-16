@@ -44,7 +44,7 @@ public class BearowlEntity extends Animal implements IAnimatable {
 	private int attackAnimationAttr;
 	private int roarTicks;
 	public boolean sleeping;
-	private BlockPos homePos;
+	public BlockPos homePos;
 
 	public BearowlEntity(EntityType<? extends BearowlEntity> type, Level level) {
 		super(type, level);
@@ -203,7 +203,7 @@ public class BearowlEntity extends Animal implements IAnimatable {
 	@Nullable
 	@Override
 	public AgeableMob getBreedOffspring(ServerLevel p_146743_, AgeableMob p_146744_) {
-		return CEEntities.ENTITY_BEAROWL.get().create(p_146743_);
+		return CEEntities.BEAROWL.get().create(p_146743_);
 	}
 
 	@Override
