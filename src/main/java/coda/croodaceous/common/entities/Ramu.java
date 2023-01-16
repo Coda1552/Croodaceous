@@ -46,9 +46,9 @@ import software.bernie.geckolib3.util.GeckoLibUtil;
 import javax.annotation.Nullable;
 import java.util.Optional;
 
-public class RamuEntity extends Animal implements IAnimatable {
-	private static final EntityDataAccessor<Boolean> DATA_SITTING = SynchedEntityData.defineId(RamuEntity.class, EntityDataSerializers.BOOLEAN);
-	private static final EntityDataAccessor<Boolean> DATA_CE = SynchedEntityData.defineId(RamuEntity.class, EntityDataSerializers.BOOLEAN);
+public class Ramu extends Animal implements IAnimatable {
+	private static final EntityDataAccessor<Boolean> DATA_SITTING = SynchedEntityData.defineId(Ramu.class, EntityDataSerializers.BOOLEAN);
+	private static final EntityDataAccessor<Boolean> DATA_CE = SynchedEntityData.defineId(Ramu.class, EntityDataSerializers.BOOLEAN);
 	private final AnimationFactory factory = GeckoLibUtil.createFactory(this);
 	private boolean sitting;
 	private boolean wantsSit;
@@ -57,7 +57,7 @@ public class RamuEntity extends Animal implements IAnimatable {
 	private int breadCooldown;
 	private BlockPos nestPos;
 
-	public RamuEntity(EntityType<? extends RamuEntity> type, Level level) {
+	public Ramu(EntityType<? extends Ramu> type, Level level) {
 		super(type, level);
 	}
 	
@@ -80,7 +80,7 @@ public class RamuEntity extends Animal implements IAnimatable {
 	}
 	
 	private boolean isTarget(LivingEntity livingEntity) {
-		if (livingEntity instanceof RamuEntity) {
+		if (livingEntity instanceof Ramu) {
 			return false;
 		}
 		if (nestPos == null) {
@@ -144,7 +144,7 @@ public class RamuEntity extends Animal implements IAnimatable {
 			} else {
 				this.setSprinting(false);
 			}
-			if (this.getTarget() instanceof LiyoteEntity && this.getTarget().getHealth() <= 5F) {
+			if (this.getTarget() instanceof Liyote && this.getTarget().getHealth() <= 5F) {
 				this.setTarget(null);
 			}
 			if (this.tickCount % 1200 == 0) {

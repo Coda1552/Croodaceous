@@ -1,6 +1,6 @@
 package coda.croodaceous.client.render;
 
-import coda.croodaceous.common.entities.RamuEntity;
+import coda.croodaceous.common.entities.Ramu;
 import coda.croodaceous.registry.CEItems;
 import coda.croodaceous.CroodaceousMod;
 import coda.croodaceous.client.model.SimpleGeoModel;
@@ -20,9 +20,9 @@ import software.bernie.geckolib3.util.RenderUtils;
 
 import javax.annotation.Nullable;
 
-public class RamuRenderer extends GeoEntityRenderer<RamuEntity> {
+public class RamuRenderer extends GeoEntityRenderer<Ramu> {
 	private MultiBufferSource renderTypeBuffer;
-	private RamuEntity animatable;
+	private Ramu animatable;
 	
 	private static final ItemStack egg = new ItemStack(CEItems.RAMU_EGG.get());
 	
@@ -52,13 +52,13 @@ public class RamuRenderer extends GeoEntityRenderer<RamuEntity> {
 	}
 	
 	@Override
-	public void renderLate(RamuEntity animatable, PoseStack stackIn, float ticks, MultiBufferSource renderTypeBuffer, VertexConsumer bufferIn, int packedLightIn, int packedOverlayIn, float red, float green, float blue, float partialTicks) {
+	public void renderLate(Ramu animatable, PoseStack stackIn, float ticks, MultiBufferSource renderTypeBuffer, VertexConsumer bufferIn, int packedLightIn, int packedOverlayIn, float red, float green, float blue, float partialTicks) {
 		this.renderTypeBuffer = renderTypeBuffer;
 		this.animatable = animatable;
 	}
 	
 	@Override
-	public RenderType getRenderType(RamuEntity animatable, float partialTicks, PoseStack stack, @Nullable MultiBufferSource renderTypeBuffer, @Nullable VertexConsumer vertexBuilder, int packedLightIn, ResourceLocation textureLocation) {
+	public RenderType getRenderType(Ramu animatable, float partialTicks, PoseStack stack, @Nullable MultiBufferSource renderTypeBuffer, @Nullable VertexConsumer vertexBuilder, int packedLightIn, ResourceLocation textureLocation) {
 		return RenderType.entityTranslucent(textureLocation);
 	}
 	

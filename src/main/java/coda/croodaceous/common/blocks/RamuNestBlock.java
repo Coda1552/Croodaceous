@@ -1,6 +1,6 @@
 package coda.croodaceous.common.blocks;
 
-import coda.croodaceous.common.entities.RamuEntity;
+import coda.croodaceous.common.entities.Ramu;
 import coda.croodaceous.registry.CEBlocks;
 import coda.croodaceous.registry.CEItems;
 import net.minecraft.core.BlockPos;
@@ -85,7 +85,7 @@ public class RamuNestBlock extends Block {
 	
 	@Override
 	public void onRemove(BlockState pState, Level pLevel, BlockPos pPos, BlockState pNewState, boolean pIsMoving) {
-		pLevel.getEntitiesOfClass(RamuEntity.class, new AABB(pPos).inflate(64)).forEach(e -> {
+		pLevel.getEntitiesOfClass(Ramu.class, new AABB(pPos).inflate(64)).forEach(e -> {
 			if (e.getNestPos() != null && e.getNestPos().equals(pPos)) {
 				e.setNestPos(null);
 			}

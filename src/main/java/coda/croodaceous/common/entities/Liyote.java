@@ -42,14 +42,14 @@ import software.bernie.geckolib3.util.GeckoLibUtil;
 
 import java.util.UUID;
 
-public class LiyoteEntity extends Wolf implements IAnimatable {
-	private static final EntityDataAccessor<ItemStack> DATA_EI = SynchedEntityData.defineId(LiyoteEntity.class, EntityDataSerializers.ITEM_STACK);
+public class Liyote extends Wolf implements IAnimatable {
+	private static final EntityDataAccessor<ItemStack> DATA_EI = SynchedEntityData.defineId(Liyote.class, EntityDataSerializers.ITEM_STACK);
 	private final AnimationFactory factory = GeckoLibUtil.createFactory(this);
 	private int eatingTicks = 0;
 	private ItemStack eatingItem = ItemStack.EMPTY;
 	private BlockPos targetNest;
 
-	public LiyoteEntity(EntityType<? extends LiyoteEntity> type, Level level) {
+	public Liyote(EntityType<? extends Liyote> type, Level level) {
 		super(type, level);
 		this.setDropChance(EquipmentSlot.MAINHAND, 1F);
 	}
@@ -64,10 +64,10 @@ public class LiyoteEntity extends Wolf implements IAnimatable {
 		this.goalSelector.addGoal(11, new AvoidEntityGoal<>(this, Player.class, 6.0F, 1.0D, 1.2D) {
 			@Override
 			public boolean canUse() {
-				return super.canUse() && !((LiyoteEntity) mob).isTame();
+				return super.canUse() && !((Liyote) mob).isTame();
 			}
 		});
-		this.goalSelector.addGoal(12, new AvoidEntityGoal<>(this, RamuEntity.class, 10.0F, 1.0D, 1.2D) {
+		this.goalSelector.addGoal(12, new AvoidEntityGoal<>(this, Ramu.class, 10.0F, 1.0D, 1.2D) {
 			@Override
 			public boolean canUse() {
 				return eatingItem.getItem() == CEItems.RAMU_EGG.get() && super.canUse();
@@ -224,7 +224,7 @@ public class LiyoteEntity extends Wolf implements IAnimatable {
 	
 	@Override
 	public Wolf getBreedOffspring(ServerLevel p_149088_, AgeableMob p_149089_) {
-		LiyoteEntity liyote = new LiyoteEntity(CEEntities.LIYOTE.get(), level);
+		Liyote liyote = new Liyote(CEEntities.LIYOTE.get(), level);
 		UUID uuid = this.getOwnerUUID();
 		if (uuid != null) {
 			liyote.setOwnerUUID(uuid);

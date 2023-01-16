@@ -1,6 +1,7 @@
 package coda.croodaceous.common.entities;
 
 import coda.croodaceous.registry.CEEntities;
+import coda.croodaceous.registry.CEItems;
 import net.minecraft.core.BlockPos;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.syncher.EntityDataAccessor;
@@ -20,9 +21,11 @@ import net.minecraft.world.entity.ai.goal.WaterAvoidingRandomStrollGoal;
 import net.minecraft.world.entity.ai.goal.target.NearestAttackableTargetGoal;
 import net.minecraft.world.entity.animal.Animal;
 import net.minecraft.world.entity.monster.Monster;
+import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.LevelAccessor;
 import net.minecraft.world.level.ServerLevelAccessor;
+import net.minecraft.world.phys.HitResult;
 import net.minecraft.world.phys.Vec3;
 import software.bernie.geckolib3.core.IAnimatable;
 import software.bernie.geckolib3.core.PlayState;
@@ -36,9 +39,9 @@ import software.bernie.geckolib3.util.GeckoLibUtil;
 
 import javax.annotation.Nullable;
 
-public class BearowlEntity extends Animal implements IAnimatable {
-	private static final EntityDataAccessor<Boolean> DATA_SLEEPING = SynchedEntityData.defineId(BearowlEntity.class, EntityDataSerializers.BOOLEAN);
-	private static final EntityDataAccessor<Boolean> DATA_ROARING = SynchedEntityData.defineId(BearowlEntity.class, EntityDataSerializers.BOOLEAN);
+public class Bearowl extends Animal implements IAnimatable {
+	private static final EntityDataAccessor<Boolean> DATA_SLEEPING = SynchedEntityData.defineId(Bearowl.class, EntityDataSerializers.BOOLEAN);
+	private static final EntityDataAccessor<Boolean> DATA_ROARING = SynchedEntityData.defineId(Bearowl.class, EntityDataSerializers.BOOLEAN);
 	private final AnimationFactory factory = GeckoLibUtil.createFactory(this);
 	private boolean roaring;
 	private int attackAnimationAttr;
@@ -46,7 +49,7 @@ public class BearowlEntity extends Animal implements IAnimatable {
 	public boolean sleeping;
 	public BlockPos homePos;
 
-	public BearowlEntity(EntityType<? extends BearowlEntity> type, Level level) {
+	public Bearowl(EntityType<? extends Bearowl> type, Level level) {
 		super(type, level);
 	}
 	
@@ -56,7 +59,7 @@ public class BearowlEntity extends Animal implements IAnimatable {
 		this.goalSelector.addGoal(1, new WaterAvoidingRandomStrollGoal(this, 1.0D));
 		this.goalSelector.addGoal(2, new RandomLookAroundGoal(this));
 		this.targetSelector.addGoal(0, new NearestAttackableTargetGoal<>(this, LivingEntity.class, 10, true, false, this::isTarget));
-		this.targetSelector.addGoal(1, new NearestAttackableTargetGoal<>(this, BearowlEntity.class, 10000, false, false, e -> true));
+		this.targetSelector.addGoal(1, new NearestAttackableTargetGoal<>(this, Bearowl.class, 10000, false, false, e -> true));
 	}
 	
 	public static AttributeSupplier.Builder createAttributes() {
@@ -73,7 +76,7 @@ public class BearowlEntity extends Animal implements IAnimatable {
 	}
 
 	private boolean isTarget(LivingEntity livingEntity) {
-		return livingEntity.getBbWidth() <= 2 && livingEntity.getBbHeight() <= 2 && !(livingEntity instanceof BearowlEntity);
+		return livingEntity.getBbWidth() <= 2 && livingEntity.getBbHeight() <= 2 && !(livingEntity instanceof Bearowl);
 	}
 	
 	private PlayState animControllerMain(AnimationEvent<?> e) {
@@ -236,7 +239,7 @@ public class BearowlEntity extends Animal implements IAnimatable {
 	@Override
 	public boolean hurt(DamageSource pSource, float pAmount) {
 		this.sleeping = false;
-		if (pSource.getEntity() instanceof BearowlEntity) {
+		if (pSource.getEntity() instanceof Bearowl) {
 			this.knockback(0.5F, pSource.getEntity().getX() - this.getX(), pSource.getEntity().getZ() - this.getZ());
 			return false;
 		}
@@ -249,7 +252,12 @@ public class BearowlEntity extends Animal implements IAnimatable {
 		this.setLastHurtByMob(null);
 		super.push(pEntity);
 	}
-	
+
+	@Override
+	public ItemStack getPickedResult(HitResult target) {
+		return new ItemStack(CEItems.BEAROWL_SPAWN_EGG.get());
+	}
+
 	@Override
 	public void swing(InteractionHand pHand) {
 		this.swing(pHand, false);

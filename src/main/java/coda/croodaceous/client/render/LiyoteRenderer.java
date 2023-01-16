@@ -2,7 +2,7 @@ package coda.croodaceous.client.render;
 
 import coda.croodaceous.CroodaceousMod;
 import coda.croodaceous.client.model.SimpleGeoModel;
-import coda.croodaceous.common.entities.LiyoteEntity;
+import coda.croodaceous.common.entities.Liyote;
 import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.blaze3d.vertex.VertexConsumer;
 import com.mojang.math.Vector3f;
@@ -17,9 +17,9 @@ import software.bernie.geckolib3.renderers.geo.GeoEntityRenderer;
 
 import javax.annotation.Nullable;
 
-public class LiyoteRenderer extends GeoEntityRenderer<LiyoteEntity> {
+public class LiyoteRenderer extends GeoEntityRenderer<Liyote> {
 	private MultiBufferSource renderTypeBuffer;
-	private LiyoteEntity animatable;
+	private Liyote animatable;
 	
 	public LiyoteRenderer(EntityRendererProvider.Context mgr) {
 		super(mgr, new SimpleGeoModel<>(CroodaceousMod.MOD_ID, "liyote"));
@@ -42,13 +42,13 @@ public class LiyoteRenderer extends GeoEntityRenderer<LiyoteEntity> {
 	}
 	
 	@Override
-	public void renderLate(LiyoteEntity animatable, PoseStack stackIn, float ticks, MultiBufferSource renderTypeBuffer, VertexConsumer bufferIn, int packedLightIn, int packedOverlayIn, float red, float green, float blue, float partialTicks) {
+	public void renderLate(Liyote animatable, PoseStack stackIn, float ticks, MultiBufferSource renderTypeBuffer, VertexConsumer bufferIn, int packedLightIn, int packedOverlayIn, float red, float green, float blue, float partialTicks) {
 		this.renderTypeBuffer = renderTypeBuffer;
 		this.animatable = animatable;
 	}
 	
 	@Override
-	public RenderType getRenderType(LiyoteEntity animatable, float partialTicks, PoseStack stack, @Nullable MultiBufferSource renderTypeBuffer, @Nullable VertexConsumer vertexBuilder, int packedLightIn, ResourceLocation textureLocation) {
+	public RenderType getRenderType(Liyote animatable, float partialTicks, PoseStack stack, @Nullable MultiBufferSource renderTypeBuffer, @Nullable VertexConsumer vertexBuilder, int packedLightIn, ResourceLocation textureLocation) {
 		return RenderType.entityTranslucent(textureLocation);
 	}
 	
