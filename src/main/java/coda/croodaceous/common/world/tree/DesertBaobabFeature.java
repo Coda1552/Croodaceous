@@ -2,9 +2,12 @@ package coda.croodaceous.common.world.tree;
 
 import coda.croodaceous.common.world.Entry;
 import coda.croodaceous.registry.CEBlocks;
+import com.google.common.collect.Lists;
+import com.google.common.collect.Sets;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.util.RandomSource;
+import net.minecraft.world.level.LevelAccessor;
 import net.minecraft.world.level.WorldGenLevel;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.RotatedPillarBlock;
@@ -18,7 +21,9 @@ import net.minecraft.world.level.levelgen.feature.configurations.NoneFeatureConf
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import java.util.Set;
 import java.util.function.Function;
+import java.util.stream.Collectors;
 
 public class DesertBaobabFeature extends Feature<NoneFeatureConfiguration> {
     private static final Function<Direction.Axis, BlockState> WOOD = (axis) -> CEBlocks.DESERT_BAOBAB_LOG.get().defaultBlockState().setValue(RotatedPillarBlock.AXIS, axis);
@@ -163,6 +168,7 @@ public class DesertBaobabFeature extends Feature<NoneFeatureConfiguration> {
         fill(iSeedReader, branchFiller.subList(0, maxAmountOfLeaves), true);
 
         fill(iSeedReader, leavesFiller, true);
+        updateLeaves(iSeedReader, filler.stream().map(e -> e.pos).collect(Collectors.toSet()));
 
         return false;
     }
@@ -213,6 +219,49 @@ public class DesertBaobabFeature extends Feature<NoneFeatureConfiguration> {
         }
     }
 
+    public static void updateLeaves(LevelAccessor pLevel, Set<BlockPos> logPositions) {
+        List<Set<BlockPos>> list = Lists.newArrayList();
+        for (int j = 0; j < 6; ++j) {
+            list.add(Sets.newHashSet());
+        }
+
+        BlockPos.MutableBlockPos mutable = new BlockPos.MutableBlockPos();
+
+        for (BlockPos pos : Lists.newArrayList(logPositions)) {
+            for (Direction direction : Direction.values()) {
+                mutable.setWithOffset(pos, direction);
+                if (!logPositions.contains(mutable)) {
+                    BlockState blockstate = pLevel.getBlockState(mutable);
+                    if (blockstate.hasProperty(BlockStateProperties.DISTANCE)) {
+                        list.get(0).add(mutable.immutable());
+                        pLevel.setBlock(mutable, blockstate.setValue(BlockStateProperties.DISTANCE, 1), 19);
+                    }
+                }
+            }
+        }
+
+        for (int l = 1; l < 6; ++l) {
+            Set<BlockPos> set = list.get(l - 1);
+            Set<BlockPos> set1 = list.get(l);
+
+            for (BlockPos pos : set) {
+                for (Direction direction1 : Direction.values()) {
+                    mutable.setWithOffset(pos, direction1);
+                    if (!set.contains(mutable) && !set1.contains(mutable)) {
+                        BlockState blockstate1 = pLevel.getBlockState(mutable);
+                        if (blockstate1.hasProperty(BlockStateProperties.DISTANCE)) {
+                            int k = blockstate1.getValue(BlockStateProperties.DISTANCE);
+                            if (k > l + 1) {
+                                BlockState blockstate2 = blockstate1.setValue(BlockStateProperties.DISTANCE, l + 1);
+                                pLevel.setBlock(mutable, blockstate2, 19);
+                                set1.add(mutable.immutable());
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    }
 
     public static void fill(WorldGenLevel reader, List<Entry> filler, boolean careful) {
         for (Entry entry : filler) {
