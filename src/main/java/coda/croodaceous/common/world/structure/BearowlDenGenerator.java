@@ -1,15 +1,19 @@
 package coda.croodaceous.common.world.structure;
 
 import coda.croodaceous.CroodaceousMod;
+import coda.croodaceous.common.entities.Bearowl;
+import coda.croodaceous.registry.CEEntities;
 import coda.croodaceous.registry.CEStructurePieces;
 import net.minecraft.core.BlockPos;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.util.RandomSource;
+import net.minecraft.world.entity.MobSpawnType;
 import net.minecraft.world.level.ChunkPos;
 import net.minecraft.world.level.ServerLevelAccessor;
 import net.minecraft.world.level.StructureManager;
 import net.minecraft.world.level.WorldGenLevel;
+import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.Mirror;
 import net.minecraft.world.level.block.Rotation;
 import net.minecraft.world.level.chunk.ChunkGenerator;
@@ -48,15 +52,14 @@ public class BearowlDenGenerator {
         @Override
         protected void handleDataMarker(String metadata, BlockPos pos, ServerLevelAccessor world, RandomSource random, BoundingBox boundingBox) {
             if ("bearowl".equals(metadata)) {
-/*                BearowlEntity bearowl = CEEntities.BEAROWL.get().create(world.getLevel());
+                Bearowl bearowl = CEEntities.BEAROWL.get().create(world.getLevel());
 
                 world.setBlock(pos, Blocks.AIR.defaultBlockState(), 2);
 
                 bearowl.moveTo(pos, 0.0F, 0.0F);
                 bearowl.finalizeSpawn(world, world.getCurrentDifficultyAt(pos), MobSpawnType.STRUCTURE, null, null);
-                bearowl.homePos = bearowl.getOnPos().above();
 
-                world.addFreshEntity(bearowl);*/
+                world.addFreshEntity(bearowl);
             }
 
         }

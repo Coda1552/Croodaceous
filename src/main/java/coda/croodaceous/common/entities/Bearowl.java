@@ -47,12 +47,12 @@ public class Bearowl extends Animal implements IAnimatable {
 	private int attackAnimationAttr;
 	private int roarTicks;
 	public boolean sleeping;
-	public BlockPos homePos;
+	private BlockPos homePos;
 
 	public Bearowl(EntityType<? extends Bearowl> type, Level level) {
 		super(type, level);
 	}
-	
+
 	@Override
 	protected void registerGoals() {
 		this.goalSelector.addGoal(0, new MeleeAttackGoal(this, 1.0D, true));
@@ -61,7 +61,7 @@ public class Bearowl extends Animal implements IAnimatable {
 		this.targetSelector.addGoal(0, new NearestAttackableTargetGoal<>(this, LivingEntity.class, 10, true, false, this::isTarget));
 		this.targetSelector.addGoal(1, new NearestAttackableTargetGoal<>(this, Bearowl.class, 10000, false, false, e -> true));
 	}
-	
+
 	public static AttributeSupplier.Builder createAttributes() {
 		return Monster.createMonsterAttributes()
 				.add(Attributes.MAX_HEALTH, 80)
@@ -78,7 +78,7 @@ public class Bearowl extends Animal implements IAnimatable {
 	private boolean isTarget(LivingEntity livingEntity) {
 		return livingEntity.getBbWidth() <= 2 && livingEntity.getBbHeight() <= 2 && !(livingEntity instanceof Bearowl);
 	}
-	
+
 	private PlayState animControllerMain(AnimationEvent<?> e) {
 		if (this.swingTime > 0) {
 			if (attackAnimationAttr == 0) {
@@ -90,7 +90,7 @@ public class Bearowl extends Animal implements IAnimatable {
 		} else {
 			attackAnimationAttr = random.nextInt(2);
 		}
-		
+
 		if (this.roaring) {
 			e.getController().setAnimation(new AnimationBuilder().addAnimation("animation.bearowl.roar", ILoopType.EDefaultLoopTypes.LOOP));
 		} else if (e.isMoving()) {
@@ -111,17 +111,20 @@ public class Bearowl extends Animal implements IAnimatable {
 	public void registerControllers(AnimationData data) {
 		data.addAnimationController(new AnimationController<>(this, "controller", 2F, this::animControllerMain));
 	}
-	
+
 	@Override
 	public AnimationFactory getFactory() {
 		return factory;
 	}
-	
+
 	@Override
 	public void tick() {
 		super.tick();
 		updateSwingTime();
 		if (!level.isClientSide) {
+			if (this.homePos == null) {
+				this.homePos = this.blockPosition();
+			}
 			if (this.isBearowlSleeping()) {
 				this.getNavigation().stop();
 				this.goalSelector.disableControlFlag(Goal.Flag.JUMP);
@@ -199,13 +202,15 @@ public class Bearowl extends Animal implements IAnimatable {
 
 	@Nullable
 	public SpawnGroupData finalizeSpawn(ServerLevelAccessor pLevel, DifficultyInstance pDifficulty, MobSpawnType pReason, @Nullable SpawnGroupData pSpawnData, @Nullable CompoundTag pDataTag) {
-		this.homePos = this.getOnPos().above();
+		if (pReason != MobSpawnType.STRUCTURE) {
+			this.homePos = this.getOnPos().above();
+		}
 		return super.finalizeSpawn(pLevel, pDifficulty, pReason, pSpawnData, pDataTag);
 	}
 
 	@Nullable
 	@Override
-	public AgeableMob getBreedOffspring(ServerLevel p_146743_, AgeableMob p_146744_) {
+	public Bearowl getBreedOffspring(ServerLevel p_146743_, AgeableMob p_146744_) {
 		return CEEntities.BEAROWL.get().create(p_146743_);
 	}
 
@@ -215,7 +220,7 @@ public class Bearowl extends Animal implements IAnimatable {
 		this.homePos = new BlockPos(pCompound.getInt("HomePosX"), pCompound.getInt("HomePosY"), pCompound.getInt("HomePosZ"));
 		this.sleeping = pCompound.getBoolean("Sleeping");
 	}
-	
+
 	@Override
 	public void addAdditionalSaveData(CompoundTag pCompound) {
 		super.addAdditionalSaveData(pCompound);
@@ -224,18 +229,18 @@ public class Bearowl extends Animal implements IAnimatable {
 		pCompound.putInt("HomePosZ", this.homePos.getZ());
 		pCompound.putBoolean("Sleeping", this.sleeping);
 	}
-	
+
 	private boolean isOnHomePos() {
 		return this.homePos != null && this.getOnPos().above().distSqr(this.homePos) < 16;
 	}
-	
+
 	@Override
 	protected void defineSynchedData() {
 		super.defineSynchedData();
 		this.entityData.define(DATA_SLEEPING, false);
 		this.entityData.define(DATA_ROARING, false);
 	}
-	
+
 	@Override
 	public boolean hurt(DamageSource pSource, float pAmount) {
 		this.sleeping = false;
@@ -245,7 +250,7 @@ public class Bearowl extends Animal implements IAnimatable {
 		}
 		return super.hurt(pSource, pAmount);
 	}
-	
+
 	@Override
 	public void push(Entity pEntity) {
 		this.sleeping = false;
@@ -262,12 +267,12 @@ public class Bearowl extends Animal implements IAnimatable {
 	public void swing(InteractionHand pHand) {
 		this.swing(pHand, false);
 	}
-	
+
 	@Override
 	public int getCurrentSwingDuration() {
 		return 20;
 	}
-	
+
 	// TODO: Custom Sounds
-	
+
 }
