@@ -40,6 +40,7 @@ public class CroodaceousMod {
 		e.put(CEEntities.LIYOTE.get(), Liyote.createAttributes().build());
 		e.put(CEEntities.BEAROWL.get(), Bearowl.createAttributes().build());
 		e.put(CEEntities.RAMU.get(), Ramu.createAttributes().build());
+		e.put(CEEntities.FANG_FLY.get(), FangFly.createAttributes().build());
 	}
 
 	private void commonSetup(final FMLCommonSetupEvent e) {

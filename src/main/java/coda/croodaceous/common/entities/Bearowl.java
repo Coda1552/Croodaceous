@@ -14,10 +14,7 @@ import net.minecraft.world.damagesource.DamageSource;
 import net.minecraft.world.entity.*;
 import net.minecraft.world.entity.ai.attributes.AttributeSupplier;
 import net.minecraft.world.entity.ai.attributes.Attributes;
-import net.minecraft.world.entity.ai.goal.Goal;
-import net.minecraft.world.entity.ai.goal.MeleeAttackGoal;
-import net.minecraft.world.entity.ai.goal.RandomLookAroundGoal;
-import net.minecraft.world.entity.ai.goal.WaterAvoidingRandomStrollGoal;
+import net.minecraft.world.entity.ai.goal.*;
 import net.minecraft.world.entity.ai.goal.target.NearestAttackableTargetGoal;
 import net.minecraft.world.entity.animal.Animal;
 import net.minecraft.world.entity.monster.Monster;
@@ -47,7 +44,7 @@ public class Bearowl extends Animal implements IAnimatable {
 	private int attackAnimationAttr;
 	private int roarTicks;
 	public boolean sleeping;
-	private BlockPos homePos;
+	public BlockPos homePos;
 
 	public Bearowl(EntityType<? extends Bearowl> type, Level level) {
 		super(type, level);
@@ -55,6 +52,7 @@ public class Bearowl extends Animal implements IAnimatable {
 
 	@Override
 	protected void registerGoals() {
+		this.goalSelector.addGoal(0, new FloatGoal(this));
 		this.goalSelector.addGoal(0, new MeleeAttackGoal(this, 1.0D, true));
 		this.goalSelector.addGoal(1, new WaterAvoidingRandomStrollGoal(this, 1.0D));
 		this.goalSelector.addGoal(2, new RandomLookAroundGoal(this));

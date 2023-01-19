@@ -4,6 +4,7 @@ import coda.croodaceous.CroodaceousMod;
 import coda.croodaceous.client.render.BearOwlRenderer;
 import coda.croodaceous.client.render.LiyoteRenderer;
 import coda.croodaceous.client.render.RamuRenderer;
+import coda.croodaceous.client.render.SimpleGeoRenderer;
 import coda.croodaceous.registry.CEEntities;
 import net.minecraft.client.renderer.entity.EntityRenderers;
 import net.minecraftforge.api.distmarker.Dist;
@@ -19,5 +20,6 @@ public class ClientEvents {
         EntityRenderers.register(CEEntities.LIYOTE.get(), LiyoteRenderer::new);
         EntityRenderers.register(CEEntities.BEAROWL.get(), BearOwlRenderer::new);
         EntityRenderers.register(CEEntities.RAMU.get(), RamuRenderer::new);
+        EntityRenderers.register(CEEntities.FANG_FLY.get(), mgr -> new SimpleGeoRenderer<>(mgr, CroodaceousMod.MOD_ID, "fang_fly"));
     }
 }

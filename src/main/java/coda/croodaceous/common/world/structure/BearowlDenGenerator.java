@@ -58,6 +58,7 @@ public class BearowlDenGenerator {
 
                 bearowl.moveTo(pos, 0.0F, 0.0F);
                 bearowl.finalizeSpawn(world, world.getCurrentDifficultyAt(pos), MobSpawnType.STRUCTURE, null, null);
+                bearowl.homePos = pos;
 
                 world.addFreshEntity(bearowl);
             }

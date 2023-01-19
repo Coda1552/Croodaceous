@@ -31,12 +31,21 @@ import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.pathfinder.BlockPathTypes;
 import net.minecraft.world.phys.HitResult;
 import net.minecraft.world.phys.Vec3;
+import software.bernie.geckolib3.core.IAnimatable;
+import software.bernie.geckolib3.core.PlayState;
+import software.bernie.geckolib3.core.builder.AnimationBuilder;
+import software.bernie.geckolib3.core.builder.ILoopType;
+import software.bernie.geckolib3.core.controller.AnimationController;
+import software.bernie.geckolib3.core.event.predicate.AnimationEvent;
+import software.bernie.geckolib3.core.manager.AnimationData;
+import software.bernie.geckolib3.core.manager.AnimationFactory;
+import software.bernie.geckolib3.util.GeckoLibUtil;
 
 import javax.annotation.Nullable;
 import java.util.EnumSet;
-import java.util.Random;
 
-public class FangFly extends Animal implements FlyingAnimal {
+public class FangFly extends Animal implements IAnimatable, FlyingAnimal {
+    private final AnimationFactory factory = GeckoLibUtil.createFactory(this);
     private int underWaterTicks;
 
     public FangFly(EntityType<? extends FangFly> type, Level worldIn) {
@@ -136,6 +145,27 @@ public class FangFly extends Animal implements FlyingAnimal {
     public static boolean canSpawn(EntityType<? extends FangFly> p_223316_0_, LevelAccessor p_223316_1_, MobSpawnType p_223316_2_, BlockPos p_223316_3_, RandomSource p_223316_4_) {
         return p_223316_1_.getBlockState(p_223316_3_.below()).is(Blocks.AIR) && p_223316_1_.getRawBrightness(p_223316_3_, 0) > 8;
     }
+
+    private PlayState animControllerMain(AnimationEvent<?> e) {
+        if (e.isMoving()) {
+            e.getController().setAnimation(new AnimationBuilder().addAnimation("animation.fang_fly.fly", ILoopType.EDefaultLoopTypes.LOOP));
+        }
+        else {
+            e.getController().setAnimation(new AnimationBuilder().addAnimation("animation.fang_fly.idle", ILoopType.EDefaultLoopTypes.LOOP));
+        }
+        return PlayState.CONTINUE;
+    }
+
+    @Override
+    public void registerControllers(AnimationData data) {
+        data.addAnimationController(new AnimationController<>(this, "controller", 2F, this::animControllerMain));
+    }
+
+    @Override
+    public AnimationFactory getFactory() {
+        return factory;
+    }
+
 
     @Override
     public boolean isFlying() {
