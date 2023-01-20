@@ -203,6 +203,10 @@ public class Bearowl extends Animal implements IAnimatable {
 		if (pReason != MobSpawnType.STRUCTURE) {
 			this.homePos = this.getOnPos().above();
 		}
+		if (pDataTag != null && pDataTag.get("SetHomeOnSpawn") != null && pDataTag.getBoolean("SetHomeOnSpawn")) {
+			this.homePos = this.getOnPos().above();
+			pDataTag.putBoolean("SetHomeOnSpawn", false);
+		}
 		return super.finalizeSpawn(pLevel, pDifficulty, pReason, pSpawnData, pDataTag);
 	}
 
