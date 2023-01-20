@@ -147,12 +147,7 @@ public class FangFly extends Animal implements IAnimatable, FlyingAnimal {
     }
 
     private PlayState animControllerMain(AnimationEvent<?> e) {
-        if (e.isMoving()) {
-            e.getController().setAnimation(new AnimationBuilder().addAnimation("animation.fang_fly.fly", ILoopType.EDefaultLoopTypes.LOOP));
-        }
-        else {
-            e.getController().setAnimation(new AnimationBuilder().addAnimation("animation.fang_fly.idle", ILoopType.EDefaultLoopTypes.LOOP));
-        }
+        e.getController().setAnimation(new AnimationBuilder().addAnimation("animation.fang_fly.fly", ILoopType.EDefaultLoopTypes.LOOP));
         return PlayState.CONTINUE;
     }
 

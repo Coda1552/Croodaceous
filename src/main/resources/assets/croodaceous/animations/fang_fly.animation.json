@@ -1,73 +1,42 @@
 {
 	"format_version": "1.8.0",
 	"animations": {
-		"animation.model.new": {
+		"animation.model.fly": {
 			"loop": true,
+			"animation_length": 1.44,
 			"bones": {
-				"root": {
-					"rotation": {
-						"vector": [15, 0, 0]
-					}
+				"body": {
+					"position": [0, "Math.cos((query.anim_time)*250)*1+5", 0]
 				},
 				"butt": {
-					"rotation": {
-						"vector": [-5, 0, 0]
-					}
+					"rotation": ["Math.cos((query.anim_time-0.3)*250)*10", 0, 0]
 				},
 				"head": {
-					"rotation": {
-						"vector": [-22.32648, 2.86313, 6.93488]
-					}
-				},
-				"leftantenna": {
-					"rotation": {
-						"vector": [10, 0, 0]
-					}
-				},
-				"rightantenna": {
-					"rotation": {
-						"vector": [20, 0, 0]
-					}
+					"rotation": ["Math.cos((query.anim_time)*250)*-10+15", 0, 0]
 				},
 				"leftfrontleg": {
-					"rotation": {
-						"vector": [-21.14074, -1.02492, 17.42096]
-					}
+					"rotation": [0, 0, "Math.cos((query.anim_time)*250)*-15+5"]
 				},
 				"leftlastleg": {
-					"rotation": {
-						"vector": [-2.5, 0, 17.5]
-					}
+					"rotation": [0, 0, "Math.cos((query.anim_time-0.2)*250)*-15+5"]
 				},
 				"leftmidleg": {
-					"rotation": {
-						"vector": [-15, 0, 22.5]
-					}
+					"rotation": [0, 0, "Math.cos((query.anim_time-0.3)*250)*-15+5"]
 				},
 				"rightmidleg": {
-					"rotation": {
-						"vector": [-15, 0, -22.5]
-					}
+					"rotation": [0, 0, "Math.cos((query.anim_time)*250)*15-5"]
 				},
 				"rightlastleg": {
-					"rotation": {
-						"vector": [0, 0, -17.5]
-					}
+					"rotation": [0, 0, "Math.cos((query.anim_time-0.3)*250)*15-5"]
 				},
 				"rightfrontleg": {
-					"rotation": {
-						"vector": [-21.14074, 1.02492, -17.42096]
-					}
+					"rotation": [0, 0, "Math.cos((query.anim_time-0.1)*250)*15-5"]
 				},
 				"leftwing": {
-					"rotation": {
-						"vector": [0, -15, -60]
-					}
+					"rotation": [0, 0, "Math.cos((query.anim_time)*1500)*-50-60"]
 				},
 				"rightwing": {
-					"rotation": {
-						"vector": [0, 15, 60]
-					}
+					"rotation": [0, 0, "Math.cos((query.anim_time)*1500)*50+60"]
 				}
 			}
 		}
