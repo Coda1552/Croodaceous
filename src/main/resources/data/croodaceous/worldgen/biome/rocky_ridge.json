@@ -37,6 +37,12 @@
       "minecraft:canyon"
     ]
   },
-  "features": []
+  "features": [
+    [
+      "croodaceous:patch_dry_bush",
+      "croodaceous:patch_dry_bush_1",
+      "croodaceous:patch_dry_bush_2"
+    ]
+  ]
 }
 
