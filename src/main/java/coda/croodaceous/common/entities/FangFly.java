@@ -1,5 +1,6 @@
 package coda.croodaceous.common.entities;
 
+import coda.croodaceous.registry.CEBlocks;
 import coda.croodaceous.registry.CEItems;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
@@ -159,7 +160,7 @@ public class FangFly extends Animal implements IAnimatable, FlyingAnimal {
     }
 
     public static boolean canSpawn(EntityType<? extends FangFly> p_223316_0_, LevelAccessor p_223316_1_, MobSpawnType p_223316_2_, BlockPos p_223316_3_, RandomSource p_223316_4_) {
-        return p_223316_1_.getBlockState(p_223316_3_.below()).is(Blocks.AIR) && p_223316_1_.getRawBrightness(p_223316_3_, 0) > 8;
+        return p_223316_1_.getBlockState(p_223316_3_.below()).is(CEBlocks.DESOLATE_SAND.get()) && p_223316_1_.getRawBrightness(p_223316_3_, 0) > 8;
     }
 
     private PlayState animControllerMain(AnimationEvent<?> e) {

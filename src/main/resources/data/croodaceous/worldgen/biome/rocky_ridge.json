@@ -13,7 +13,22 @@
     "foliage_color": 5531697,
     "grass_color_modifier": "none"
   },
-  "spawners": {},
+  "spawners": {
+    "creature": [
+      {
+        "type": "croodaceous:liyote",
+        "weight": 8,
+        "minCount": 4,
+        "maxCount": 8
+      },
+      {
+        "type": "croodaceous:fang_fly",
+        "weight": 10,
+        "minCount": 1,
+        "maxCount": 3
+      }
+    ]
+  },
   "spawn_costs": {},
   "carvers": {
     "air": [

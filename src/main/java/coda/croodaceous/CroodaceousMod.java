@@ -48,7 +48,8 @@ public class CroodaceousMod {
 			CEStructures.init();
 			CEStructurePieces.init();
 
-			SpawnPlacements.register(CEEntities.FANG_FLY.get(), SpawnPlacements.Type.NO_RESTRICTIONS, Heightmap.Types.MOTION_BLOCKING_NO_LEAVES, FangFly::canSpawn);
+			SpawnPlacements.register(CEEntities.LIYOTE.get(), SpawnPlacements.Type.ON_GROUND, Heightmap.Types.MOTION_BLOCKING_NO_LEAVES, Liyote::canSpawn);
+			SpawnPlacements.register(CEEntities.FANG_FLY.get(), SpawnPlacements.Type.ON_GROUND, Heightmap.Types.MOTION_BLOCKING_NO_LEAVES, FangFly::canSpawn);
 		});
 	}
 
