@@ -48,7 +48,7 @@ public class StealItemFromPlayerGoal extends Goal {
 	@Override
 	public void tick() {
 		this.mob.getLookControl().setLookAt(this.nearestPlayer, 30.0F, 30.0F);
-		if (this.mob.distanceToSqr(this.nearestPlayer) < 6.25D) {
+		if (this.mob.distanceToSqr(this.nearestPlayer) < 6.25D && !nearestPlayer.isCreative()) {
 			this.steal();
 		} else {
 			this.mob.getNavigation().moveTo(this.nearestPlayer, 1.0D);
