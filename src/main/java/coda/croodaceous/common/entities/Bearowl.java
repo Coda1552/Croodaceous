@@ -217,7 +217,9 @@ public class Bearowl extends Animal implements IAnimatable {
 	@Override
 	public void readAdditionalSaveData(CompoundTag pCompound) {
 		super.readAdditionalSaveData(pCompound);
-		this.homePos = new BlockPos(pCompound.getInt("HomePosX"), pCompound.getInt("HomePosY"), pCompound.getInt("HomePosZ"));
+		if (pCompound.contains("HomePosX")) {
+			this.homePos = new BlockPos(pCompound.getInt("HomePosX"), pCompound.getInt("HomePosY"), pCompound.getInt("HomePosZ"));
+		}
 		this.sleeping = pCompound.getBoolean("Sleeping");
 	}
 
