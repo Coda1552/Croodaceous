@@ -37,6 +37,9 @@
 				},
 				"rightwing": {
 					"rotation": [0, 0, "Math.cos((query.anim_time)*1500)*50+60"]
+				},
+				"root": {
+					"position": [0, -5, 0]
 				}
 			}
 		}

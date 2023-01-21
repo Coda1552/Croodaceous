@@ -248,7 +248,6 @@ public class FangFly extends Animal implements IAnimatable, FlyingAnimal {
 
                 if (fly.distanceToSqr(fly.getTarget()) <= 1.0) {
                     fly.getTarget().startRiding(fly);
-                    //fly.getTarget().hurt(DamageSource.mobAttack(fly), 1.0F);
                     fly.navigation.moveTo(getX(), getY() + 2.0D, getZ(), 1.0D);
 
                     int y = level.getHeight(Heightmap.Types.MOTION_BLOCKING_NO_LEAVES, blockPosition().getX(), blockPosition().getZ());
