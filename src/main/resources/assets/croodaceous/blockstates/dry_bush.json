@@ -1,0 +1,7 @@
+{
+  "variants": {
+    "age=0": { "model": "croodaceous:block/short_dry_bush" },
+    "age=1": { "model": "croodaceous:block/dry_bush" },
+    "age=2": { "model": "croodaceous:block/tall_dry_bush" }
+  }
+}

@@ -155,6 +155,11 @@ public class FangFly extends Animal implements IAnimatable, FlyingAnimal {
     }
 
     @Override
+    public MobType getMobType() {
+        return MobType.ARTHROPOD;
+    }
+
+    @Override
     public ItemStack getPickedResult(HitResult target) {
         return new ItemStack(CEItems.FANG_FLY_SPAWN_EGG.get());
     }
@@ -221,7 +226,6 @@ public class FangFly extends Animal implements IAnimatable, FlyingAnimal {
             return vec32 != null ? vec32 : AirAndWaterRandomPos.getPos(FangFly.this, 8, 4, -2, vec3.x, vec3.z, (float) Math.PI / 2F);
         }
     }
-
 
     class PickupAndHurtTargetGoal extends Goal {
 

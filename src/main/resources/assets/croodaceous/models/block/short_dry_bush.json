@@ -1,0 +1,7 @@
+{
+  "parent": "minecraft:block/cross",
+  "textures": {
+    "cross": "croodaceous:block/short_dry_bush"
+  },
+  "render_type": "cutout"
+}

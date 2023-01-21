@@ -20,6 +20,7 @@ public class CEBlocks {
 
     // Other
 	public static final RegistryObject<Block> RAMU_NEST = register("ramu_nest", RamuNestBlock::new);
+	public static final RegistryObject<Block> DRY_BUSH = register("dry_bush", () -> new DryBushBlock(BlockBehaviour.Properties.of(Material.PLANT).instabreak().noCollission().sound(SoundType.GRASS)));
 
     // Desert Baobab
     // todo - fix door models
