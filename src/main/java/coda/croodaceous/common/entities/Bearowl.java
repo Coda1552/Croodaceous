@@ -18,6 +18,7 @@ import net.minecraft.world.entity.ai.goal.*;
 import net.minecraft.world.entity.ai.goal.target.NearestAttackableTargetGoal;
 import net.minecraft.world.entity.animal.Animal;
 import net.minecraft.world.entity.monster.Monster;
+import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.LevelAccessor;
@@ -39,11 +40,13 @@ import javax.annotation.Nullable;
 public class Bearowl extends Animal implements IAnimatable {
 	private static final EntityDataAccessor<Boolean> DATA_SLEEPING = SynchedEntityData.defineId(Bearowl.class, EntityDataSerializers.BOOLEAN);
 	private static final EntityDataAccessor<Boolean> DATA_ROARING = SynchedEntityData.defineId(Bearowl.class, EntityDataSerializers.BOOLEAN);
+	private static final EntityDataAccessor<Boolean> DATA_HAS_KILLED = SynchedEntityData.defineId(Bearowl.class, EntityDataSerializers.BOOLEAN);
 	private final AnimationFactory factory = GeckoLibUtil.createFactory(this);
 	private boolean roaring;
 	private int attackAnimationAttr;
 	private int roarTicks;
 	public boolean sleeping;
+	public boolean hasKilled;
 	public BlockPos homePos;
 
 	public Bearowl(EntityType<? extends Bearowl> type, Level level) {
@@ -116,6 +119,16 @@ public class Bearowl extends Animal implements IAnimatable {
 	}
 
 	@Override
+	public boolean canAttack(LivingEntity pTarget) {
+		return !hasKilled || (pTarget instanceof Player player && !player.isCreative());
+	}
+
+	@Override
+	public boolean doHurtTarget(Entity pEntity) {
+		return super.doHurtTarget(pEntity);
+	}
+
+	@Override
 	public void tick() {
 		super.tick();
 		updateSwingTime();
@@ -130,6 +143,7 @@ public class Bearowl extends Animal implements IAnimatable {
 				this.goalSelector.disableControlFlag(Goal.Flag.LOOK);
 				this.targetSelector.disableControlFlag(Goal.Flag.TARGET);
 				sleeping = true;
+				hasKilled = false;
 			} else {
 				this.goalSelector.enableControlFlag(Goal.Flag.JUMP);
 				this.goalSelector.enableControlFlag(Goal.Flag.MOVE);
@@ -163,11 +177,18 @@ public class Bearowl extends Animal implements IAnimatable {
 				this.roaring = false;
 				roarTicks = 0;
 			}
+
+			if (getTarget() != null && !getTarget().isAlive() && getTarget().getLastHurtByMob() != null && getTarget().getLastHurtByMob().is(this)) {
+				this.hasKilled = true;
+			}
+
 			this.entityData.set(DATA_SLEEPING, this.sleeping);
 			this.entityData.set(DATA_ROARING, this.roaring);
+			this.entityData.set(DATA_HAS_KILLED, this.hasKilled);
 		} else {
 			this.sleeping = this.entityData.get(DATA_SLEEPING);
 			this.roaring = this.entityData.get(DATA_ROARING);
+			this.hasKilled = this.entityData.get(DATA_HAS_KILLED);
 		}
 	}
 
@@ -232,6 +253,7 @@ public class Bearowl extends Animal implements IAnimatable {
 			pCompound.putInt("HomePosZ", this.homePos.getZ());
 		}
 		pCompound.putBoolean("Sleeping", this.sleeping);
+		pCompound.putBoolean("HasKilled", this.hasKilled);
 	}
 
 	private boolean isOnHomePos() {
@@ -243,6 +265,7 @@ public class Bearowl extends Animal implements IAnimatable {
 		super.defineSynchedData();
 		this.entityData.define(DATA_SLEEPING, false);
 		this.entityData.define(DATA_ROARING, false);
+		this.entityData.define(DATA_HAS_KILLED, false);
 	}
 
 	@Override

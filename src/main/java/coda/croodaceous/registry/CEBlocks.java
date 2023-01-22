@@ -23,7 +23,7 @@ public class CEBlocks {
 	public static final RegistryObject<Block> DRY_BUSH = register("dry_bush", () -> new DryBushBlock(BlockBehaviour.Properties.of(Material.PLANT).instabreak().noCollission().sound(SoundType.GRASS)));
 
     // Desert Baobab
-    // todo - fix door models
+    // todo - make baobab logs (and wood) strippable
     public static final RegistryObject<Block> DESERT_BAOBAB_SAPLING = register("desert_baobab_sapling", () -> new BaobabSaplingBlock(BlockBehaviour.Properties.of(Material.WOOD, MaterialColor.TERRACOTTA_ORANGE).strength(0).noCollission().sound(SoundType.GRASS)));
     public static final RegistryObject<Block> DESERT_BAOBAB_LOG = register("desert_baobab_log", () -> new RotatedPillarBlock(BlockBehaviour.Properties.of(Material.WOOD, MaterialColor.TERRACOTTA_ORANGE).strength(2.0f).sound(SoundType.WOOD)));
     public static final RegistryObject<Block> DESERT_BAOBAB_WOOD = register("desert_baobab_wood", () -> new RotatedPillarBlock(BlockBehaviour.Properties.copy(DESERT_BAOBAB_LOG.get())));
