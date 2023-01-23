@@ -52,7 +52,7 @@ public class DryBushBlock extends DeadBushBlock implements BonemealableBlock {
             pLevel.playSound(pPlayer, pPos, SoundEvents.MOSS_BREAK, SoundSource.BLOCKS, 1.0F, 1.0F);
             pPlayer.swing(pHand);
 
-            for (int i = 0; i < 10; i++) {
+            for (int i = 0; i < 25; i++) {
                 pLevel.addParticle(new BlockParticleOption(ParticleTypes.BLOCK, pState), pPos.getX() + 0.5D, pPos.getY() + 0.5D, pPos.getZ() + 0.5D, 0.0D, 0.0D, 0.0D);
             }
 
