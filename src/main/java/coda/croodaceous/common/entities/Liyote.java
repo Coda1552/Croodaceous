@@ -104,7 +104,7 @@ public class Liyote extends Wolf implements IAnimatable {
 			}
 
 			return interactionresult;
-		} else if (itemstack.is(Items.TURTLE_EGG) && !this.isAngry()) {
+		} else if (itemstack.is(CEItems.RAMU_EGG.get()) && !this.isAngry()) {
 			if (!pPlayer.getAbilities().instabuild) {
 				itemstack.shrink(1);
 			}
