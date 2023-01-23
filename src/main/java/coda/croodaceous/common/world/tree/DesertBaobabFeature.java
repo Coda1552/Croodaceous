@@ -53,7 +53,6 @@ public class DesertBaobabFeature extends Feature<NoneFeatureConfiguration> {
         float biggerSideChance = 0.4f;
         Direction[] directions = new Direction[]{Direction.NORTH, Direction.WEST, Direction.SOUTH, Direction.EAST};
         for (Direction direction : directions) {
-            BlockState horizontalLogState = WOOD.apply(direction.getAxis());
             BlockPos sideStartPos = blockPos.relative(direction, 2);
             if (maxBiggerSides != 0 && random.nextFloat() < biggerSideChance) {
                 BlockPos sideEndPos = blockPos.relative(direction, 3);
@@ -81,7 +80,7 @@ public class DesertBaobabFeature extends Feature<NoneFeatureConfiguration> {
                 if (!canPlace(iSeedReader, sideEndPos)) {
                     return false;
                 }
-                filler.add(new Entry(sideEndPos, horizontalLogState));
+                filler.add(new Entry(sideEndPos, trunkLogState));
                 if (!addDownwardsTrunk(iSeedReader, filler, sideEndPos)) {
                     return false;
                 }
@@ -90,7 +89,7 @@ public class DesertBaobabFeature extends Feature<NoneFeatureConfiguration> {
                 if (!canPlace(iSeedReader, sideStartPos)) {
                     return false;
                 }
-                filler.add(new Entry(sideStartPos, horizontalLogState));
+                filler.add(new Entry(sideStartPos, trunkLogState));
             }
             if (!addDownwardsTrunk(iSeedReader, filler, sideStartPos)) {
                 return false;
