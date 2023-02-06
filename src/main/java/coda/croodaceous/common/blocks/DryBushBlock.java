@@ -32,7 +32,7 @@ public class DryBushBlock extends DeadBushBlock implements BonemealableBlock {
 
     public DryBushBlock(Properties pProperties) {
         super(pProperties);
-        this.registerDefaultState(this.stateDefinition.any().setValue(SIZE,2));
+        this.registerDefaultState(this.stateDefinition.any().setValue(SIZE, 2));
     }
 
     @Nullable
