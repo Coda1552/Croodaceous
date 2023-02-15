@@ -5,8 +5,11 @@ import coda.croodaceous.common.entities.FangFly;
 import coda.croodaceous.common.entities.Liyote;
 import coda.croodaceous.common.entities.Ramu;
 import coda.croodaceous.registry.*;
+import com.google.common.collect.ImmutableMap;
 import com.mojang.logging.LogUtils;
 import net.minecraft.world.entity.SpawnPlacements;
+import net.minecraft.world.item.AxeItem;
+import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.levelgen.Heightmap;
 import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.event.entity.EntityAttributeCreationEvent;
@@ -52,9 +55,8 @@ public class CroodaceousMod {
 			SpawnPlacements.register(CEEntities.FANG_FLY.get(), SpawnPlacements.Type.ON_GROUND, Heightmap.Types.MOTION_BLOCKING_NO_LEAVES, FangFly::canSpawn);
 			SpawnPlacements.register(CEEntities.RAMU.get(), SpawnPlacements.Type.ON_GROUND, Heightmap.Types.MOTION_BLOCKING_NO_LEAVES, Ramu::canSpawn);
 
-//			AxeItem.STRIPPABLES = new ImmutableMap.Builder<Block, Block>().putAll(AxeItem.STRIPPABLES)
-//					.put(LOG, STRIPPED_LOG)
-//					.put(LOG, STRIPPED_LOG).build();
+			AxeItem.STRIPPABLES = new ImmutableMap.Builder<Block, Block>().putAll(AxeItem.STRIPPABLES)
+					.put(CEBlocks.DESERT_BAOBAB_LOG.get(), CEBlocks.STRIPPED_DESERT_BAOBAB_LOG.get()).build();
 		});
 	}
 
