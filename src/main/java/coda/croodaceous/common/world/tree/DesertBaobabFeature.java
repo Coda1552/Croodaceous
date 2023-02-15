@@ -272,7 +272,6 @@ public class DesertBaobabFeature extends Feature<NoneFeatureConfiguration> {
     }
 
     public static boolean canPlace(WorldGenLevel reader, BlockPos pos) {
-        //todo implement some more proper 'is outside of world' check, mekanism has one
         if (pos.getY() > reader.getMaxBuildHeight() || pos.getY() < 0) {
             return false;
         }
