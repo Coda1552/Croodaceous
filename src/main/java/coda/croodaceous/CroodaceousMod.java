@@ -48,8 +48,6 @@ public class CroodaceousMod {
 
 	private void commonSetup(final FMLCommonSetupEvent e) {
 		e.enqueueWork(() -> {
-			CEStructures.init();
-			CEStructurePieces.init();
 
 			SpawnPlacements.register(CEEntities.LIYOTE.get(), SpawnPlacements.Type.ON_GROUND, Heightmap.Types.MOTION_BLOCKING_NO_LEAVES, Liyote::canSpawn);
 			SpawnPlacements.register(CEEntities.FANG_FLY.get(), SpawnPlacements.Type.ON_GROUND, Heightmap.Types.MOTION_BLOCKING_NO_LEAVES, FangFly::canSpawn);

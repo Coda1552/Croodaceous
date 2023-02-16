@@ -29,6 +29,18 @@
             "depth": 1.1,
             "offset": 0
           }
+        },
+        {
+          "biome": "croodaceous:nesting_grounds",
+          "parameters": {
+            "temperature": 0.1,
+            "humidity": 0.9,
+            "continentalness": 1,
+            "erosion": 1.5,
+            "weirdness": 0,
+            "depth": 1.1,
+            "offset": 0
+          }
         }
       ]
     }

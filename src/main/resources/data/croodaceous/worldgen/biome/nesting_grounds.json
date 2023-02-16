@@ -16,14 +16,20 @@
   "spawners": {
     "creature": [
       {
+        "type": "croodaceous:ramu",
+        "weight": 6,
+        "minCount": 1,
+        "maxCount": 1
+      },
+      {
         "type": "croodaceous:liyote",
-        "weight": 8,
+        "weight": 4,
         "minCount": 4,
         "maxCount": 8
       },
       {
         "type": "croodaceous:fang_fly",
-        "weight": 10,
+        "weight": 8,
         "minCount": 1,
         "maxCount": 3
       }
@@ -75,15 +81,15 @@
       "minecraft:underwater_magma",
       "minecraft:disk_sand",
       "minecraft:disk_clay",
-      "minecraft:disk_gravel"
+      "minecraft:disk_gravel",
+      "croodaceous:terracotta_patch",
+      "croodaceous:orange_terracotta_patch"
     ],
     [],
     [
       "minecraft:spring_lava"
     ],
     [
-      "croodaceous:desert_baobab",
-      "minecraft:patch_cactus_desert",
       "croodaceous:patch_dry_bush",
       "croodaceous:patch_dry_bush_1",
       "croodaceous:patch_dry_bush_2",
