@@ -56,7 +56,8 @@ public class CroodaceousMod {
 			SpawnPlacements.register(CEEntities.RAMU.get(), SpawnPlacements.Type.ON_GROUND, Heightmap.Types.MOTION_BLOCKING_NO_LEAVES, Ramu::canSpawn);
 
 			AxeItem.STRIPPABLES = new ImmutableMap.Builder<Block, Block>().putAll(AxeItem.STRIPPABLES)
-					.put(CEBlocks.DESERT_BAOBAB_LOG.get(), CEBlocks.STRIPPED_DESERT_BAOBAB_LOG.get()).build();
+					.put(CEBlocks.DESERT_BAOBAB_LOG.get(), CEBlocks.STRIPPED_DESERT_BAOBAB_LOG.get())
+					.put(CEBlocks.DESERT_BAOBAB_WOOD.get(), CEBlocks.STRIPPED_DESERT_BAOBAB_WOOD.get()).build();
 		});
 	}
 
