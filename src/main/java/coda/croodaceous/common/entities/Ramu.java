@@ -1,7 +1,7 @@
 package coda.croodaceous.common.entities;
 
-import coda.croodaceous.registry.CEBlocks;
 import coda.croodaceous.common.blocks.RamuNestBlock;
+import coda.croodaceous.registry.CEBlocks;
 import coda.croodaceous.registry.CEEntities;
 import coda.croodaceous.registry.CEItems;
 import coda.croodaceous.registry.CEPoiTypes;
@@ -24,7 +24,6 @@ import net.minecraft.world.entity.ai.goal.*;
 import net.minecraft.world.entity.ai.goal.target.HurtByTargetGoal;
 import net.minecraft.world.entity.ai.goal.target.NearestAttackableTargetGoal;
 import net.minecraft.world.entity.ai.village.poi.PoiManager;
-import net.minecraft.world.entity.ai.village.poi.PoiType;
 import net.minecraft.world.entity.animal.Animal;
 import net.minecraft.world.entity.item.ItemEntity;
 import net.minecraft.world.entity.monster.Monster;
@@ -56,7 +55,7 @@ public class Ramu extends Animal implements IAnimatable {
 	private boolean wantsSit;
 	private boolean willLayEgg;
 	private boolean carryingEgg;
-	private int breadCooldown;
+	private int breedCooldown;
 	private BlockPos nestPos;
 
 	public Ramu(EntityType<? extends Ramu> type, Level level) {
@@ -126,6 +125,15 @@ public class Ramu extends Animal implements IAnimatable {
 	}
 
 	@Override
+	public void travel(Vec3 pTravelVector) {
+		if (isSprinting()) {
+			float speedMod = (float) this.getMoveControl().getSpeedModifier();
+			setSpeed(speedMod + 0.15F);
+		}
+		super.travel(pTravelVector);
+	}
+
+	@Override
 	public void tick() {
 		super.tick();
 		if (!level.isClientSide) {
@@ -145,7 +153,11 @@ public class Ramu extends Animal implements IAnimatable {
 			if (((wantsSit() && !isSitting()) || willLayEgg) && nestPos != null && this.getTarget() == null) {
 				this.getNavigation().moveTo(nestPos.getX(), nestPos.getY(), nestPos.getZ(), 1.0D);
 			}
-			if (!sitting && this.getTarget() != null && (this.getTarget().getMainHandItem().getItem() == CEItems.RAMU_EGG.get() || this.getTarget().getLastHurtMob() == this)) {
+			if (this.getTarget() != null && (this.getTarget().getMainHandItem().getItem() == CEItems.RAMU_EGG.get() || this.getTarget().getLastHurtMob() == this)) {
+				if (isSitting()) {
+					sitting = false;
+					wantsSit = false;
+				}
 				this.setSprinting(true);
 			} else {
 				this.setSprinting(false);
@@ -182,8 +194,8 @@ public class Ramu extends Animal implements IAnimatable {
 			if (this.getTarget() != null && nestPos != null && this.getTarget().getPosition(1F).distanceTo(new Vec3(nestPos.getX(), nestPos.getY(), nestPos.getZ())) > 4 && this.getTarget().getMainHandItem().getItem() != CEItems.RAMU_EGG.get()) {
 				this.setTarget(null);
 			}
-			if (breadCooldown > 0) {
-				breadCooldown--;
+			if (breedCooldown > 0) {
+				breedCooldown--;
 			}
 			this.entityData.set(DATA_SITTING, this.sitting);
 			this.entityData.set(DATA_CE, this.carryingEgg);
@@ -199,7 +211,6 @@ public class Ramu extends Animal implements IAnimatable {
 	
 	private void findNest() {
 		PoiManager poiManager = ((ServerLevel) level).getPoiManager();
-		PoiType pt = CEPoiTypes.RAMU_NEST.get();
 		Optional<BlockPos> poi = poiManager.findClosest(e -> {
 			assert CEPoiTypes.RAMU_NEST.getKey() != null;
 
@@ -223,7 +234,7 @@ public class Ramu extends Animal implements IAnimatable {
 		}
 		ItemStack itemStack = pPlayer.getMainHandItem();
 		if (itemStack.getItem() == Items.MELON || itemStack.getItem() == Items.PUMPKIN) {
-			if (nestPos != null && !willLayEgg && breadCooldown == 0) {
+			if (nestPos != null && !willLayEgg && breedCooldown == 0) {
 				itemStack.shrink(1);
 				this.setInLove(pPlayer);
 				return InteractionResult.CONSUME_PARTIAL;
@@ -232,19 +243,20 @@ public class Ramu extends Animal implements IAnimatable {
 		return InteractionResult.SUCCESS;
 	}
 
-	@Override
+	// todo - remove?
+/*	@Override
 	protected void usePlayerItem(Player pPlayer, InteractionHand pHand, ItemStack pStack) {
 		if (pStack.is(Items.MELON) || pStack.is(Items.PUMPKIN)) {
 			pPlayer.setItemInHand(pHand, new ItemStack(Items.WATER_BUCKET));
 		} else {
 			super.usePlayerItem(pPlayer, pHand, pStack);
 		}
-	}
+	}*/
 
 	@Override
 	public void spawnChildFromBreeding(ServerLevel p_27564_, Animal p_27565_) {
 		willLayEgg = true;
-		breadCooldown = 2 * 60 * 20;
+		breedCooldown = 2 * 60 * 20;
 	}
 
 	private boolean isSitting() {
@@ -275,7 +287,7 @@ public class Ramu extends Animal implements IAnimatable {
 		super.readAdditionalSaveData(pCompound);
 		this.nestPos = new BlockPos(pCompound.getInt("NestPosX"), pCompound.getInt("NestPosY"), pCompound.getInt("NestPosZ"));
 		this.sitting = pCompound.getBoolean("Sitting");
-		this.breadCooldown = pCompound.getInt("BreadCooldown");
+		this.breedCooldown = pCompound.getInt("BreedCooldown");
 	}
 	
 	@Override
@@ -287,7 +299,7 @@ public class Ramu extends Animal implements IAnimatable {
 			pCompound.putInt("NestPosZ", nestPos.getZ());
 		}
 		pCompound.putBoolean("Sitting", this.sitting);
-		pCompound.putInt("BreadCooldown", this.breadCooldown);
+		pCompound.putInt("BreedCooldown", this.breedCooldown);
 	}
 	
 	private boolean isNearNest() {
