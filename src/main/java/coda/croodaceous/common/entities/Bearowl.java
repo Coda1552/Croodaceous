@@ -4,6 +4,7 @@ import coda.croodaceous.registry.CEEntities;
 import coda.croodaceous.registry.CEItems;
 import net.minecraft.core.BlockPos;
 import net.minecraft.nbt.CompoundTag;
+import net.minecraft.nbt.NbtUtils;
 import net.minecraft.network.syncher.EntityDataAccessor;
 import net.minecraft.network.syncher.EntityDataSerializers;
 import net.minecraft.network.syncher.SynchedEntityData;
@@ -42,7 +43,16 @@ public class Bearowl extends Animal implements IAnimatable {
 	private static final EntityDataAccessor<Boolean> DATA_SLEEPING = SynchedEntityData.defineId(Bearowl.class, EntityDataSerializers.BOOLEAN);
 	private static final EntityDataAccessor<Boolean> DATA_ROARING = SynchedEntityData.defineId(Bearowl.class, EntityDataSerializers.BOOLEAN);
 	private static final EntityDataAccessor<Boolean> DATA_HAS_KILLED = SynchedEntityData.defineId(Bearowl.class, EntityDataSerializers.BOOLEAN);
+
 	private final AnimationFactory factory = GeckoLibUtil.createFactory(this);
+	private static final AnimationBuilder ANIM_SWIPE_RIGHT = new AnimationBuilder().addAnimation("animation.bearowl.swipe_right",  ILoopType.EDefaultLoopTypes.LOOP);
+	private static final AnimationBuilder ANIM_SWIPE_LEFT = new AnimationBuilder().addAnimation("animation.bearowl.swipe_left",  ILoopType.EDefaultLoopTypes.LOOP);
+	private static final AnimationBuilder ANIM_ROAR = new AnimationBuilder().addAnimation("animation.bearowl.roar", ILoopType.EDefaultLoopTypes.LOOP);
+	private static final AnimationBuilder ANIM_RUN = new AnimationBuilder().addAnimation("animation.bearowl.run", ILoopType.EDefaultLoopTypes.LOOP);
+	private static final AnimationBuilder ANIM_WALK = new AnimationBuilder().addAnimation("animation.bearowl.walk", ILoopType.EDefaultLoopTypes.LOOP);
+	private static final AnimationBuilder ANIM_SLEEP = new AnimationBuilder().addAnimation("animation.bearowl.sleep", ILoopType.EDefaultLoopTypes.LOOP);
+	private static final AnimationBuilder ANIM_IDLE = new AnimationBuilder().addAnimation("animation.bearowl.idle", ILoopType.EDefaultLoopTypes.LOOP);
+
 	private boolean roaring;
 	private int attackAnimationAttr;
 	private int roarTicks;
@@ -85,9 +95,9 @@ public class Bearowl extends Animal implements IAnimatable {
 	private PlayState animControllerMain(AnimationEvent<?> e) {
 		if (this.swingTime > 0) {
 			if (attackAnimationAttr == 0) {
-				e.getController().setAnimation(new AnimationBuilder().addAnimation("animation.bearowl.swipe_right",  ILoopType.EDefaultLoopTypes.LOOP));
+				e.getController().setAnimation(ANIM_SWIPE_RIGHT);
 			} else {
-				e.getController().setAnimation(new AnimationBuilder().addAnimation("animation.bearowl.swipe_left",  ILoopType.EDefaultLoopTypes.LOOP));
+				e.getController().setAnimation(ANIM_SWIPE_LEFT);
 			}
 			return PlayState.CONTINUE;
 		} else {
@@ -95,17 +105,17 @@ public class Bearowl extends Animal implements IAnimatable {
 		}
 
 		if (this.roaring) {
-			e.getController().setAnimation(new AnimationBuilder().addAnimation("animation.bearowl.roar", ILoopType.EDefaultLoopTypes.LOOP));
+			e.getController().setAnimation(ANIM_ROAR);
 		} else if (e.isMoving()) {
 			if (this.isSprinting()) {
-				e.getController().setAnimation(new AnimationBuilder().addAnimation("animation.bearowl.run", ILoopType.EDefaultLoopTypes.LOOP));
+				e.getController().setAnimation(ANIM_RUN);
 			} else {
-				e.getController().setAnimation(new AnimationBuilder().addAnimation("animation.bearowl.walk", ILoopType.EDefaultLoopTypes.LOOP));
+				e.getController().setAnimation(ANIM_WALK);
 			}
 		} else if (sleeping) {
-			e.getController().setAnimation(new AnimationBuilder().addAnimation("animation.bearowl.sleep", ILoopType.EDefaultLoopTypes.LOOP));
+			e.getController().setAnimation(ANIM_SLEEP);
 		} else {
-			e.getController().setAnimation(new AnimationBuilder().addAnimation("animation.bearowl.idle", ILoopType.EDefaultLoopTypes.LOOP));
+			e.getController().setAnimation(ANIM_IDLE);
 		}
 		return PlayState.CONTINUE;
 	}
@@ -240,8 +250,8 @@ public class Bearowl extends Animal implements IAnimatable {
 	@Override
 	public void readAdditionalSaveData(CompoundTag pCompound) {
 		super.readAdditionalSaveData(pCompound);
-		if (pCompound.contains("HomePosX")) {
-			this.homePos = new BlockPos(pCompound.getInt("HomePosX"), pCompound.getInt("HomePosY"), pCompound.getInt("HomePosZ"));
+		if (pCompound.contains("HomePos")) {
+			this.homePos = NbtUtils.readBlockPos(pCompound.getCompound("HomePos"));
 		}
 		this.sleeping = pCompound.getBoolean("Sleeping");
 	}
@@ -250,9 +260,7 @@ public class Bearowl extends Animal implements IAnimatable {
 	public void addAdditionalSaveData(CompoundTag pCompound) {
 		super.addAdditionalSaveData(pCompound);
 		if (this.homePos != null) {
-			pCompound.putInt("HomePosX", this.homePos.getX());
-			pCompound.putInt("HomePosY", this.homePos.getY());
-			pCompound.putInt("HomePosZ", this.homePos.getZ());
+			pCompound.put("HomePos", NbtUtils.writeBlockPos(this.homePos));
 		}
 		pCompound.putBoolean("Sleeping", this.sleeping);
 		pCompound.putBoolean("HasKilled", this.hasKilled);

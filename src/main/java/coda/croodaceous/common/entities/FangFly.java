@@ -48,6 +48,7 @@ import java.util.EnumSet;
 
 public class FangFly extends Animal implements IAnimatable, FlyingAnimal {
     private final AnimationFactory factory = GeckoLibUtil.createFactory(this);
+    private static final AnimationBuilder ANIM_FLY = new AnimationBuilder().addAnimation("animation.fang_fly.fly", ILoopType.EDefaultLoopTypes.LOOP);
     private int underWaterTicks;
 
     public FangFly(EntityType<? extends FangFly> type, Level worldIn) {
@@ -169,7 +170,7 @@ public class FangFly extends Animal implements IAnimatable, FlyingAnimal {
     }
 
     private PlayState animControllerMain(AnimationEvent<?> e) {
-        e.getController().setAnimation(new AnimationBuilder().addAnimation("animation.fang_fly.fly", ILoopType.EDefaultLoopTypes.LOOP));
+        e.getController().setAnimation(ANIM_FLY);
         return PlayState.CONTINUE;
     }
 

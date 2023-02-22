@@ -51,6 +51,11 @@ public class Ramu extends Animal implements IAnimatable {
 	private static final EntityDataAccessor<Boolean> DATA_SITTING = SynchedEntityData.defineId(Ramu.class, EntityDataSerializers.BOOLEAN);
 	private static final EntityDataAccessor<Boolean> DATA_CE = SynchedEntityData.defineId(Ramu.class, EntityDataSerializers.BOOLEAN);
 	private final AnimationFactory factory = GeckoLibUtil.createFactory(this);
+	private static final AnimationBuilder ANIM_CHARGE = new AnimationBuilder().addAnimation("animation.ramu.charge", ILoopType.EDefaultLoopTypes.LOOP);
+	private static final AnimationBuilder ANIM_WALK = new AnimationBuilder().addAnimation("animation.ramu.walk", ILoopType.EDefaultLoopTypes.LOOP);
+	private static final AnimationBuilder ANIM_SIT = new AnimationBuilder().addAnimation("animation.ramu.sit", ILoopType.EDefaultLoopTypes.LOOP);
+	private static final AnimationBuilder ANIM_IDLE = new AnimationBuilder().addAnimation("animation.ramu.idle", ILoopType.EDefaultLoopTypes.LOOP);
+
 	private boolean sitting;
 	private boolean wantsSit;
 	private boolean willLayEgg;
@@ -93,14 +98,14 @@ public class Ramu extends Animal implements IAnimatable {
 	private PlayState animControllerMain(AnimationEvent<?> e) {
 		if (e.isMoving()) {
 			if (this.isSprinting()) {
-				e.getController().setAnimation(new AnimationBuilder().addAnimation("animation.ramu.charge", ILoopType.EDefaultLoopTypes.LOOP));
+				e.getController().setAnimation(ANIM_CHARGE);
 			} else {
-				e.getController().setAnimation(new AnimationBuilder().addAnimation("animation.ramu.walk", ILoopType.EDefaultLoopTypes.LOOP));
+				e.getController().setAnimation(ANIM_WALK);
 			}
 		} else if (sitting) {
-			e.getController().setAnimation(new AnimationBuilder().addAnimation("animation.ramu.sit", ILoopType.EDefaultLoopTypes.LOOP));
+			e.getController().setAnimation(ANIM_SIT);
 		} else {
-			e.getController().setAnimation(new AnimationBuilder().addAnimation("animation.ramu.idle", ILoopType.EDefaultLoopTypes.LOOP));
+			e.getController().setAnimation(ANIM_IDLE);
 		}
 		return PlayState.CONTINUE;
 	}

@@ -28,7 +28,8 @@ public class CroodaceousMod {
 		IEventBus bus = FMLJavaModLoadingContext.get().getModEventBus();
 		IEventBus forgeBus = MinecraftForge.EVENT_BUS;
 
-		bus.addListener(this::registerAttributes);
+		bus.addListener(CEEntities::registerAttributes);
+		bus.addListener(CEEntities::registerSpawnPlacements);
 		bus.addListener(this::commonSetup);
 
 		CEEntities.ENTITIES.register(bus);
@@ -38,25 +39,9 @@ public class CroodaceousMod {
 		CEFeatures.FEATURES.register(bus);
 
 	}
-	
-	private void registerAttributes(final EntityAttributeCreationEvent e) {
-		e.put(CEEntities.LIYOTE.get(), Liyote.createAttributes().build());
-		e.put(CEEntities.BEAROWL.get(), Bearowl.createAttributes().build());
-		e.put(CEEntities.RAMU.get(), Ramu.createAttributes().build());
-		e.put(CEEntities.FANG_FLY.get(), FangFly.createAttributes().build());
-	}
 
 	private void commonSetup(final FMLCommonSetupEvent e) {
-		e.enqueueWork(() -> {
-
-			SpawnPlacements.register(CEEntities.LIYOTE.get(), SpawnPlacements.Type.ON_GROUND, Heightmap.Types.MOTION_BLOCKING_NO_LEAVES, Liyote::canSpawn);
-			SpawnPlacements.register(CEEntities.FANG_FLY.get(), SpawnPlacements.Type.ON_GROUND, Heightmap.Types.MOTION_BLOCKING_NO_LEAVES, FangFly::canSpawn);
-			SpawnPlacements.register(CEEntities.RAMU.get(), SpawnPlacements.Type.ON_GROUND, Heightmap.Types.MOTION_BLOCKING_NO_LEAVES, Ramu::canSpawn);
-
-			AxeItem.STRIPPABLES = new ImmutableMap.Builder<Block, Block>().putAll(AxeItem.STRIPPABLES)
-					.put(CEBlocks.DESERT_BAOBAB_LOG.get(), CEBlocks.STRIPPED_DESERT_BAOBAB_LOG.get())
-					.put(CEBlocks.DESERT_BAOBAB_WOOD.get(), CEBlocks.STRIPPED_DESERT_BAOBAB_WOOD.get()).build();
-		});
+		// removed STRIPPABLES map modifications in favor of IForgeBlock#getToolModifiedState
 	}
 
 }

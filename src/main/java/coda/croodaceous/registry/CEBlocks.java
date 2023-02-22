@@ -4,17 +4,23 @@ import coda.croodaceous.CroodaceousMod;
 import coda.croodaceous.common.blocks.*;
 import net.minecraft.world.item.BlockItem;
 import net.minecraft.world.item.Item;
+import net.minecraft.world.item.context.UseOnContext;
 import net.minecraft.world.level.block.*;
 import net.minecraft.world.level.block.state.BlockBehaviour;
+import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.material.Material;
 import net.minecraft.world.level.material.MaterialColor;
+import net.minecraftforge.common.ToolAction;
+import net.minecraftforge.common.ToolActions;
 import net.minecraftforge.registries.DeferredRegister;
 import net.minecraftforge.registries.ForgeRegistries;
 import net.minecraftforge.registries.RegistryObject;
+import org.jetbrains.annotations.Nullable;
 
 import java.util.function.BiFunction;
 import java.util.function.Supplier;
 
+@SuppressWarnings("unused")
 public class CEBlocks {
 	public static final DeferredRegister<Block> BLOCKS = DeferredRegister.create(ForgeRegistries.BLOCKS, CroodaceousMod.MOD_ID);
 
@@ -23,10 +29,9 @@ public class CEBlocks {
 	public static final RegistryObject<Block> DRY_BUSH = register("dry_bush", () -> new DryBushBlock(BlockBehaviour.Properties.of(Material.PLANT).instabreak().noCollission().sound(SoundType.GRASS)));
 
     // Desert Baobab
-    // todo - make baobab logs (and wood) strippable
     public static final RegistryObject<Block> DESERT_BAOBAB_SAPLING = register("desert_baobab_sapling", () -> new BaobabSaplingBlock(BlockBehaviour.Properties.of(Material.WOOD, MaterialColor.TERRACOTTA_ORANGE).strength(0).noCollission().sound(SoundType.GRASS)));
-    public static final RegistryObject<Block> DESERT_BAOBAB_LOG = register("desert_baobab_log", () -> new RotatedPillarBlock(BlockBehaviour.Properties.of(Material.WOOD, MaterialColor.TERRACOTTA_ORANGE).strength(2.0f).sound(SoundType.WOOD)));
-    public static final RegistryObject<Block> DESERT_BAOBAB_WOOD = register("desert_baobab_wood", () -> new RotatedPillarBlock(BlockBehaviour.Properties.copy(DESERT_BAOBAB_LOG.get())));
+    public static final RegistryObject<Block> DESERT_BAOBAB_LOG = registerRotatedPillar("desert_baobab_log", CEBlocks.STRIPPED_DESERT_BAOBAB_LOG, BlockBehaviour.Properties.of(Material.WOOD, MaterialColor.TERRACOTTA_ORANGE).strength(2.0f).sound(SoundType.WOOD));
+    public static final RegistryObject<Block> DESERT_BAOBAB_WOOD = registerRotatedPillar("desert_baobab_wood", CEBlocks.STRIPPED_DESERT_BAOBAB_WOOD, BlockBehaviour.Properties.of(Material.WOOD, MaterialColor.TERRACOTTA_ORANGE).strength(2.0f).sound(SoundType.WOOD));
     public static final RegistryObject<Block> STRIPPED_DESERT_BAOBAB_LOG = register("stripped_desert_baobab_log", () -> new RotatedPillarBlock(BlockBehaviour.Properties.copy(DESERT_BAOBAB_LOG.get())));
     public static final RegistryObject<Block> STRIPPED_DESERT_BAOBAB_WOOD = register("stripped_desert_baobab_wood", () -> new RotatedPillarBlock(BlockBehaviour.Properties.copy(DESERT_BAOBAB_LOG.get())));
     public static final RegistryObject<Block> DESERT_BAOBAB_PLANKS = register("desert_baobab_planks", () -> new Block(BlockBehaviour.Properties.copy(Blocks.OAK_PLANKS)));
@@ -65,6 +70,18 @@ public class CEBlocks {
     public static final RegistryObject<Block> HOODOO_SHALE_SLAB = register("hoodoo_shale_slab", () -> new SlabBlock(BlockBehaviour.Properties.of(Material.STONE, MaterialColor.COLOR_BROWN).strength(1.5f, 6.0f).requiresCorrectToolForDrops()));
     public static final RegistryObject<Block> POLISHED_HOODOO_SHALE_SLAB = register("polished_hoodoo_shale_slab", () -> new SlabBlock(BlockBehaviour.Properties.of(Material.STONE, MaterialColor.COLOR_BROWN).strength(1.5f, 6.0f).requiresCorrectToolForDrops()));
     public static final RegistryObject<Block> HOODOO_SHALE_WALL = register("hoodoo_shale_wall", () -> new WallBlock(BlockBehaviour.Properties.of(Material.STONE, MaterialColor.COLOR_BROWN).strength(1.5f, 6.0f).requiresCorrectToolForDrops()));
+
+    private static RegistryObject<Block> registerRotatedPillar(String name, Supplier<Block> stripped, BlockBehaviour.Properties properties) {
+        return register(name, () -> new RotatedPillarBlock(properties) {
+            @Override
+            public @Nullable BlockState getToolModifiedState(BlockState state, UseOnContext context, ToolAction toolAction, boolean simulate) {
+                if (toolAction == ToolActions.AXE_STRIP) {
+                    return stripped.get().defaultBlockState().setValue(RotatedPillarBlock.AXIS, state.getValue(RotatedPillarBlock.AXIS));
+                }
+                return super.getToolModifiedState(state, context, toolAction, simulate);
+            }
+        });
+    }
 
     private static <T extends Block> RegistryObject<T> register(String name, Supplier<T> block) {
 		return register(name, block, new Item.Properties().tab(CEItems.TAB));
