@@ -6,6 +6,7 @@ import coda.croodaceous.client.render.JackrobatRenderer;
 import coda.croodaceous.client.render.LiyoteRenderer;
 import coda.croodaceous.client.render.RamuRenderer;
 import coda.croodaceous.client.render.SimpleGeoRenderer;
+import coda.croodaceous.client.render.TripGerbilRenderer;
 import coda.croodaceous.registry.CEEntities;
 import net.minecraft.client.renderer.entity.EntityRenderers;
 import net.minecraftforge.api.distmarker.Dist;
@@ -23,5 +24,6 @@ public class ClientEvents {
         EntityRenderers.register(CEEntities.RAMU.get(), RamuRenderer::new);
         EntityRenderers.register(CEEntities.FANG_FLY.get(), mgr -> new SimpleGeoRenderer<>(mgr, CroodaceousMod.MOD_ID, "fang_fly"));
         EntityRenderers.register(CEEntities.JACKROBAT.get(), JackrobatRenderer::new);
+        EntityRenderers.register(CEEntities.TRIP_GERBIL.get(), TripGerbilRenderer::new);
     }
 }

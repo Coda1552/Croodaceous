@@ -4,6 +4,7 @@ import coda.croodaceous.common.entities.Bearowl;
 import coda.croodaceous.common.entities.FangFly;
 import coda.croodaceous.common.entities.Liyote;
 import coda.croodaceous.common.entities.Ramu;
+import coda.croodaceous.common.network.CENetwork;
 import coda.croodaceous.registry.*;
 import com.google.common.collect.ImmutableMap;
 import com.mojang.logging.LogUtils;
@@ -37,6 +38,8 @@ public class CroodaceousMod {
 		CEBlocks.BLOCKS.register(bus);
 		CEPoiTypes.POIS.register(bus);
 		CEFeatures.FEATURES.register(bus);
+
+		CENetwork.register();
 
 	}
 

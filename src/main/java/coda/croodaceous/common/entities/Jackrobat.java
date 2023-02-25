@@ -1,7 +1,6 @@
 package coda.croodaceous.common.entities;
 
 import coda.croodaceous.registry.CEBlocks;
-import coda.croodaceous.registry.CEEntities;
 import coda.croodaceous.registry.CEItems;
 import net.minecraft.core.BlockPos;
 import net.minecraft.nbt.CompoundTag;
@@ -28,11 +27,12 @@ import net.minecraft.world.entity.ai.goal.LookAtPlayerGoal;
 import net.minecraft.world.entity.ai.goal.PanicGoal;
 import net.minecraft.world.entity.ai.goal.RandomLookAroundGoal;
 import net.minecraft.world.entity.ai.goal.WaterAvoidingRandomStrollGoal;
-import net.minecraft.world.entity.ai.goal.target.HurtByTargetGoal;
 import net.minecraft.world.entity.ai.goal.target.NearestAttackableTargetGoal;
 import net.minecraft.world.entity.ai.goal.target.TargetGoal;
 import net.minecraft.world.entity.ai.navigation.FlyingPathNavigation;
 import net.minecraft.world.entity.ai.navigation.PathNavigation;
+import net.minecraft.world.entity.ai.targeting.TargetingConditions;
+import net.minecraft.world.entity.ai.util.DefaultRandomPos;
 import net.minecraft.world.entity.animal.Animal;
 import net.minecraft.world.entity.animal.FlyingAnimal;
 import net.minecraft.world.entity.player.Player;
@@ -61,17 +61,18 @@ import java.util.function.Predicate;
 
 public class Jackrobat extends Animal implements IAnimatable, FlyingAnimal {
 
-    // TODO if this jackrobat is holding a ramu egg, nearby jackrobats should take bites
-
     // LEADER //
     @Nullable
     private Jackrobat leader;
     private int groupSize;
-
+    // EGG //
+    private static final int EAT_EGG_COOLDOWN = 100;
+    private static final float EAT_EGG_AMOUNT = 0.15F;
     private float remainingEgg;
+    private int eatEggCooldown;
 
     // TARGET //
-    private static final Predicate<LivingEntity> IS_LIYOTE_WITH_EGG = (e) -> e instanceof Liyote liyote && liyote.getMainHandItem().is(CEItems.RAMU_EGG.get());
+    private static final Predicate<LivingEntity> IS_LIYOTE_WITH_EGG = (e) -> !e.isInvulnerable() && e instanceof Liyote liyote && liyote.getMainHandItem().is(CEItems.RAMU_EGG.get());
 
     // ANIMATIONS //
     private final AnimationFactory factory = GeckoLibUtil.createFactory(this);
@@ -104,26 +105,13 @@ public class Jackrobat extends Animal implements IAnimatable, FlyingAnimal {
     protected void registerGoals() {
         this.goalSelector.addGoal(1, new PanicGoal(this, 2.0D));
         this.goalSelector.addGoal(2, new AvoidEntityGoal<>(this, Liyote.class, 8.0F, 1.8D, 2.0D, e -> this.isHoldingEgg()));
-        this.goalSelector.addGoal(3, new Jackrobat.WanderGoal(this, 0.9D));
-        this.goalSelector.addGoal(4, new LookAtPlayerGoal(this, Player.class, 6.0F));
-        this.goalSelector.addGoal(5, new RandomLookAroundGoal(this));
+        this.goalSelector.addGoal(3, new Jackrobat.EatingGoal(this, 1.2F, 8.0F));
+        this.goalSelector.addGoal(4, new Jackrobat.WanderGoal(this, 1.0D));
+        this.goalSelector.addGoal(5, new LookAtPlayerGoal(this, Player.class, 6.0F));
+        this.goalSelector.addGoal(6, new RandomLookAroundGoal(this));
         this.targetSelector.addGoal(0, new Jackrobat.FindLeaderGoal(this));
         this.targetSelector.addGoal(1, new Jackrobat.TargetWithLeaderGoal(this));
         this.targetSelector.addGoal(3, new NearestAttackableTargetGoal<>(this, Liyote.class, 10, false, false, IS_LIYOTE_WITH_EGG.and(e -> !this.isHoldingEgg())));
-    }
-
-    @Override
-    protected PathNavigation createNavigation(Level worldIn) {
-        FlyingPathNavigation flyingpathnavigator = new FlyingPathNavigation(this, worldIn);
-        flyingpathnavigator.setCanOpenDoors(false);
-        flyingpathnavigator.setCanFloat(true);
-        flyingpathnavigator.setCanPassDoors(true);
-        return flyingpathnavigator;
-    }
-
-    @Override
-    public float getWalkTargetValue(BlockPos pos, LevelReader worldIn) {
-        return worldIn.getBlockState(pos).isAir() ? 10.0F : 0.0F;
     }
 
     @Override
@@ -137,15 +125,6 @@ public class Jackrobat extends Animal implements IAnimatable, FlyingAnimal {
             return true;
         }
         return false;
-    }
-
-    @Override
-    public boolean causeFallDamage(float pFallDistance, float pMultiplier, DamageSource pSource) {
-        return false;
-    }
-
-    @Override
-    protected void checkFallDamage(double y, boolean onGroundIn, BlockState state, BlockPos pos) {
     }
 
     @Override
@@ -181,8 +160,8 @@ public class Jackrobat extends Animal implements IAnimatable, FlyingAnimal {
     @Override
     protected void customServerAiStep() {
         super.customServerAiStep();
-        if(null == getTarget() && getLeader() != null && getLeader().getTarget() != null) {
-            setTarget(getLeader().getTarget());
+        if(!level.isClientSide() && eatEggCooldown > 0) {
+            eatEggCooldown--;
         }
     }
 
@@ -192,6 +171,36 @@ public class Jackrobat extends Animal implements IAnimatable, FlyingAnimal {
             getLeader().removeFollower(this);
         }
         super.remove(pReason);
+    }
+
+    //// FLYING ////
+
+    @Override
+    protected PathNavigation createNavigation(Level worldIn) {
+        FlyingPathNavigation flyingpathnavigator = new FlyingPathNavigation(this, worldIn);
+        flyingpathnavigator.setCanOpenDoors(false);
+        flyingpathnavigator.setCanFloat(true);
+        flyingpathnavigator.setCanPassDoors(true);
+        return flyingpathnavigator;
+    }
+
+    @Override
+    public float getWalkTargetValue(BlockPos pos, LevelReader worldIn) {
+        return worldIn.getBlockState(pos).isAir() ? 10.0F : 0.0F;
+    }
+
+    @Override
+    public boolean causeFallDamage(float pFallDistance, float pMultiplier, DamageSource pSource) {
+        return false;
+    }
+
+    @Override
+    protected void checkFallDamage(double y, boolean onGroundIn, BlockState state, BlockPos pos) {
+    }
+
+    @Override
+    public boolean isFlying() {
+        return !this.onGround/* || (this.getDeltaMovement().lengthSqr() > 0.06D)*/;
     }
 
     //// LEADER ////
@@ -222,39 +231,53 @@ public class Jackrobat extends Animal implements IAnimatable, FlyingAnimal {
         this.groupSize--;
     }
 
+    //// EGG ////
+
     public boolean isHoldingEgg() {
         return getMainHandItem().is(CEItems.RAMU_EGG.get());
     }
 
-    public boolean hasEgg() {
+    public boolean hasRemainingEgg() {
         return isHoldingEgg() && remainingEgg > 0;
     }
 
-    public void eatEgg(final float amount) {
+    public void eatHeldEgg(final float amount) {
+        if(!isHoldingEgg()) {
+            return;
+        }
         // reduce remaining egg
-        if(isHoldingEgg()) {
-            this.remainingEgg -= amount;
-            // check if egg is consumed
-            if(this.remainingEgg <= 0) {
-                setItemInHand(InteractionHand.MAIN_HAND, ItemStack.EMPTY);
-                playSound(SoundEvents.PLAYER_BURP, getSoundVolume(), getVoicePitch());
-            }
+        this.remainingEgg -= amount;
+        // check if egg is consumed
+        if(this.remainingEgg <= 0) {
+            setItemInHand(InteractionHand.MAIN_HAND, ItemStack.EMPTY);
+            playSound(SoundEvents.PLAYER_BURP, getSoundVolume() + 0.2F, getVoicePitch());
         }
     }
 
-    public float getRemainingEgg() {
-        return remainingEgg;
+    public void eatOtherEgg(final Jackrobat entity) {
+        if(!entity.hasRemainingEgg()) {
+            return;
+        }
+        entity.eatHeldEgg(EAT_EGG_AMOUNT);
+        this.eatEggCooldown = EAT_EGG_COOLDOWN;
+        this.playSound(SoundEvents.GENERIC_EAT, getSoundVolume() + 0.1F, getVoicePitch());
+    }
+
+    public boolean canEatEgg() {
+        return this.eatEggCooldown <= 0;
     }
 
     //// NBT ////
 
     private static final String KEY_LEADER = "Leader";
     private static final String KEY_GROUP_SIZE = "GroupSize";
+    private static final String KEY_EAT_EGG_COOLDOWN = "EggCooldown";
 
     @Override
     public void readAdditionalSaveData(CompoundTag pCompound) {
         super.readAdditionalSaveData(pCompound);
         groupSize = pCompound.getInt(KEY_GROUP_SIZE);
+        eatEggCooldown = pCompound.getInt(KEY_EAT_EGG_COOLDOWN);
         if(pCompound.contains(KEY_LEADER) && level instanceof ServerLevel serverLevel) {
             // attempt to load leader by UUID
             final UUID leaderId = pCompound.getUUID(KEY_LEADER);
@@ -267,6 +290,7 @@ public class Jackrobat extends Animal implements IAnimatable, FlyingAnimal {
     public void addAdditionalSaveData(CompoundTag pCompound) {
         super.addAdditionalSaveData(pCompound);
         pCompound.putInt(KEY_GROUP_SIZE, groupSize);
+        pCompound.putInt(KEY_EAT_EGG_COOLDOWN, eatEggCooldown);
         if(getLeader() != null) {
             pCompound.putUUID(KEY_LEADER, getLeader().getUUID());
         }
@@ -290,13 +314,11 @@ public class Jackrobat extends Animal implements IAnimatable, FlyingAnimal {
         return factory;
     }
 
-    @Override
-    public boolean isFlying() {
-        return !this.onGround/* || (this.getDeltaMovement().lengthSqr() > 0.06D)*/;
-    }
-
     //// GOALS ////
 
+    /**
+     * Adapted from the standard wander goal to move Jackrobats toward their leader when too far away
+     */
     private static class WanderGoal extends WaterAvoidingRandomStrollGoal {
 
         private final Jackrobat entity;
@@ -321,6 +343,9 @@ public class Jackrobat extends Animal implements IAnimatable, FlyingAnimal {
         }
     }
 
+    /**
+     * Searches for a nearby Jackrobat with the largest group size to assign as the leader of the flock
+     */
     private static class FindLeaderGoal extends Goal {
 
         private final Jackrobat entity;
@@ -363,6 +388,10 @@ public class Jackrobat extends Animal implements IAnimatable, FlyingAnimal {
         }
     }
 
+    /**
+     * Periodically checks if this entity has a leader and the leader has an attack target,
+     * then updates the entity attack target to match
+     */
     private static class TargetWithLeaderGoal extends TargetGoal {
 
         private final Jackrobat entity;
@@ -386,6 +415,83 @@ public class Jackrobat extends Animal implements IAnimatable, FlyingAnimal {
         public void start() {
             this.entity.setTarget(this.target);
             super.start();
+        }
+    }
+
+    private static class EatingGoal extends Goal {
+
+        private final Jackrobat entity;
+        @Nullable
+        private Jackrobat target;
+        private final double speedModifier;
+        private final float within;
+        private final TargetingConditions selector;
+        private final int recalculatePathTimer = 10;
+
+        public EatingGoal(Jackrobat pMob, double pSpeedModifier, float pWithin) {
+            this.entity = pMob;
+            this.speedModifier = pSpeedModifier;
+            this.within = pWithin;
+            this.selector = TargetingConditions.forNonCombat()
+                    .selector(e -> e instanceof Jackrobat jackrobat && jackrobat.hasRemainingEgg())
+                    .ignoreLineOfSight();
+            this.setFlags(EnumSet.of(Goal.Flag.MOVE, Flag.LOOK));
+        }
+
+        @Override
+        public boolean canUse() {
+            // check cooldown
+            if(!this.entity.canEatEgg()) {
+                return false;
+            }
+            // find target
+            final AABB aabb = this.entity.getBoundingBox().inflate(within);
+            this.target = this.entity.level.getNearestEntity(Jackrobat.class, this.selector, this.entity, this.entity.getX(), this.entity.getY(), this.entity.getZ(), aabb);
+            return this.target != null;
+        }
+
+        @Override
+        public boolean canContinueToUse() {
+            return !this.entity.getNavigation().isDone()
+                    && this.target != null && this.target.isAlive() && this.target.hasRemainingEgg()
+                    && this.entity.position().closerThan(this.target.position(), within);
+        }
+
+        @Override
+        public void start() {
+            if(this.target != null) {
+                this.entity.getNavigation().moveTo(this.target, this.speedModifier);
+            }
+        }
+
+        @Override
+        public void tick() {
+            super.tick();
+            if(this.target != null) {
+                // recalculate path
+                if(this.entity.tickCount % recalculatePathTimer == 0) {
+                    this.entity.getNavigation().moveTo(this.target, this.speedModifier);
+                }
+                // look at target
+                this.entity.getLookControl().setLookAt(this.target);
+                // verify target has egg
+                if(!this.target.hasRemainingEgg()) {
+                    stop();
+                    return;
+                }
+                // check target is within distance
+                if(this.entity.position().closerThan(this.target.position(), 2.0D)) {
+                    // eat egg and stop goal
+                    this.entity.eatOtherEgg(this.target);
+                    stop();
+                    return;
+                }
+            }
+        }
+
+        @Override
+        public void stop() {
+            this.target = null;
         }
     }
 }
