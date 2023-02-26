@@ -1,7 +1,7 @@
-package coda.croodaceous.client.render;
+package coda.croodaceous.client.render.geo;
 
 import coda.croodaceous.client.layer.BearowlEyesLayer;
-import coda.croodaceous.client.model.BearowlModel;
+import coda.croodaceous.client.model.geo.BearowlModel;
 import coda.croodaceous.common.entities.Bearowl;
 import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.blaze3d.vertex.VertexConsumer;

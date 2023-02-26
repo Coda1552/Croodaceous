@@ -1,4 +1,4 @@
-package coda.croodaceous.client.model;
+package coda.croodaceous.client.model.geo;
 
 import coda.croodaceous.CroodaceousMod;
 import coda.croodaceous.common.entities.Jackrobat;

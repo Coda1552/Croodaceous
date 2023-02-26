@@ -1,6 +1,6 @@
-package coda.croodaceous.client.render;
+package coda.croodaceous.client.render.geo;
 
-import coda.croodaceous.client.model.SimpleGeoModel;
+import coda.croodaceous.client.model.geo.SimpleGeoModel;
 import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.blaze3d.vertex.VertexConsumer;
 import net.minecraft.client.renderer.MultiBufferSource;
