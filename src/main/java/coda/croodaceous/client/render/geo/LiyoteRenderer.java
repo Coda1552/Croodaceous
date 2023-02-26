@@ -18,7 +18,8 @@ import software.bernie.geckolib3.renderers.geo.GeoEntityRenderer;
 
 import javax.annotation.Nullable;
 
-public class LiyoteRenderer extends GeoEntityRenderer<Liyote> {
+public class LiyoteRenderer {
+/*
 	private MultiBufferSource renderTypeBuffer;
 	private Liyote animatable;
 	
@@ -52,5 +53,6 @@ public class LiyoteRenderer extends GeoEntityRenderer<Liyote> {
 	public RenderType getRenderType(Liyote animatable, float partialTicks, PoseStack stack, @Nullable MultiBufferSource renderTypeBuffer, @Nullable VertexConsumer vertexBuilder, int packedLightIn, ResourceLocation textureLocation) {
 		return RenderType.entityTranslucent(textureLocation);
 	}
-	
+*/
+
 }
