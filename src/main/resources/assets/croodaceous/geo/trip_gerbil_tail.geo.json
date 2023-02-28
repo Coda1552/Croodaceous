@@ -1,0 +1,35 @@
+{
+	"format_version": "1.12.0",
+	"minecraft:geometry": [
+		{
+			"description": {
+				"identifier": "geometry.cm_trip_gerbil",
+				"texture_width": 32,
+				"texture_height": 32,
+				"visible_bounds_width": 2,
+				"visible_bounds_height": 1.5,
+				"visible_bounds_offset": [0, 0.25, 0]
+			},
+			"bones": [
+				{
+					"name": "tail",
+					"pivot": [0, 0, 0],
+					"cubes": [
+						{
+							"origin": [-1, 0, -5],
+							"size": [2, 2, 5],
+							"uv": {
+								"north": {"uv": [15, 8], "uv_size": [2, 2]},
+								"east": {"uv": [1, 0], "uv_size": [5, 2]},
+								"south": {"uv": [15, 6], "uv_size": [2, 2]},
+								"west": {"uv": [2, 2], "uv_size": [5, 2]},
+								"up": {"uv": [0, 7], "uv_size": [2, 5]},
+								"down": {"uv": [2, 12], "uv_size": [2, -5]}
+							}
+						}
+					]
+				}
+			]
+		}
+	]
+}

@@ -19,6 +19,7 @@ import net.minecraft.world.damagesource.DamageSource;
 import net.minecraft.world.entity.AgeableMob;
 import net.minecraft.world.entity.EntityDimensions;
 import net.minecraft.world.entity.EntityType;
+import net.minecraft.world.entity.EquipmentSlot;
 import net.minecraft.world.entity.Mob;
 import net.minecraft.world.entity.MobSpawnType;
 import net.minecraft.world.entity.Pose;
@@ -33,9 +34,12 @@ import net.minecraft.world.entity.ai.goal.RandomLookAroundGoal;
 import net.minecraft.world.entity.ai.goal.WaterAvoidingRandomStrollGoal;
 import net.minecraft.world.entity.animal.Animal;
 import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.item.Items;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.LevelAccessor;
 import net.minecraft.world.level.ServerLevelAccessor;
+import net.minecraft.world.level.levelgen.structure.BoundingBox;
+import net.minecraft.world.phys.AABB;
 import net.minecraft.world.phys.Vec3;
 import net.minecraftforge.network.PacketDistributor;
 import software.bernie.geckolib3.core.IAnimatable;
@@ -195,14 +199,6 @@ public class TripGerbil extends Animal implements IAnimatable {
     @Override
     public void onSyncedDataUpdated(EntityDataAccessor<?> pKey) {
         super.onSyncedDataUpdated(pKey);
-        /*if(pKey.equals(DATA_PARTNER)) {
-            // attempt to load partner
-            final Optional<UUID> partnerId = this.getEntityData().get(DATA_PARTNER);
-            if(partnerId.isPresent() && this.level instanceof ServerLevel serverLevel) {
-                // send update packet
-                CENetwork.CHANNEL.send(PacketDistributor.TRACKING_ENTITY_AND_SELF.with(() -> this), new ClientBoundTripGerbilPartnerPacket(this.getId(), partnerId));
-            }
-        }*/
     }
 
     public void setClientPartner(final TripGerbil entity) {
@@ -215,6 +211,14 @@ public class TripGerbil extends Animal implements IAnimatable {
         // send update packet
         int partnerId = getPartner() != null ? getPartner().getId() : -1;
         CENetwork.CHANNEL.send(PacketDistributor.TRACKING_ENTITY.with(() -> this), new ClientBoundTripGerbilPartnerPacket(this.getId(), partnerId));
+    }
+
+    @Override
+    public AABB getBoundingBoxForCulling() {
+        if(this.isLeader()) {
+            return this.getBoundingBox().inflate(MAX_PARTNER_DISTANCE * 2.0D);
+        }
+        return super.getBoundingBoxForCulling();
     }
 
     @Nullable

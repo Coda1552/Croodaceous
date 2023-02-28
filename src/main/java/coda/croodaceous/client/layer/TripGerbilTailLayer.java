@@ -1,22 +1,30 @@
 package coda.croodaceous.client.layer;
 
+import coda.croodaceous.CroodaceousMod;
 import coda.croodaceous.common.entities.TripGerbil;
 import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.blaze3d.vertex.VertexConsumer;
+import com.mojang.math.Matrix4f;
+import com.mojang.math.Quaternion;
 import com.mojang.math.Vector3f;
 import net.minecraft.client.renderer.MultiBufferSource;
 import net.minecraft.client.renderer.RenderType;
+import net.minecraft.client.renderer.entity.LivingEntityRenderer;
+import net.minecraft.resources.ResourceLocation;
 import net.minecraft.util.Mth;
+import software.bernie.geckolib3.geo.render.built.GeoModel;
 import software.bernie.geckolib3.renderers.geo.GeoLayerRenderer;
 import software.bernie.geckolib3.renderers.geo.IGeoRenderer;
 
 public class TripGerbilTailLayer extends GeoLayerRenderer<TripGerbil> {
-    // TODO fix the line rendering (incorrect positions? idk)
-    private final Vector3f color;
 
-    public TripGerbilTailLayer(IGeoRenderer<TripGerbil> entityRendererIn, final Vector3f color) {
+    private static final ResourceLocation TRIP_GERBIL_TAIL_LOCATION = new ResourceLocation(CroodaceousMod.MOD_ID, "geo/trip_gerbil_tail.geo.json");
+
+    private final GeoModel tailModel;
+
+    public TripGerbilTailLayer(IGeoRenderer<TripGerbil> entityRendererIn) {
         super(entityRendererIn);
-        this.color = color;
+        this.tailModel = getEntityModel().getModel(TRIP_GERBIL_TAIL_LOCATION);
     }
 
     @Override
@@ -25,31 +33,34 @@ public class TripGerbilTailLayer extends GeoLayerRenderer<TripGerbil> {
         if(partner != null && entity.isLeader()) {
             // draw line between self and partner
             matrixStackIn.pushPose();
-            int i = 0;
+            matrixStackIn.mulPose(Vector3f.YP.rotationDegrees(180.0F));
+            final float deltaY = 1.0F / 16.0F;
 
-            float yRot = Mth.lerp(partialTicks, partner.yBodyRotO, partner.yBodyRot) * ((float)Math.PI / 180F);
-            double dX = Mth.sin(yRot);
-            double dZ = Mth.cos(yRot);
-            double d2 = (double)i * 0.35D; // TODO replace with 0 ?
+            final double startX = Mth.lerp(partialTicks, entity.xo, entity.getX());
+            final double startY = Mth.lerp(partialTicks, entity.yo, entity.getY()) + deltaY;
+            final double startZ = Mth.lerp(partialTicks, entity.zo, entity.getZ());
+            final float offsetY = entity.isCrouching() ? -0.1875F : 0.0F;
 
-            final float dy = 0; //-0.15F;
+            final double endX = Mth.lerp(partialTicks, partner.xo, partner.getX());
+            final double endY = Mth.lerp(partialTicks, partner.yo, partner.getY()) + deltaY;
+            final double endZ = Mth.lerp(partialTicks, partner.zo, partner.getZ());
+            final float disX = (float)(startX - endX);
+            final float disY = (float)(startY - endY) * -1 + offsetY + deltaY;
+            final float disZ = (float)(startZ - endZ);
+            final float dis = Mth.sqrt(disX * disX + disY * disY + disZ * disZ);
 
-            double startX = Mth.lerp(partialTicks, partner.xo, partner.getX()) - dZ * d2 - dX * 0.8D;
-            double startY = partner.yo + (double)partner.getEyeHeight() + (partner.getY() - partner.yo) * partialTicks - 0.45D;
-            double startZ = Mth.lerp(partialTicks, partner.zo, partner.getZ()) - dX * d2 + dZ * 0.8D;
-            float offsetY = partner.isCrouching() ? -0.1875F : 0.0F;
+            // calculate rotations
+            final Quaternion rotation = Vector3f.YP.rotation((float) Math.atan2(disX, disZ));
+            rotation.mul(Vector3f.XP.rotation((float) Math.atan(-disY)));
+            final Matrix4f rotationMatrix = new Matrix4f(rotation);
 
-            double d9 = Mth.lerp(partialTicks, partner.xo, partner.getX());
-            double d10 = Mth.lerp(partialTicks, partner.yo, partner.getY()) + 0.25D;
-            double d8 = Mth.lerp(partialTicks, partner.zo, partner.getZ());
-            float f4 = (float)(startX - d9);
-            float f5 = (float)(startY - d10) + offsetY + dy;
-            float f6 = (float)(startZ - d8);
-            VertexConsumer vertexconsumer1 = bufferIn.getBuffer(RenderType.lineStrip());
-            PoseStack.Pose matrixStackIn$pose1 = matrixStackIn.last();
+            // prepare to render
+            final RenderType renderType = getRenderType(getEntityTexture(entity));
+            final VertexConsumer vertexConsumer = bufferIn.getBuffer(renderType);
 
-            for(int k = 0; k <= 16; ++k) {
-                stringVertex(f4, f5, f6, vertexconsumer1, matrixStackIn$pose1, (float)k / 16.0F, (float)(k + 1.0F) / 16.0F, this.color);
+            for(int k = 0, n = (int) (dis * 16.0F / 4.5F); k <= n; ++k) {
+                float startPercent = (float)k / n;
+                modelVertex(matrixStackIn, bufferIn, renderType, vertexConsumer, packedLightIn, entity, partialTicks, disX, disY, disZ, startPercent, rotationMatrix);
             }
 
             matrixStackIn.popPose();
@@ -57,17 +68,19 @@ public class TripGerbilTailLayer extends GeoLayerRenderer<TripGerbil> {
 
     }
 
-    public static void stringVertex(float x, float y, float z, VertexConsumer vertexConsumer, PoseStack.Pose pose, float startPercent, float endPercent, final Vector3f color) {
-        float f = x * startPercent;
-        float f1 = y * (startPercent * startPercent + startPercent) * 0.5F + 0.25F;
-        float f2 = z * startPercent;
-        float f3 = x * endPercent - f;
-        float f4 = y * (endPercent * endPercent + endPercent) * 0.5F + 0.25F - f1;
-        float f5 = z * endPercent - f2;
-        float f6 = Mth.sqrt(f3 * f3 + f4 * f4 + f5 * f5);
-        f3 /= f6;
-        f4 /= f6;
-        f5 /= f6;
-        vertexConsumer.vertex(pose.pose(), f, f1, f2).color(color.x(), color.y(), color.z(), 1.0F).normal(pose.normal(), f3, f4, f5).endVertex();
+    private void modelVertex(PoseStack poseStack, MultiBufferSource bufferSource, RenderType renderType, VertexConsumer vertexConsumer,
+                             int packedLight, TripGerbil entity, float partialTick,
+                             float disX, float disY, float disZ, float startPercent, Matrix4f rotation) {
+        float f = disX * startPercent;
+        float f1 = disY * startPercent;// (startPercent * startPercent + startPercent) * 0.5F + 0.25F;
+        float f2 = disZ * startPercent;
+        poseStack.pushPose();
+        poseStack.translate(f, f1, f2);
+        poseStack.mulPoseMatrix(rotation);
+
+        getRenderer().render(tailModel,
+                entity, partialTick, renderType, poseStack, bufferSource, vertexConsumer,
+                packedLight, LivingEntityRenderer.getOverlayCoords(entity, 0), 1, 1, 1, 1);
+        poseStack.popPose();
     }
 }

@@ -6,7 +6,7 @@
 				"identifier": "geometry.cm_trip_gerbil",
 				"texture_width": 32,
 				"texture_height": 32,
-				"visible_bounds_width": 3,
+				"visible_bounds_width": 2,
 				"visible_bounds_height": 2.5,
 				"visible_bounds_offset": [0, 0.75, 0]
 			},
@@ -139,25 +139,6 @@
 								"west": {"uv": [16, 14], "uv_size": [2, 1]},
 								"up": {"uv": [16, 15], "uv_size": [1, 2]},
 								"down": {"uv": [17, 2], "uv_size": [1, -2]}
-							}
-						}
-					]
-				},
-				{
-					"name": "tail",
-					"parent": "body",
-					"pivot": [0, 2, 1],
-					"cubes": [
-						{
-							"origin": [-1, 1, 1],
-							"size": [2, 2, 10],
-							"uv": {
-								"north": {"uv": [15, 6], "uv_size": [2, 2]},
-								"east": {"uv": [0, 0], "uv_size": [10, 2]},
-								"south": {"uv": [15, 8], "uv_size": [2, 2]},
-								"west": {"uv": [0, 2], "uv_size": [10, 2]},
-								"up": {"uv": [0, 4], "uv_size": [2, 10]},
-								"down": {"uv": [2, 14], "uv_size": [2, -10]}
 							}
 						}
 					]
