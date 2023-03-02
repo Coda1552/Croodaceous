@@ -1,13 +1,16 @@
 package coda.croodaceous.client;
 
 import coda.croodaceous.CroodaceousMod;
+import coda.croodaceous.client.model.FangFlyModel;
 import coda.croodaceous.client.model.LiyoteModel;
+import coda.croodaceous.client.render.FangFlyRenderer;
 import coda.croodaceous.client.render.geo.BearOwlRenderer;
 import coda.croodaceous.client.render.geo.JackrobatRenderer;
 import coda.croodaceous.client.render.LiyoteRenderer;
 import coda.croodaceous.client.render.geo.RamuRenderer;
 import coda.croodaceous.client.render.geo.SimpleGeoRenderer;
 import coda.croodaceous.client.render.geo.TripGerbilRenderer;
+import coda.croodaceous.common.entities.FangFly;
 import coda.croodaceous.registry.CEEntities;
 import net.minecraft.client.renderer.entity.EntityRenderers;
 import net.minecraftforge.api.distmarker.Dist;
@@ -24,7 +27,7 @@ public class ClientEvents {
         EntityRenderers.register(CEEntities.LIYOTE.get(), LiyoteRenderer::new);
         EntityRenderers.register(CEEntities.BEAROWL.get(), BearOwlRenderer::new);
         EntityRenderers.register(CEEntities.RAMU.get(), RamuRenderer::new);
-        EntityRenderers.register(CEEntities.FANG_FLY.get(), mgr -> new SimpleGeoRenderer<>(mgr, CroodaceousMod.MOD_ID, "fang_fly"));
+        EntityRenderers.register(CEEntities.FANG_FLY.get(), FangFlyRenderer::new);
         EntityRenderers.register(CEEntities.JACKROBAT.get(), JackrobatRenderer::new);
         EntityRenderers.register(CEEntities.TRIP_GERBIL.get(), TripGerbilRenderer::new);
     }
@@ -32,5 +35,6 @@ public class ClientEvents {
     @SubscribeEvent
     public static void registerLayers(EntityRenderersEvent.RegisterLayerDefinitions e) {
         e.registerLayerDefinition(CEModelLayers.LIYOTE, LiyoteModel::createBodyLayer);
+        e.registerLayerDefinition(CEModelLayers.FANG_FLY, FangFlyModel::createBodyLayer);
     }
 }

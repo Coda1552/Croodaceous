@@ -47,6 +47,9 @@ import javax.annotation.Nullable;
 import java.util.EnumSet;
 
 public class FangFly extends Animal implements IAnimatable, FlyingAnimal {
+
+    public final AnimationState flyIdleAnimationState = new AnimationState();
+
     private final AnimationFactory factory = GeckoLibUtil.createFactory(this);
     private static final AnimationBuilder ANIM_FLY = new AnimationBuilder().addAnimation("animation.fang_fly.fly", ILoopType.EDefaultLoopTypes.LOOP);
     private int underWaterTicks;
@@ -152,6 +155,14 @@ public class FangFly extends Animal implements IAnimatable, FlyingAnimal {
 
         if (this.underWaterTicks > 20) {
             this.hurt(DamageSource.DROWN, 1.0F);
+        }
+    }
+
+    @Override
+    public void tick() {
+        super.tick();
+        if(this.level.isClientSide()) {
+            this.flyIdleAnimationState.startIfStopped(this.tickCount);
         }
     }
 

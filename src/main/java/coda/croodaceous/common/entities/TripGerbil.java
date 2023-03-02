@@ -1,5 +1,6 @@
 package coda.croodaceous.common.entities;
 
+import coda.croodaceous.CroodaceousMod;
 import coda.croodaceous.common.network.CENetwork;
 import coda.croodaceous.common.network.ClientBoundTripGerbilPartnerPacket;
 import coda.croodaceous.registry.CEBlocks;
@@ -9,17 +10,22 @@ import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.syncher.EntityDataAccessor;
 import net.minecraft.network.syncher.EntityDataSerializers;
 import net.minecraft.network.syncher.SynchedEntityData;
+import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.sounds.SoundEvent;
 import net.minecraft.sounds.SoundEvents;
+import net.minecraft.tags.TagKey;
 import net.minecraft.util.RandomSource;
 import net.minecraft.world.DifficultyInstance;
 import net.minecraft.world.damagesource.DamageSource;
+import net.minecraft.world.effect.MobEffectInstance;
+import net.minecraft.world.effect.MobEffects;
 import net.minecraft.world.entity.AgeableMob;
 import net.minecraft.world.entity.EntityDimensions;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.EquipmentSlot;
+import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.Mob;
 import net.minecraft.world.entity.MobSpawnType;
 import net.minecraft.world.entity.Pose;
@@ -32,8 +38,12 @@ import net.minecraft.world.entity.ai.goal.LookAtPlayerGoal;
 import net.minecraft.world.entity.ai.goal.PanicGoal;
 import net.minecraft.world.entity.ai.goal.RandomLookAroundGoal;
 import net.minecraft.world.entity.ai.goal.WaterAvoidingRandomStrollGoal;
+import net.minecraft.world.entity.ai.targeting.TargetingConditions;
 import net.minecraft.world.entity.animal.Animal;
+import net.minecraft.world.entity.animal.FlyingAnimal;
+import net.minecraft.world.entity.animal.WaterAnimal;
 import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.entity.projectile.ProjectileUtil;
 import net.minecraft.world.item.Items;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.LevelAccessor;
@@ -42,6 +52,7 @@ import net.minecraft.world.level.levelgen.structure.BoundingBox;
 import net.minecraft.world.phys.AABB;
 import net.minecraft.world.phys.Vec3;
 import net.minecraftforge.network.PacketDistributor;
+import net.minecraftforge.registries.ForgeRegistries;
 import software.bernie.geckolib3.core.IAnimatable;
 import software.bernie.geckolib3.core.PlayState;
 import software.bernie.geckolib3.core.controller.AnimationController;
@@ -52,19 +63,33 @@ import software.bernie.geckolib3.util.GeckoLibUtil;
 
 import javax.annotation.Nullable;
 import java.util.EnumSet;
+import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
+import java.util.function.Predicate;
 
 public class TripGerbil extends Animal implements IAnimatable {
 
+    // SYNCED DATA //
     private static final EntityDataAccessor<Optional<UUID>> DATA_PARTNER = SynchedEntityData.defineId(TripGerbil.class, EntityDataSerializers.OPTIONAL_UUID);
     private static final EntityDataAccessor<Boolean> DATA_LEADER = SynchedEntityData.defineId(TripGerbil.class, EntityDataSerializers.BOOLEAN);
+
+    // TRIP ATTACK CONDITIONS //
+    private static final TagKey<EntityType<?>> TRIP_GERBIL_IMMUNE = ForgeRegistries.ENTITY_TYPES.tags().createTagKey(new ResourceLocation(CroodaceousMod.MOD_ID, "trip_gerbil_immune"));
+    private static final Predicate<LivingEntity> CAN_TRIP_PREDICATE = e ->
+            !(e instanceof FlyingAnimal || e instanceof WaterAnimal)
+            && e.getType() != CEEntities.TRIP_GERBIL.get()
+            && !ForgeRegistries.ENTITY_TYPES.tags().getTag(TRIP_GERBIL_IMMUNE).contains(e.getType())
+            && !e.isCrouching() && e.getDeltaMovement().horizontalDistanceSqr() > 5.2E-4F && e.hurtTime <= 0;
+    private static final TargetingConditions CAN_TRIP_CONDITIONS = TargetingConditions.forCombat().ignoreInvisibilityTesting().ignoreLineOfSight();
+
+    // PARTNER //
+    public static final double MAX_PARTNER_DISTANCE = 5.0D;
     @Nullable
     private TripGerbil partner;
     /** Used on the server to indicate the partner entity needs to be loaded from the level the next tick **/
     private boolean isPartnerDirty;
 
-    public static final double MAX_PARTNER_DISTANCE = 5.0D;
 
     // ANIMATIONS //
     private final AnimationFactory factory = GeckoLibUtil.createFactory(this);
@@ -144,6 +169,15 @@ public class TripGerbil extends Animal implements IAnimatable {
             }
             CENetwork.CHANNEL.send(PacketDistributor.TRACKING_ENTITY_AND_SELF.with(() -> this), new ClientBoundTripGerbilPartnerPacket(this.getId(), this.partner != null ? this.partner.getId() : -1));
         }
+        // attempt to trip nearby entities
+        if(!level.isClientSide() && this.isLeader() && this.partner != null) {
+            getEntitiesToTrip(this.position(), this.partner.position()).forEach(e -> {
+                e.hurt(DamageSource.indirectMobAttack(this, this), 1.0F);
+                e.setDeltaMovement(e.getDeltaMovement().multiply(0, 1, 0).add(0, 0.02D, 0));
+                e.hurtMarked = true;
+                e.addEffect(new MobEffectInstance(MobEffects.MOVEMENT_SLOWDOWN, 20, 4, false, false, false));
+            });
+        }
     }
 
     @Override
@@ -161,8 +195,8 @@ public class TripGerbil extends Animal implements IAnimatable {
 
     @Override
     public void travel(Vec3 pTravelVector) {
-        if(!isLeader() && getPartner() != null && !this.position().closerThan(getPartner().position(), MAX_PARTNER_DISTANCE)) {
-            Vec3 vec = this.position().subtract(getPartner().position()).normalize().scale(0.5D);
+        if(getPartner() != null && !this.position().closerThan(getPartner().position(), MAX_PARTNER_DISTANCE)) {
+            Vec3 vec = getPartner().position().subtract(this.position()).scale(0.085D);
             this.setDeltaMovement(vec);
         }
         super.travel(pTravelVector);
@@ -284,6 +318,23 @@ public class TripGerbil extends Animal implements IAnimatable {
     @Override
     public AnimationFactory getFactory() {
         return factory;
+    }
+
+    //// TRIP ATTACK ////
+
+    private List<LivingEntity> getEntitiesToTrip(final Vec3 first, final Vec3 second) {
+        final double dY = 0.4D;
+        final AABB aabb = fromCorners(first.add(0, -dY, 0), second.add(0, dY, 0));
+        final TargetingConditions conditions = CAN_TRIP_CONDITIONS.copy().selector(CAN_TRIP_PREDICATE.and(e -> intersects(first, second, aabb)));
+        return level.getNearbyEntities(LivingEntity.class, conditions, this, aabb);
+    }
+
+    private static AABB fromCorners(final Vec3 pFirst, final Vec3 pSecond) {
+        return new AABB(Math.min(pFirst.x(), pSecond.x()), Math.min(pFirst.y(), pSecond.y()), Math.min(pFirst.z(), pSecond.z()), Math.max(pFirst.x(), pSecond.x()), Math.max(pFirst.y(), pSecond.y()), Math.max(pFirst.z(), pSecond.z()));
+    }
+
+    private static boolean intersects(final Vec3 startVec, final Vec3 endVec, final AABB aabb) {
+        return aabb.contains(startVec) || aabb.clip(startVec, endVec).isPresent();
     }
 
     //// GOALS ////

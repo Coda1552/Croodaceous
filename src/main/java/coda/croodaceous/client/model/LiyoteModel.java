@@ -42,32 +42,28 @@ public class LiyoteModel<T extends Liyote> extends EntityModel<T> {
 	public static LayerDefinition createBodyLayer() {
 		MeshDefinition meshdefinition = new MeshDefinition();
 		PartDefinition partdefinition = meshdefinition.getRoot();
-
+		// root
 		PartDefinition root = partdefinition.addOrReplaceChild("root", CubeListBuilder.create(), PartPose.offset(0.0F, 24.0F, 0.0F));
 
-		PartDefinition chest = root.addOrReplaceChild("chest", CubeListBuilder.create().texOffs(0, 21).addBox(-3.0F, -2.5F, -2.5F, 6.0F, 5.0F, 5.0F, new CubeDeformation(0.0F)), PartPose.offset(0.0F, -8.0F, -4.0F));
+		// head
+		PartDefinition head = root.addOrReplaceChild("head", CubeListBuilder.create().texOffs(0, 3).addBox(-2.5F, -2.5F, -5.0F, 5.0F, 4.0F, 5.0F, CubeDeformation.NONE), PartPose.offset(0.0F, -9.0F, -5.5F));
+		PartDefinition snout = head.addOrReplaceChild("snout", CubeListBuilder.create().texOffs(0, 14).addBox(-1.5F, -1.5F, -3.0F, 3.0F, 2.0F, 3.0F, CubeDeformation.NONE), PartPose.offset(0.0F, 1.0F, -5.0F));
+		snout.addOrReplaceChild("tongue", CubeListBuilder.create().texOffs(32, 11).addBox(0.0F, 0.0F, -1.75F, 0.0F, 3.0F, 2.0F, CubeDeformation.NONE), PartPose.offsetAndRotation(-1.5F, -0.5F, -1.0F, 0.0F, 0.0F, 0.0349F));
+		head.addOrReplaceChild("earLeft", CubeListBuilder.create().texOffs(33, 3).mirror().addBox(-5.5F, -3.0F, 0.0F, 6.0F, 4.0F, 0.0F, CubeDeformation.NONE).mirror(false), PartPose.offset(-1.0F, -2.5F, -2.5F));
+		head.addOrReplaceChild("earRight", CubeListBuilder.create().texOffs(33, 3).addBox(-0.5F, -3.0F, 0.0F, 6.0F, 4.0F, 0.0F, CubeDeformation.NONE), PartPose.offset(1.0F, -2.5F, -2.5F));
 
-		PartDefinition body = chest.addOrReplaceChild("body", CubeListBuilder.create().texOffs(37, 2).addBox(-2.0F, -2.0F, -1.0F, 4.0F, 4.0F, 9.0F, new CubeDeformation(0.0F)), PartPose.offsetAndRotation(0.0F, 0.0F, 2.5F, -0.2618F, 0.0F, 0.0F));
+		// body
+		PartDefinition chest = root.addOrReplaceChild("chest", CubeListBuilder.create().texOffs(0, 21).addBox(-3.0F, -2.5F, -2.5F, 6.0F, 5.0F, 5.0F, CubeDeformation.NONE), PartPose.offset(0.0F, -8.0F, -4.0F));
+		PartDefinition body = chest.addOrReplaceChild("body", CubeListBuilder.create().texOffs(37, 2).addBox(-2.0F, -2.0F, -1.0F, 4.0F, 4.0F, 9.0F, CubeDeformation.NONE), PartPose.offsetAndRotation(0.0F, 0.0F, 2.5F, -0.2618F, 0.0F, 0.0F));
+		body.addOrReplaceChild("tail", CubeListBuilder.create().texOffs(33, 16).addBox(-1.0F, -1.0F, -1.0F, 2.0F, 2.0F, 13.0F, CubeDeformation.NONE), PartPose.offsetAndRotation(0.0F, 0.0F, 7.5F, -0.1745F, 0.0F, 0.0F));
 
-		PartDefinition leftLeg = body.addOrReplaceChild("leftLeg", CubeListBuilder.create().texOffs(23, 22).mirror().addBox(-1.0F, 0.0F, -1.0F, 2.0F, 7.0F, 2.0F, new CubeDeformation(0.0F)).mirror(false), PartPose.offsetAndRotation(-1.0F, 0.0F, 6.0F, 0.3491F, 0.0F, 0.3491F));
+		// legs
+		body.addOrReplaceChild("leftLeg", CubeListBuilder.create().texOffs(23, 22).mirror().addBox(-1.0F, 0.0F, -1.0F, 2.0F, 7.0F, 2.0F, CubeDeformation.NONE).mirror(false), PartPose.offsetAndRotation(-1.0F, 0.0F, 6.0F, 0.3491F, 0.0F, 0.3491F));
+		body.addOrReplaceChild("rightLeg", CubeListBuilder.create().texOffs(23, 22).addBox(-1.0F, 0.0F, -1.0F, 2.0F, 7.0F, 2.0F, CubeDeformation.NONE), PartPose.offsetAndRotation(1.0F, 0.0F, 6.0F, 0.3491F, 0.0F, -0.3491F));
 
-		PartDefinition rightLeg = body.addOrReplaceChild("rightLeg", CubeListBuilder.create().texOffs(23, 22).addBox(-1.0F, 0.0F, -1.0F, 2.0F, 7.0F, 2.0F, new CubeDeformation(0.0F)), PartPose.offsetAndRotation(1.0F, 0.0F, 6.0F, 0.3491F, 0.0F, -0.3491F));
-
-		PartDefinition tail = body.addOrReplaceChild("tail", CubeListBuilder.create().texOffs(33, 16).addBox(-1.0F, -1.0F, -1.0F, 2.0F, 2.0F, 13.0F, new CubeDeformation(0.0F)), PartPose.offsetAndRotation(0.0F, 0.0F, 7.5F, -0.1745F, 0.0F, 0.0F));
-
-		PartDefinition leftArm = chest.addOrReplaceChild("leftArm", CubeListBuilder.create().texOffs(32, 18).mirror().addBox(-1.0F, -1.0F, -1.0F, 2.0F, 8.0F, 2.0F, new CubeDeformation(0.0F)).mirror(false), PartPose.offsetAndRotation(-2.0F, 1.5F, 0.0F, -0.1745F, 0.0F, 0.2618F));
-
-		PartDefinition rightArm = chest.addOrReplaceChild("rightArm", CubeListBuilder.create().texOffs(32, 18).addBox(-1.0F, -1.0F, -1.0F, 2.0F, 8.0F, 2.0F, new CubeDeformation(0.0F)), PartPose.offsetAndRotation(2.0F, 1.5F, 0.0F, -0.1745F, 0.0F, -0.2618F));
-
-		PartDefinition head = root.addOrReplaceChild("head", CubeListBuilder.create().texOffs(0, 3).addBox(-2.5F, -2.5F, -5.0F, 5.0F, 4.0F, 5.0F, new CubeDeformation(0.0F)), PartPose.offset(0.0F, -9.0F, -5.5F));
-
-		PartDefinition snout = head.addOrReplaceChild("snout", CubeListBuilder.create().texOffs(0, 14).addBox(-1.5F, -1.5F, -3.0F, 3.0F, 2.0F, 3.0F, new CubeDeformation(0.0F)), PartPose.offset(0.0F, 1.0F, -5.0F));
-
-		PartDefinition tongue = snout.addOrReplaceChild("tongue", CubeListBuilder.create().texOffs(32, 11).addBox(0.0F, 0.0F, -1.75F, 0.0F, 3.0F, 2.0F, new CubeDeformation(0.0F)), PartPose.offsetAndRotation(-1.5F, -0.5F, -1.0F, 0.0F, 0.0F, 0.0349F));
-
-		PartDefinition earLeft = head.addOrReplaceChild("earLeft", CubeListBuilder.create().texOffs(33, 3).mirror().addBox(-5.5F, -3.0F, 0.0F, 6.0F, 4.0F, 0.0F, new CubeDeformation(0.0F)).mirror(false), PartPose.offset(-1.0F, -2.5F, -2.5F));
-
-		PartDefinition earRight = head.addOrReplaceChild("earRight", CubeListBuilder.create().texOffs(33, 3).addBox(-0.5F, -3.0F, 0.0F, 6.0F, 4.0F, 0.0F, new CubeDeformation(0.0F)), PartPose.offset(1.0F, -2.5F, -2.5F));
+		// arms
+		chest.addOrReplaceChild("leftArm", CubeListBuilder.create().texOffs(32, 18).mirror().addBox(-1.0F, -1.0F, -1.0F, 2.0F, 8.0F, 2.0F, CubeDeformation.NONE).mirror(false), PartPose.offsetAndRotation(-2.0F, 1.5F, 0.0F, -0.1745F, 0.0F, 0.2618F));
+		chest.addOrReplaceChild("rightArm", CubeListBuilder.create().texOffs(32, 18).addBox(-1.0F, -1.0F, -1.0F, 2.0F, 8.0F, 2.0F, CubeDeformation.NONE), PartPose.offsetAndRotation(2.0F, 1.5F, 0.0F, -0.1745F, 0.0F, -0.2618F));
 
 		return LayerDefinition.create(meshdefinition, 64, 32);
 	}
