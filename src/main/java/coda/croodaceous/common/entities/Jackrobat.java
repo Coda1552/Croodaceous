@@ -79,7 +79,7 @@ public class Jackrobat extends Animal implements IAnimatable, FlyingAnimal {
 
     public Jackrobat(EntityType<? extends Jackrobat> type, Level worldIn) {
         super(type, worldIn);
-        this.moveControl = new FlyingMoveControl(this, 20, true);
+        this.moveControl = new FlyingMoveControl(this, 20, false);
         this.setPathfindingMalus(BlockPathTypes.WATER, -1.0F);
         this.setPathfindingMalus(BlockPathTypes.WATER_BORDER, 16.0F);
         this.setPathfindingMalus(BlockPathTypes.DANGER_FIRE, -1.0F);

@@ -1,0 +1,59 @@
+{
+	"format_version": "1.12.0",
+	"minecraft:geometry": [
+		{
+			"description": {
+				"identifier": "geometry.cm_bear_pear",
+				"texture_width": 64,
+				"texture_height": 64,
+				"visible_bounds_width": 2,
+				"visible_bounds_height": 4,
+				"visible_bounds_offset": [0, 1, 0]
+			},
+			"bones": [
+				{
+					"name": "root",
+					"pivot": [0, 0, 0]
+				},
+				{
+					"name": "body",
+					"parent": "root",
+					"pivot": [0, 11, 0],
+					"cubes": [
+						{
+							"origin": [-3.5, 0, -3],
+							"size": [7, 11, 6],
+							"uv": {
+								"north": {"uv": [0, 11], "uv_size": [7, -11]},
+								"east": {"uv": [0, 22], "uv_size": [6, -11]},
+								"south": {"uv": [7, 11], "uv_size": [7, -11]},
+								"west": {"uv": [6, 22], "uv_size": [6, -11]},
+								"up": {"uv": [14, 0], "uv_size": [7, 6]},
+								"down": {"uv": [12, 17], "uv_size": [7, -6]}
+							}
+						}
+					]
+				},
+				{
+					"name": "tail",
+					"parent": "body",
+					"pivot": [0, 29, 0],
+					"cubes": [
+						{
+							"origin": [-1, 11, -1],
+							"size": [2, 18, 2],
+							"uv": {
+								"north": {"uv": [12, 35], "uv_size": [2, -18]},
+								"east": {"uv": [14, 35], "uv_size": [2, -18]},
+								"south": {"uv": [16, 35], "uv_size": [2, -18]},
+								"west": {"uv": [18, 35], "uv_size": [2, -18]},
+								"up": {"uv": [14, 8], "uv_size": [2, 2]},
+								"down": {"uv": [14, 8], "uv_size": [2, -2]}
+							}
+						}
+					]
+				}
+			]
+		}
+	]
+}

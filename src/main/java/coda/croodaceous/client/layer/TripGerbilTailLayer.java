@@ -71,11 +71,11 @@ public class TripGerbilTailLayer extends GeoLayerRenderer<TripGerbil> {
     private void modelVertex(PoseStack poseStack, MultiBufferSource bufferSource, RenderType renderType, VertexConsumer vertexConsumer,
                              int packedLight, TripGerbil entity, float partialTick,
                              float disX, float disY, float disZ, float startPercent, Matrix4f rotation) {
-        float f = disX * startPercent;
-        float f1 = disY * startPercent;// (startPercent * startPercent + startPercent) * 0.5F + 0.25F;
-        float f2 = disZ * startPercent;
+        float x = disX * startPercent;
+        float y = disY * startPercent;// (startPercent * startPercent + startPercent) * 0.5F + 0.25F;
+        float z = disZ * startPercent;
         poseStack.pushPose();
-        poseStack.translate(f, f1, f2);
+        poseStack.translate(x, y, z);
         poseStack.mulPoseMatrix(rotation);
 
         getRenderer().render(tailModel,
