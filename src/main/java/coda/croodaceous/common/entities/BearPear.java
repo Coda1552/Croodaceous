@@ -1,10 +1,13 @@
 package coda.croodaceous.common.entities;
 
 import coda.croodaceous.registry.CEBlocks;
+import com.mojang.math.Vector4f;
 import net.minecraft.core.BlockPos;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.NbtUtils;
+import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.network.syncher.EntityDataAccessor;
+import net.minecraft.network.syncher.EntityDataSerializer;
 import net.minecraft.network.syncher.EntityDataSerializers;
 import net.minecraft.network.syncher.SynchedEntityData;
 import net.minecraft.server.level.ServerLevel;
@@ -12,6 +15,7 @@ import net.minecraft.sounds.SoundEvent;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.tags.BlockTags;
 import net.minecraft.tags.TagKey;
+import net.minecraft.util.Mth;
 import net.minecraft.util.RandomSource;
 import net.minecraft.world.DifficultyInstance;
 import net.minecraft.world.InteractionHand;
@@ -43,6 +47,7 @@ import net.minecraft.world.level.ServerLevelAccessor;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.phys.AABB;
+import net.minecraft.world.phys.Vec2;
 import net.minecraft.world.phys.Vec3;
 import net.minecraftforge.common.util.ITeleporter;
 import software.bernie.geckolib3.core.IAnimatable;
@@ -54,7 +59,9 @@ import software.bernie.geckolib3.core.manager.AnimationFactory;
 import software.bernie.geckolib3.util.GeckoLibUtil;
 
 import javax.annotation.Nullable;
+import java.util.Comparator;
 import java.util.EnumSet;
+import java.util.List;
 import java.util.Optional;
 
 public class BearPear extends Animal implements IAnimatable {
@@ -62,6 +69,11 @@ public class BearPear extends Animal implements IAnimatable {
     private static final EntityDataAccessor<Optional<BlockPos>> DATA_HANGING_POS = SynchedEntityData.defineId(BearPear.class, EntityDataSerializers.OPTIONAL_BLOCK_POS);
 
     private static final TagKey<Block> SUPPORTS_BEAR_PEAR = BlockTags.LEAVES;
+
+    public static final float DELTA_SWINGING = 0.015F;
+    private float swingingAmount = 0.0F;
+    private float swingingStrength = 0.0F;
+    private Vec2 swingingDirection = Vec2.ZERO;
 
     // ANIMATIONS //
     private final AnimationFactory factory = GeckoLibUtil.createFactory(this);
@@ -94,12 +106,12 @@ public class BearPear extends Animal implements IAnimatable {
     @Override
     protected void registerGoals() {
         this.goalSelector.addGoal(0, new FloatGoal(this));
-        this.goalSelector.addGoal(1, new BearPear.AttackGoal(this, 1.5F));
+        this.goalSelector.addGoal(1, new BearPear.AttackGoal(this, 2.0F));
         this.goalSelector.addGoal(5, new BearPear.LookAwayFromPlayerGoal(this, Player.class, 8.0F));
         this.goalSelector.addGoal(5, new BearPear.LookAwayFromPlayerGoal(this, Jackrobat.class, 8.0F));
         this.goalSelector.addGoal(6, new BearPear.RandomLookGoal(this));
         this.targetSelector.addGoal(0, new HurtByTargetGoal(this).setAlertOthers());
-        this.targetSelector.addGoal(1, new NearestAttackableTargetGoal<>(this, Player.class, true, false));
+        //this.targetSelector.addGoal(1, new NearestAttackableTargetGoal<>(this, Player.class, true, false));
     }
 
     @Override
@@ -164,6 +176,17 @@ public class BearPear extends Animal implements IAnimatable {
                 }
             }
         }
+        // update swinging
+        this.swingingAmount = Math.max(this.swingingAmount - DELTA_SWINGING, 0);
+        if(level.isClientSide() && swingingAmount < 0.1F && isHanging()) {
+            // locate intersecting entity with the largest horizontal motion
+            final List<Entity> entities = level.getEntitiesOfClass(Entity.class, this.getBoundingBox(), e -> e != this && e.getDeltaMovement().horizontalDistanceSqr() > 0.00002F);
+            entities.sort(Comparator.comparing(e -> e.getDeltaMovement().horizontalDistanceSqr()));
+            // start swinging in accordance to the given entity
+            if(!entities.isEmpty()) {
+                startSwinging(entities.get(entities.size() - 1));
+            }
+        }
     }
 
     @Override
@@ -205,16 +228,21 @@ public class BearPear extends Animal implements IAnimatable {
 
     @Override
     public boolean isPushable() {
-        return false;
+        return true;
+    }
+
+    @Override
+    public void push(Entity pEntity) {
+        // update attack target
+        if ((pEntity instanceof Player entity)
+                && TargetingConditions.DEFAULT.test(this, entity)
+                && (/*null == this.getTarget() || */this.getRandom().nextInt(60) == 0)) {
+            this.setTarget(entity);
+        }
     }
 
     @Override
     protected void doPush(Entity pEntity) {
-        if ((pEntity instanceof Player entity)
-                && TargetingConditions.DEFAULT.test(this, entity)
-                && (null == this.getTarget() || this.getRandom().nextInt(10) == 0)) {
-            this.setTarget((LivingEntity)pEntity);
-        }
         return;
     }
 
@@ -225,7 +253,7 @@ public class BearPear extends Animal implements IAnimatable {
 
     @Override
     public AABB getBoundingBoxForCulling() {
-        return super.getBoundingBoxForCulling().inflate(0, 2.0D, 0);
+        return super.getBoundingBoxForCulling().inflate(0.5D, 2.0D, 0.5D);
     }
 
     @Override
@@ -243,6 +271,45 @@ public class BearPear extends Animal implements IAnimatable {
     public SpawnGroupData finalizeSpawn(ServerLevelAccessor pLevel, DifficultyInstance pDifficulty, MobSpawnType pReason, @org.jetbrains.annotations.Nullable SpawnGroupData pSpawnData, @org.jetbrains.annotations.Nullable CompoundTag pDataTag) {
         // TODO detect hanging block, if any
         return super.finalizeSpawn(pLevel, pDifficulty, pReason, pSpawnData, pDataTag);
+    }
+
+    //// SWINGING ////
+
+    protected void startSwinging(final Entity entity) {
+        final Vec2 deltaPos = new Vec2((float) (this.getY() - entity.getY()), (float) (this.getX() - entity.getX()));
+        final float motionSq = (float) entity.getDeltaMovement().horizontalDistanceSqr();
+        startSwinging(deltaPos, motionSq);
+    }
+
+    protected void startSwinging(final Vec2 deltaPos, final float motionSq) {
+        final float strengthMultiplier = 8.0F;
+        final float strengthSign = (isAggressive() ? -1.0F : 1.0F);
+        final float strength = strengthSign * Mth.clamp((float) Mth.sqrt(motionSq) * strengthMultiplier, 0, 1.0F);
+        setSwinging(strength, deltaPos.normalized());
+    }
+
+    public float getSwingingAmount() {
+        return swingingAmount;
+    }
+
+    public float getSwingingStrength() {
+        return swingingStrength;
+    }
+
+    public Vec2 getSwingingDirection() {
+        return swingingDirection;
+    }
+
+    public void setSwinging(final float strength, final Vec2 direction) {
+        this.swingingAmount = 1.0F;
+        this.swingingStrength = strength;
+        this.swingingDirection = direction;
+    }
+
+    public void resetSwinging() {
+        this.swingingAmount = 0.0F;
+        this.swingingStrength = 0.0F;
+        this.swingingDirection = Vec2.ZERO;
     }
 
     //// NBT ////
@@ -280,9 +347,6 @@ public class BearPear extends Animal implements IAnimatable {
         return factory;
     }
 
-    //// OTHER ////
-
-
     //// GOALS ////
 
     protected void lookAwayFrom(final Entity entity) {
@@ -307,7 +371,7 @@ public class BearPear extends Animal implements IAnimatable {
 
         @Override
         public boolean canUse() {
-            return /*!this.mob.level.isNight() && */super.canUse();
+            return this.entity.isHanging() && super.canUse();
         }
 
         @Override
@@ -397,11 +461,10 @@ public class BearPear extends Animal implements IAnimatable {
         public void tick() {
             LivingEntity livingentity = this.mob.getTarget();
             if (livingentity != null) {
-
-                this.mob.getLookControl().setLookAt(livingentity, 30.0F, 30.0F);
                 double disSq = this.mob.distanceToSqr(livingentity.getX(), livingentity.getEyeY(), livingentity.getZ());
                 if(disSq < lookAtDistanceSq) {
-                    this.mob.getLookControl().setLookAt(livingentity, 30.0F, 30.0F);
+                    this.mob.getLookControl().setLookAt(livingentity, 180.0F, 30.0F);
+                    this.mob.markHurt();
                 } else {
                     this.mob.lookAwayFrom(livingentity);
                 }
@@ -430,22 +493,22 @@ public class BearPear extends Animal implements IAnimatable {
         }
 
         protected double getAttackReachSqr(LivingEntity pAttackTarget) {
-            return (this.mob.getBbWidth() * 2.0F * this.mob.getBbWidth() * 2.0F + pAttackTarget.getBbWidth());
+            return (this.mob.getBbWidth() * 1.5F * this.mob.getBbWidth() * 1.5F + pAttackTarget.getBbWidth());
         }
     }
 
     private static class RandomLookGoal extends RandomLookAroundGoal {
 
-        private final Mob mob;
+        private final BearPear entity;
 
-        public RandomLookGoal(Mob pMob) {
+        public RandomLookGoal(BearPear pMob) {
             super(pMob);
-            this.mob = pMob;
+            this.entity = pMob;
         }
 
         @Override
         public boolean canUse() {
-            return !this.mob.level.isDay() && super.canUse();
+            return !this.entity.level.isDay() && this.entity.isHanging() && super.canUse();
         }
     }
 

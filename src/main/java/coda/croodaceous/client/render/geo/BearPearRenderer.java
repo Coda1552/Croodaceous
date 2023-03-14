@@ -1,6 +1,7 @@
 package coda.croodaceous.client.render.geo;
 
 import coda.croodaceous.CroodaceousMod;
+import coda.croodaceous.client.model.geo.BearPearModel;
 import coda.croodaceous.client.model.geo.SimpleGeoModel;
 import coda.croodaceous.common.entities.BearPear;
 import com.mojang.blaze3d.vertex.PoseStack;
@@ -14,7 +15,7 @@ public class BearPearRenderer extends GeoEntityRenderer<BearPear> {
 	private static final ResourceLocation TEXTURE_HOSTILE = new ResourceLocation(CroodaceousMod.MOD_ID, "textures/entity/bear_pear/hostile.png");
 
 	public BearPearRenderer(EntityRendererProvider.Context mgr) {
-		super(mgr, new SimpleGeoModel<>(CroodaceousMod.MOD_ID, "bear_pear"));
+		super(mgr, new BearPearModel());
 	}
 
 	@Override
@@ -23,10 +24,5 @@ public class BearPearRenderer extends GeoEntityRenderer<BearPear> {
 			return TEXTURE_HOSTILE;
 		}
 		return TEXTURE_IDLE;
-	}
-
-	@Override
-	protected void applyRotations(BearPear animatable, PoseStack poseStack, float ageInTicks, float rotationYaw, float partialTick) {
-		super.applyRotations(animatable, poseStack, ageInTicks, rotationYaw, partialTick);
 	}
 }
