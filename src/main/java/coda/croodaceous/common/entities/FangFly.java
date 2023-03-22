@@ -7,6 +7,7 @@ import net.minecraft.core.Direction;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.sounds.SoundEvent;
 import net.minecraft.sounds.SoundEvents;
+import net.minecraft.tags.BlockTags;
 import net.minecraft.util.RandomSource;
 import net.minecraft.world.damagesource.DamageSource;
 import net.minecraft.world.entity.*;
@@ -177,7 +178,7 @@ public class FangFly extends Animal implements IAnimatable, FlyingAnimal {
     }
 
     public static boolean canSpawn(EntityType<? extends FangFly> p_223316_0_, LevelAccessor p_223316_1_, MobSpawnType p_223316_2_, BlockPos p_223316_3_, RandomSource p_223316_4_) {
-        return p_223316_1_.getBlockState(p_223316_3_.below()).is(CEBlocks.DESOLATE_SAND.get()) && p_223316_1_.getRawBrightness(p_223316_3_, 0) > 8;
+        return p_223316_1_.getBlockState(p_223316_3_.below()).is(BlockTags.SAND) && p_223316_1_.getRawBrightness(p_223316_3_, 0) > 8;
     }
 
     private PlayState animControllerMain(AnimationEvent<?> e) {

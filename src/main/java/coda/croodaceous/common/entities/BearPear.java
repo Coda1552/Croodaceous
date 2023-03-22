@@ -94,7 +94,7 @@ public class BearPear extends Animal implements IAnimatable {
 
     public static boolean canSpawn(EntityType<? extends BearPear> entityType, LevelAccessor level, MobSpawnType spawnType, BlockPos pos, RandomSource random) {
         // TODO only allow spawn in a valid position
-        return level.getBlockState(pos.below()).is(CEBlocks.DESOLATE_SAND.get()) && level.getRawBrightness(pos, 0) > 8;
+        return level.getBlockState(pos.below()).is(BlockTags.SAND) && level.getRawBrightness(pos, 0) > 8;
     }
 
     @Override
@@ -151,7 +151,7 @@ public class BearPear extends Animal implements IAnimatable {
         // update position and movement
         if(hangingPos.isPresent()) {
             setDeltaMovement(Vec3.ZERO);
-            Vec3 hangingVec = Vec3.atBottomCenterOf(hangingPos.get()).subtract(0, 1.0F + getBbHeight(), 0);
+            Vec3 hangingVec = Vec3.atBottomCenterOf(hangingPos.get()).subtract(0, 0.125D + getBbHeight(), 0);
             setPosRaw(hangingVec.x(), hangingVec.y(), hangingVec.z());
         }
         // update hanging position

@@ -15,6 +15,7 @@ import net.minecraft.network.syncher.EntityDataSerializers;
 import net.minecraft.network.syncher.SynchedEntityData;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.sounds.SoundEvents;
+import net.minecraft.tags.BlockTags;
 import net.minecraft.util.RandomSource;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.InteractionResult;
@@ -137,7 +138,7 @@ public class Liyote extends Wolf {
 	}
 
 	public static boolean canSpawn(EntityType<? extends Liyote> p_223316_0_, LevelAccessor p_223316_1_, MobSpawnType p_223316_2_, BlockPos p_223316_3_, RandomSource p_223316_4_) {
-		return p_223316_1_.getBlockState(p_223316_3_.below()).is(CEBlocks.DESOLATE_SAND.get()) && p_223316_1_.getRawBrightness(p_223316_3_, 0) > 8;
+		return p_223316_1_.getBlockState(p_223316_3_.below()).is(BlockTags.SAND) && p_223316_1_.getRawBrightness(p_223316_3_, 0) > 8;
 	}
 
 
