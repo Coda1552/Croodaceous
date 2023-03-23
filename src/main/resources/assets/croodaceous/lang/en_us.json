@@ -5,11 +5,17 @@
   "entity.croodaceous.bearowl": "Bearowl",
   "entity.croodaceous.ramu": "Ramu",
   "entity.croodaceous.fang_fly": "Fang Fly",
+  "entity.croodaceous.trip_gerbil": "Trip Gerbil",
+  "entity.croodaceous.bear_pear": "Bear Pear",
+  "entity.croodaceous.jackrobat": "Jackrobat",
 
   "item.croodaceous.liyote_spawn_egg": "Liyote Spawn Egg",
   "item.croodaceous.bearowl_spawn_egg": "Bearowl Spawn Egg",
   "item.croodaceous.ramu_spawn_egg": "Ramu Spawn Egg",
   "item.croodaceous.fang_fly_spawn_egg": "Fang Fly Spawn Egg",
+  "item.croodaceous.trip_gerbil_spawn_egg": "Trip Gerbil Spawn Egg",
+  "item.croodaceous.bear_pear_spawn_egg": "Bear Pear Spawn Egg",
+  "item.croodaceous.jackrobat_spawn_egg": "Jackrobat Spawn Egg",
 
   "item.croodaceous.ramu_egg": "Ramu Egg",
 

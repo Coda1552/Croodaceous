@@ -34,8 +34,8 @@ public class BearPearModel extends SimpleGeoModel<BearPear> {
         }
         // rotate root when not hanging
         final IBone root = this.getBone("root");
-        if(entity.isHanging()) {
-            root.setRotationX(0);
+        if (entity.isHanging()) {
+            root.setRotationX(0.0F);
             root.setPositionY(0.0F);
         } else {
             root.setRotationX(90.0F * Mth.DEG_TO_RAD);

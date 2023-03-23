@@ -160,7 +160,7 @@ public class BearPear extends Animal implements IAnimatable {
         // update position and movement
         if(hangingPos.isPresent()) {
             setDeltaMovement(Vec3.ZERO);
-            Vec3 hangingVec = Vec3.atBottomCenterOf(hangingPos.get()).subtract(0, 1.0F + getBbHeight(), 0);
+            Vec3 hangingVec = Vec3.atBottomCenterOf(hangingPos.get()).subtract(0, 0.125D + getBbHeight(), 0);
             setPosRaw(hangingVec.x(), hangingVec.y(), hangingVec.z());
         }
         // update hanging position
