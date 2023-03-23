@@ -70,7 +70,7 @@ public class BearPear extends Animal implements IAnimatable {
 
     private static final TagKey<Block> SUPPORTS_BEAR_PEAR = BlockTags.LEAVES;
 
-    public static final float DELTA_SWINGING = 0.015F;
+    public static final float DELTA_SWINGING = 0.0185F;
     private float swingingAmount = 0.0F;
     private float swingingStrength = 0.0F;
     private Vec2 swingingDirection = Vec2.ZERO;
@@ -229,11 +229,9 @@ public class BearPear extends Animal implements IAnimatable {
             return false;
         }
         // validate space below block
-        for(int i = 1; i <= 2; i++) {
-            BlockState stateBelow = level.getBlockState(pos.below(i));
-            if(stateBelow.getMaterial().blocksMotion() || !stateBelow.getFluidState().isEmpty()) {
-                return false;
-            }
+        BlockState stateBelow = level.getBlockState(pos.below(1));
+        if(stateBelow.getMaterial().blocksMotion() || !stateBelow.getFluidState().isEmpty()) {
+            return false;
         }
         // all checks passed
         return true;
@@ -266,7 +264,7 @@ public class BearPear extends Animal implements IAnimatable {
 
     @Override
     public AABB getBoundingBoxForCulling() {
-        return super.getBoundingBoxForCulling().inflate(0.5D, 2.0D, 0.5D);
+        return super.getBoundingBoxForCulling().inflate(0.5D, 0.25D, 0.5D);
     }
 
     @Override
