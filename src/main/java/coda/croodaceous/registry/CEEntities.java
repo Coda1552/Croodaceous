@@ -37,7 +37,7 @@ public class CEEntities {
         event.register(CEEntities.RAMU.get(), SpawnPlacements.Type.ON_GROUND, Heightmap.Types.MOTION_BLOCKING_NO_LEAVES, Ramu::canSpawn, SpawnPlacementRegisterEvent.Operation.REPLACE);
         event.register(CEEntities.JACKROBAT.get(), SpawnPlacements.Type.ON_GROUND, Heightmap.Types.MOTION_BLOCKING_NO_LEAVES, Jackrobat::canSpawn, SpawnPlacementRegisterEvent.Operation.REPLACE);
         event.register(CEEntities.TRIP_GERBIL.get(), SpawnPlacements.Type.ON_GROUND, Heightmap.Types.MOTION_BLOCKING_NO_LEAVES, TripGerbil::canSpawn, SpawnPlacementRegisterEvent.Operation.REPLACE);
-        event.register(CEEntities.BEAR_PEAR.get(), SpawnPlacements.Type.ON_GROUND, Heightmap.Types.MOTION_BLOCKING_NO_LEAVES, BearPear::canSpawn, SpawnPlacementRegisterEvent.Operation.REPLACE);
+        event.register(CEEntities.BEAR_PEAR.get(), SpawnPlacements.Type.ON_GROUND, Heightmap.Types.MOTION_BLOCKING, BearPear::canSpawn, SpawnPlacementRegisterEvent.Operation.REPLACE);
     }
 
     public static final RegistryObject<EntityType<Liyote>> LIYOTE = ENTITIES.register("liyote", () -> EntityType.Builder.of(Liyote::new, MobCategory.CREATURE).sized(0.75F, 0.6F).setTrackingRange(16).updateInterval(1).build("liyote"));

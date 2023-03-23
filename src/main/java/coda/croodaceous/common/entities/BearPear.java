@@ -32,12 +32,12 @@ import net.minecraft.world.entity.Pose;
 import net.minecraft.world.entity.SpawnGroupData;
 import net.minecraft.world.entity.ai.attributes.AttributeSupplier;
 import net.minecraft.world.entity.ai.attributes.Attributes;
+import net.minecraft.world.entity.ai.control.LookControl;
 import net.minecraft.world.entity.ai.goal.FloatGoal;
 import net.minecraft.world.entity.ai.goal.Goal;
 import net.minecraft.world.entity.ai.goal.LookAtPlayerGoal;
 import net.minecraft.world.entity.ai.goal.RandomLookAroundGoal;
 import net.minecraft.world.entity.ai.goal.target.HurtByTargetGoal;
-import net.minecraft.world.entity.ai.goal.target.NearestAttackableTargetGoal;
 import net.minecraft.world.entity.ai.targeting.TargetingConditions;
 import net.minecraft.world.entity.animal.Animal;
 import net.minecraft.world.entity.player.Player;
@@ -80,12 +80,13 @@ public class BearPear extends Animal implements IAnimatable {
 
     public BearPear(EntityType<? extends BearPear> type, Level worldIn) {
         super(type, worldIn);
+        this.lookControl = new NoResetLookControl(this);
     }
 
     public static AttributeSupplier.Builder createAttributes() {
         // TODO balance
         return Mob.createMobAttributes()
-                .add(Attributes.MAX_HEALTH, 8.0D)
+                .add(Attributes.MAX_HEALTH, 12.0D)
                 .add(Attributes.ATTACK_DAMAGE, 1.0D)
                 .add(Attributes.KNOCKBACK_RESISTANCE, 1.0D)
                 .add(Attributes.FOLLOW_RANGE, 8.0D)
@@ -93,8 +94,16 @@ public class BearPear extends Animal implements IAnimatable {
     }
 
     public static boolean canSpawn(EntityType<? extends BearPear> entityType, LevelAccessor level, MobSpawnType spawnType, BlockPos pos, RandomSource random) {
-        // TODO only allow spawn in a valid position
-        return level.getBlockState(pos.below()).is(CEBlocks.DESOLATE_SAND.get()) && level.getRawBrightness(pos, 0) > 8;
+        // only allow spawn in a valid position
+        if(level.getRawBrightness(pos, 0) <= 8) {
+            return false;
+        }
+        for(BlockPos p : BlockPos.betweenClosed(pos, pos.above(7))) {
+            if(canHangOn(level, p)) {
+                return true;
+            }
+        }
+        return true;
     }
 
     @Override
@@ -158,22 +167,12 @@ public class BearPear extends Animal implements IAnimatable {
         if(!level.isClientSide() && (tickCount + getId()) % 20 == 1) {
             if(hangingPos.isPresent()) {
                 // validate hanging position
-                if(!canHangOn(hangingPos.get())) {
+                if(!canHangOn(level, hangingPos.get())) {
                     setHangingPos(null);
                 }
             } else {
                 // locate hanging position
-                BlockPos position = new BlockPos(position());
-                BlockPos.MutableBlockPos checkPos = new BlockPos.MutableBlockPos();
-                for(int i = 1; i < 8; i++) {
-                    checkPos.setWithOffset(position, 0, i, 0);
-                    if(canHangOn(checkPos)) {
-                        setHangingPos(checkPos.immutable());
-                        // move to hanging position
-                        moveTo(Vec3.atBottomCenterOf(checkPos).subtract(0, 1.0F + getBbHeight(), 0));
-                        break;
-                    }
-                }
+                findHangingPos(position());
             }
         }
         // update swinging
@@ -196,6 +195,20 @@ public class BearPear extends Animal implements IAnimatable {
 
     //// HANGING ////
 
+    public Optional<BlockPos> findHangingPos(final Vec3 position) {
+        BlockPos blockPosition = new BlockPos(position);
+        for(BlockPos pos : BlockPos.betweenClosed(blockPosition.above(1), blockPosition.above(8))) {
+            if(canHangOn(level, pos)) {
+                final BlockPos hangingPos = pos.immutable();
+                setHangingPos(hangingPos);
+                // move to hanging position
+                moveTo(Vec3.atBottomCenterOf(pos).subtract(0, 1.0F + getBbHeight(), 0));
+                return Optional.of(hangingPos);
+            }
+        }
+        return Optional.empty();
+    }
+
     public Optional<BlockPos> getHangingPos() {
         return getEntityData().get(DATA_HANGING_POS);
     }
@@ -209,7 +222,7 @@ public class BearPear extends Animal implements IAnimatable {
         return getHangingPos().isPresent();
     }
 
-    public boolean canHangOn(final BlockPos pos) {
+    public static boolean canHangOn(final LevelAccessor level, final BlockPos pos) {
         final BlockState blockState = level.getBlockState(pos);
         // validate block
         if(!blockState.is(SUPPORTS_BEAR_PEAR)) {
@@ -236,7 +249,7 @@ public class BearPear extends Animal implements IAnimatable {
         // update attack target
         if ((pEntity instanceof Player entity)
                 && TargetingConditions.DEFAULT.test(this, entity)
-                && (/*null == this.getTarget() || */this.getRandom().nextInt(60) == 0)) {
+                && (this.getRandom().nextInt(!level.isDay() ? 10 : 40) == 0)) {
             this.setTarget(entity);
         }
     }
@@ -269,8 +282,14 @@ public class BearPear extends Animal implements IAnimatable {
 
     @Override
     public SpawnGroupData finalizeSpawn(ServerLevelAccessor pLevel, DifficultyInstance pDifficulty, MobSpawnType pReason, @org.jetbrains.annotations.Nullable SpawnGroupData pSpawnData, @org.jetbrains.annotations.Nullable CompoundTag pDataTag) {
-        // TODO detect hanging block, if any
+        // locate hanging position
+        findHangingPos(position());
         return super.finalizeSpawn(pLevel, pDifficulty, pReason, pSpawnData, pDataTag);
+    }
+
+    @Override
+    public int getHeadRotSpeed() {
+        return 30;
     }
 
     //// SWINGING ////
@@ -333,7 +352,7 @@ public class BearPear extends Animal implements IAnimatable {
     //// ANIMATIONS ////
 
     private PlayState animControllerMain(AnimationEvent<?> e) {
-        // TODO bear pear animations
+        // TODO bear pear animations, if any
         return PlayState.CONTINUE;
     }
 
@@ -345,6 +364,26 @@ public class BearPear extends Animal implements IAnimatable {
     @Override
     public AnimationFactory getFactory() {
         return factory;
+    }
+
+    //// LOOK CONTROL ////
+
+    private static class NoResetLookControl extends LookControl {
+
+        public NoResetLookControl(Mob pMob) {
+            super(pMob);
+        }
+
+        @Override
+        protected boolean resetXRotOnTick() {
+            return false;
+        }
+
+        @Override
+        public void tick() {
+            this.lookAtCooldown = 1;
+            super.tick();
+        }
     }
 
     //// GOALS ////
