@@ -20,7 +20,7 @@ public class BearPearRenderer extends GeoEntityRenderer<BearPear> {
 
 	@Override
 	public ResourceLocation getTextureLocation(BearPear animatable) {
-		if (animatable.isAggressive()) {
+		if (animatable.isAggressive() || animatable.isDropping()) {
 			return TEXTURE_HOSTILE;
 		}
 		return TEXTURE_IDLE;
