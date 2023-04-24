@@ -377,7 +377,7 @@ public class BearPear extends Animal implements IAnimatable {
      */
     public int calculateDropAttackDistance(final LivingEntity target) {
         final Vec3 position = this.position();
-        final Vec3 targetPosition = this.getTarget().getEyePosition();
+        final Vec3 targetPosition = target.getEyePosition();
         // verify horizontal distance
         if(position.vectorTo(targetPosition).horizontalDistanceSqr() > this.getMeleeAttackRangeSqr(target)) {
             return -1;
