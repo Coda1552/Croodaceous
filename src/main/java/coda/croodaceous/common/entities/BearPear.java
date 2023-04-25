@@ -1,5 +1,6 @@
 package coda.croodaceous.common.entities;
 
+import coda.croodaceous.registry.CEEntities;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.nbt.CompoundTag;
@@ -15,25 +16,27 @@ import net.minecraft.tags.TagKey;
 import net.minecraft.util.Mth;
 import net.minecraft.util.RandomSource;
 import net.minecraft.world.DifficultyInstance;
-import net.minecraft.world.InteractionHand;
 import net.minecraft.world.damagesource.DamageSource;
 import net.minecraft.world.entity.AgeableMob;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EntityDimensions;
-import net.minecraft.world.entity.EntitySelector;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.Mob;
 import net.minecraft.world.entity.MobSpawnType;
 import net.minecraft.world.entity.Pose;
 import net.minecraft.world.entity.SpawnGroupData;
+import net.minecraft.world.entity.ai.attributes.AttributeModifier;
 import net.minecraft.world.entity.ai.attributes.AttributeSupplier;
 import net.minecraft.world.entity.ai.attributes.Attributes;
 import net.minecraft.world.entity.ai.control.LookControl;
+import net.minecraft.world.entity.ai.goal.AvoidEntityGoal;
 import net.minecraft.world.entity.ai.goal.FloatGoal;
 import net.minecraft.world.entity.ai.goal.Goal;
 import net.minecraft.world.entity.ai.goal.LookAtPlayerGoal;
+import net.minecraft.world.entity.ai.goal.MoveToBlockGoal;
 import net.minecraft.world.entity.ai.goal.RandomLookAroundGoal;
+import net.minecraft.world.entity.ai.goal.WaterAvoidingRandomStrollGoal;
 import net.minecraft.world.entity.ai.goal.target.HurtByTargetGoal;
 import net.minecraft.world.entity.ai.goal.target.NearestAttackableTargetGoal;
 import net.minecraft.world.entity.ai.targeting.TargetingConditions;
@@ -41,6 +44,7 @@ import net.minecraft.world.entity.animal.Animal;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.LevelAccessor;
+import net.minecraft.world.level.LevelReader;
 import net.minecraft.world.level.ServerLevelAccessor;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.state.BlockState;
@@ -51,6 +55,8 @@ import net.minecraft.world.phys.Vec3;
 import net.minecraftforge.common.util.ITeleporter;
 import software.bernie.geckolib3.core.IAnimatable;
 import software.bernie.geckolib3.core.PlayState;
+import software.bernie.geckolib3.core.builder.AnimationBuilder;
+import software.bernie.geckolib3.core.builder.ILoopType;
 import software.bernie.geckolib3.core.controller.AnimationController;
 import software.bernie.geckolib3.core.event.predicate.AnimationEvent;
 import software.bernie.geckolib3.core.manager.AnimationData;
@@ -71,10 +77,11 @@ public class BearPear extends Animal implements IAnimatable {
 
     // EVENTS //
     private static final byte EVENT_START_DROPPING = (byte) 9;
+    private static final byte EVENT_STOP_HANGING = (byte) 10;
 
     // DROPPING //
     /** The number of ticks between drop attacks, not including the time spent dropping **/
-    public static final int DROP_ATTACK_COOLDOWN = 30;
+    public static final int DROP_ATTACK_COOLDOWN = 24;
     /** The maximum number of blocks to attempt to drop **/
     public static final int MAX_DROPPING_DISTANCE = 8;
     /** The percent of drop attack to add each tick **/
@@ -94,9 +101,15 @@ public class BearPear extends Animal implements IAnimatable {
 
     // ANIMATIONS //
     private final AnimationFactory factory = GeckoLibUtil.createFactory(this);
+    private static final AnimationBuilder ANIM_HANGING = new AnimationBuilder().addAnimation("animation.bear_pear.hanging", ILoopType.EDefaultLoopTypes.LOOP);
+    private static final AnimationBuilder ANIM_GROUNDED = new AnimationBuilder().addAnimation("animation.bear_pear.grounded", ILoopType.EDefaultLoopTypes.PLAY_ONCE);
+    private static final AnimationBuilder ANIM_WALK = new AnimationBuilder().addAnimation("animation.bear_pear.walk", ILoopType.EDefaultLoopTypes.LOOP);
 
     // CONSTANTS //
+    /** The maximum number of bear pear entities that can share the same hanging position **/
+    private static final int MAX_ENTITIES_PER_BLOCK = 4;
     private static final TagKey<Block> SUPPORTS_BEAR_PEAR = BlockTags.LEAVES;
+    private static final AttributeModifier DROP_ATTACK_BONUS = new AttributeModifier("Drop attack bonus", 2.0F, AttributeModifier.Operation.MULTIPLY_TOTAL);
 
     public BearPear(EntityType<? extends BearPear> type, Level worldIn) {
         super(type, worldIn);
@@ -107,21 +120,16 @@ public class BearPear extends Animal implements IAnimatable {
         // TODO balance
         return Mob.createMobAttributes()
                 .add(Attributes.MAX_HEALTH, 12.0D)
-                .add(Attributes.ATTACK_DAMAGE, 1.0D)
+                .add(Attributes.ATTACK_DAMAGE, 1.5D)
                 .add(Attributes.KNOCKBACK_RESISTANCE, 1.0D)
-                .add(Attributes.FOLLOW_RANGE, 8.0D)
-                .add(Attributes.MOVEMENT_SPEED, 0.0D);
+                .add(Attributes.FOLLOW_RANGE, 10.0D)
+                .add(Attributes.MOVEMENT_SPEED, 0.29D);
     }
 
     public static boolean canSpawn(EntityType<? extends BearPear> entityType, LevelAccessor level, MobSpawnType spawnType, BlockPos pos, RandomSource random) {
         // only allow spawn in a valid position
         if(level.getRawBrightness(pos, 0) <= 8) {
             return false;
-        }
-        for(BlockPos p : BlockPos.betweenClosed(pos, pos.above(7))) {
-            if(canHangOn(level, p)) {
-                return true;
-            }
         }
         return true;
     }
@@ -136,17 +144,23 @@ public class BearPear extends Animal implements IAnimatable {
     @Override
     protected void registerGoals() {
         this.goalSelector.addGoal(0, new FloatGoal(this));
-        this.goalSelector.addGoal(1, new BearPear.DropAttackGoal(this, DROP_ATTACK_COOLDOWN + (int) (1.0F / DELTA_DROPPING)));
-        this.goalSelector.addGoal(2, new BearPear.AttackGoal(this, 2.0F));
-        this.goalSelector.addGoal(5, new BearPear.LookAwayFromPlayerGoal(this, Player.class, 8.0F));
-        this.goalSelector.addGoal(5, new BearPear.LookAwayFromPlayerGoal(this, Jackrobat.class, 8.0F));
-        this.goalSelector.addGoal(6, new BearPear.RandomLookGoal(this));
+        this.goalSelector.addGoal(2, new BearPear.DropAttackGoal(this, DROP_ATTACK_COOLDOWN + (int) (1.0F / DELTA_DROPPING)));
+        this.goalSelector.addGoal(4, new BearPear.MoveToLeavesGoal(this, 1.0D, MAX_DROPPING_DISTANCE, MAX_DROPPING_DISTANCE));
+        this.goalSelector.addGoal(4, new BearPear.FleeGoal<>(this, Player.class, 6.0F, 1.2F, 1.4F));
+        this.goalSelector.addGoal(5, new BearPear.RandomWanderGoal(this, 0.9D));
+        this.goalSelector.addGoal(7, new BearPear.LookAwayFromPlayerGoal(this, Player.class, 8.0F));
+        this.goalSelector.addGoal(7, new BearPear.LookAwayFromPlayerGoal(this, Jackrobat.class, 8.0F));
+        this.goalSelector.addGoal(8, new BearPear.RandomLookGoal(this));
         this.targetSelector.addGoal(0, new HurtByTargetGoal(this).setAlertOthers());
         this.targetSelector.addGoal(1, new BearPearTargetGoal<>(this, Player.class));
     }
 
     @Override
     protected SoundEvent getAmbientSound() {
+        if(isAggressive()) {
+            // TODO add angry sound
+            return SoundEvents.OCELOT_AMBIENT;
+        }
         return SoundEvents.OCELOT_AMBIENT;
     }
 
@@ -172,7 +186,7 @@ public class BearPear extends Animal implements IAnimatable {
 
     @Override
     protected float getStandingEyeHeight(Pose poseIn, EntityDimensions sizeIn) {
-        return getBbHeight() * 0.125F;
+        return 0.125F;
     }
 
     @Override
@@ -182,22 +196,16 @@ public class BearPear extends Animal implements IAnimatable {
         // update position and movement
         if(hangingPos.isPresent()) {
             setDeltaMovement(Vec3.ZERO);
-            Vec3 hangingVec = Vec3.atBottomCenterOf(hangingPos.get())
-                    .subtract(0, 0.125D + getBbHeight(), 0)
-                    .subtract(0, getDroppingDistanceOffset(1.0F), 0);
-            setPosRaw(hangingVec.x(), hangingVec.y(), hangingVec.z());
+            updateHangingPosition(hangingPos.get());
         }
         // update hanging position
         if(!level.isClientSide() && (tickCount + getId()) % 20 == 1) {
             if(hangingPos.isPresent()) {
                 // validate hanging position
-                if(!canHangOn(level, hangingPos.get())) {
-                    setHangingPos(null);
+                if(!canHangOn(hangingPos.get())) {
+                    resetHangingPos();
                     stopDropping();
                 }
-            } else {
-                // locate hanging position
-                findHangingPos(position());
             }
         }
         // update dropping
@@ -223,7 +231,7 @@ public class BearPear extends Animal implements IAnimatable {
     @Override
     protected void customServerAiStep() {
         super.customServerAiStep();
-        if(droppingPercent > 0.0F && droppingPercent < 0.65F && tickCount % 3 == 0) {
+        if(droppingPercent > 0.11F && droppingPercent < 0.65F && tickCount % 2 == 0) {
             performDropAttack();
         }
     }
@@ -245,17 +253,21 @@ public class BearPear extends Animal implements IAnimatable {
 
     @Override
     protected void doPush(Entity pEntity) {
-        return;
+        if(!isHanging()) {
+            super.doPush(pEntity);
+        }
     }
 
     @Override
     protected void pushEntities() {
-        return;
+        if(!isHanging()) {
+            super.pushEntities();
+        }
     }
 
     @Override
     public AABB getBoundingBoxForCulling() {
-        final double cullY = isDropping() ? 8.0D : 0.25D;
+        final double cullY = isDropping() ? (double)MAX_DROPPING_DISTANCE : 0.25D;
         return super.getBoundingBoxForCulling().inflate(0.5D, cullY, 0.5D);
     }
 
@@ -267,15 +279,32 @@ public class BearPear extends Animal implements IAnimatable {
     }
 
     @Override
+    public boolean canAttackType(EntityType<?> pType) {
+        return pType != this.getType() && super.canAttackType(pType);
+    }
+
+    @Override
+    public boolean canAttack(LivingEntity pTarget) {
+        return this.isHanging() && super.canAttack(pTarget);
+    }
+
+    @Override
+    public boolean isWithinMeleeAttackRange(LivingEntity target) {
+        if(!isHanging()) {
+            return super.isWithinMeleeAttackRange(target);
+        }
+        double disSq = this.distanceToSqr(target.getX(), target.getEyeY(), target.getZ());
+        return disSq <= this.getMeleeAttackRangeSqr(target);
+    }
+
+    @Override
     public Entity changeDimension(ServerLevel pDestination, ITeleporter teleporter) {
-        setHangingPos(null);
+        resetHangingPos();
         return super.changeDimension(pDestination, teleporter);
     }
 
     @Override
     public SpawnGroupData finalizeSpawn(ServerLevelAccessor pLevel, DifficultyInstance pDifficulty, MobSpawnType pReason, @org.jetbrains.annotations.Nullable SpawnGroupData pSpawnData, @org.jetbrains.annotations.Nullable CompoundTag pDataTag) {
-        // locate hanging position
-        findHangingPos(position());
         return super.finalizeSpawn(pLevel, pDifficulty, pReason, pSpawnData, pDataTag);
     }
 
@@ -291,6 +320,9 @@ public class BearPear extends Animal implements IAnimatable {
                 droppingPercent = 0.0F;
                 swingingAmount = 0.0F;
                 break;
+            case EVENT_STOP_HANGING:
+                resetHangingPos();
+                break;
             default:
                 super.handleEntityEvent(pId);
         }
@@ -298,14 +330,20 @@ public class BearPear extends Animal implements IAnimatable {
 
     //// HANGING ////
 
+    /**
+     * Searches the blocks above the entity to find a suitable position to start hanging
+     * @param position the entity position
+     * @return the first valid position to start hanging, if any was found
+     */
     public Optional<BlockPos> findHangingPos(final Vec3 position) {
-        BlockPos blockPosition = new BlockPos(position);
-        for(BlockPos pos : BlockPos.betweenClosed(blockPosition.above(1), blockPosition.above(8))) {
-            if(canHangOn(level, pos)) {
-                final BlockPos hangingPos = pos.immutable();
+        BlockPos.MutableBlockPos mPos = new BlockPos(position).mutable();
+        for(int i = 1; i <= MAX_DROPPING_DISTANCE; i++) {
+            mPos.move(Direction.UP);
+            if(canHangOn(mPos)) {
+                final BlockPos hangingPos = mPos.immutable();
                 setHangingPos(hangingPos);
                 // move to hanging position
-                moveTo(Vec3.atBottomCenterOf(pos).subtract(0, 1.0F + getBbHeight(), 0));
+                updateHangingPosition(hangingPos);
                 return Optional.of(hangingPos);
             }
         }
@@ -316,28 +354,89 @@ public class BearPear extends Animal implements IAnimatable {
         return getEntityData().get(DATA_HANGING_POS);
     }
 
-    public void setHangingPos(@Nullable BlockPos hangingPos) {
-        this.getEntityData().set(DATA_HANGING_POS, Optional.ofNullable(hangingPos));
-        this.setNoGravity(hangingPos != null);
+    /**
+     * Removes the hanging position and enables gravity
+     */
+    public void resetHangingPos() {
+        if(!level.isClientSide()) {
+            this.getEntityData().set(DATA_HANGING_POS, Optional.empty());
+            this.level.broadcastEntityEvent(this, EVENT_STOP_HANGING);
+        }
+        this.setNoGravity(false);
+        this.setDeltaMovement(this.getDeltaMovement().add(0.0D, -0.08D / 4.0D, 0.0D));
+        this.markHurt();
     }
 
+    /**
+     * @param hangingPos the updated hanging position
+     */
+    public void setHangingPos(BlockPos hangingPos) {
+        this.getEntityData().set(DATA_HANGING_POS, Optional.ofNullable(hangingPos));
+        setNoGravity(true);
+    }
+
+    /**
+     * @return true if the entity is hanging on a block
+     */
     public boolean isHanging() {
         return getHangingPos().isPresent();
     }
 
-    public static boolean canHangOn(final LevelAccessor level, final BlockPos pos) {
+    /**
+     * @param pos the block position to test
+     * @return true if a bear pear can hang under the block at the given position
+     */
+    public boolean canHangOn(final BlockPos pos) {
         final BlockState blockState = level.getBlockState(pos);
         // validate block
         if(!blockState.is(SUPPORTS_BEAR_PEAR)) {
             return false;
         }
         // validate space below block
-        BlockState stateBelow = level.getBlockState(pos.below(1));
+        final BlockPos posBelow = pos.below(1);
+        BlockState stateBelow = level.getBlockState(posBelow);
         if(stateBelow.getMaterial().blocksMotion() || !stateBelow.getFluidState().isEmpty()) {
+            return false;
+        }
+        // validate no entity cramming
+        // TODO this doesn't seem to work
+        final int disY = MAX_DROPPING_DISTANCE / 2;
+        final AABB aabb = new AABB(posBelow).inflate(0, disY, 0).move(0, -disY, 0);
+        final List<BearPear> entityList = level.getEntitiesOfClass(BearPear.class, aabb, e -> e != this && e.isHanging());
+        if(entityList.size() > MAX_ENTITIES_PER_BLOCK - 1) {
             return false;
         }
         // all checks passed
         return true;
+    }
+
+    /**
+     * Moves the entity underneath the given position with an offset
+     * for horizontal randomness and vertical dropping progress
+     * @param hangingPos the position to hang on
+     */
+    protected void updateHangingPosition(final BlockPos hangingPos) {
+        Vec3 hangingVec = Vec3.atBottomCenterOf(hangingPos)
+                .add(getHangingOffset())
+                .subtract(0, 0.125D + getBbHeight(), 0)
+                .subtract(0, getDroppingDistanceOffset(1.0F), 0);
+        setPosRaw(hangingVec.x(), hangingVec.y(), hangingVec.z());
+    }
+
+    /**
+     * @return a random position offset to apply to the entity when hanging,
+     * seeded using its ID and position
+     */
+    public Vec3 getHangingOffset() {
+        final BlockPos pos = getHangingPos().orElse(blockPosition());
+        final long seed = (getId() * 3311L + Mth.getSeed(pos));
+        final float width = getBbWidth();
+        final float deltaWidth = 16.0F - width;
+        final float deltaHeight = 0.0125F;
+        final float dx = Mth.clamp((((seed & 15L) / 15.0F) - 0.5F) * 0.5F, -deltaWidth, deltaWidth);
+        final float dy = (((seed >> 4 & 15L) / 15.0F) - 1.0F) * deltaHeight;
+        final float dz = Mth.clamp((((seed >> 8 & 15L) / 15.0F) - 0.5F) * 0.5F, -deltaWidth, deltaWidth);
+        return new Vec3(dx, dy, dz);
     }
 
     //// DROPPING ////
@@ -351,19 +450,27 @@ public class BearPear extends Animal implements IAnimatable {
     }
 
     public void stopDropping() {
-        getEntityData().set(DATA_DROPPING_DISTANCE, OptionalInt.empty());
         droppingPercent = 0.0F;
+        if(!level.isClientSide()) {
+            getEntityData().set(DATA_DROPPING_DISTANCE, OptionalInt.empty());
+            setAggressive(false);
+        }
     }
 
     public void startDropping(final int distance) {
         droppingPercent = 0.0F;
         if(!level.isClientSide()) {
+            setAggressive(true);
             final OptionalInt value = distance > 0 ? OptionalInt.of(distance) : OptionalInt.empty();
             getEntityData().set(DATA_DROPPING_DISTANCE, value);
             level.broadcastEntityEvent(this, EVENT_START_DROPPING);
         }
     }
 
+    /**
+     * @param partialTick the partial tick, pass 1.0 when none is available
+     * @return the distance in blocks to offset the entity Y position based on the dropping progress
+     */
     public double getDroppingDistanceOffset(final float partialTick) {
         final int targetDistance = getEntityData().get(DATA_DROPPING_DISTANCE).orElse(0);
         final float lerpedProgress = Mth.lerp(partialTick * DELTA_DROPPING, Math.max(0, droppingPercent - DELTA_DROPPING), droppingPercent);
@@ -405,9 +512,14 @@ public class BearPear extends Animal implements IAnimatable {
     protected void performDropAttack() {
         // collect intersecting entities
         final AABB aabb = getBoundingBox().inflate(2.0D);
-        final TargetingConditions conditions = TargetingConditions.forCombat().ignoreLineOfSight().selector(this::isWithinMeleeAttackRange);
+        final TargetingConditions conditions = TargetingConditions.forCombat().ignoreLineOfSight().selector(e -> canAttackType(e.getType()) && canAttack(e) && isWithinMeleeAttackRange(e));
         final List<LivingEntity> targets = level.getEntitiesOfClass(LivingEntity.class, aabb, e -> conditions.test(this, e));
+        // apply attack modifier
+        this.getAttribute(Attributes.ATTACK_DAMAGE).addTransientModifier(DROP_ATTACK_BONUS);
+        // attack each entity
         targets.forEach(this::doHurtTarget);
+        // remove attack damage modifier
+        this.getAttribute(Attributes.ATTACK_DAMAGE).removeModifier(DROP_ATTACK_BONUS);
     }
 
     //// SWINGING ////
@@ -458,6 +570,8 @@ public class BearPear extends Animal implements IAnimatable {
         super.readAdditionalSaveData(pCompound);
         if(pCompound.contains(KEY_HANGING_POS)) {
             setHangingPos(NbtUtils.readBlockPos(pCompound.getCompound(KEY_HANGING_POS)));
+        } else {
+            resetHangingPos();
         }
     }
 
@@ -469,8 +583,14 @@ public class BearPear extends Animal implements IAnimatable {
 
     //// ANIMATIONS ////
 
-    private PlayState animControllerMain(AnimationEvent<?> e) {
-        // TODO bear pear animations, if any
+    private PlayState animControllerMain(AnimationEvent<?> event) {
+        if(this.isHanging()) {
+            event.getController().setAnimation(ANIM_HANGING);
+        } else if(this.getDeltaMovement().horizontalDistanceSqr() > 2.500000277905201E-7D) {
+            event.getController().setAnimation(ANIM_WALK);
+        } else {
+            event.getController().setAnimation(ANIM_GROUNDED);
+        }
         return PlayState.CONTINUE;
     }
 
@@ -512,6 +632,86 @@ public class BearPear extends Animal implements IAnimatable {
         this.getLookControl().setLookAt(lookAtVec.x(), lookAtVec.y(), lookAtVec.z());
     }
 
+    private static class RandomWanderGoal extends WaterAvoidingRandomStrollGoal {
+
+        private final BearPear entity;
+
+        public RandomWanderGoal(BearPear pMob, double pSpeedModifier) {
+            super(pMob, pSpeedModifier);
+            this.entity = pMob;
+        }
+
+        @Override
+        public boolean canUse() {
+            return !entity.isHanging() && super.canUse();
+        }
+    }
+
+    private static class FleeGoal<T extends LivingEntity> extends AvoidEntityGoal<T> {
+
+        private final BearPear entity;
+
+        public FleeGoal(BearPear pMob, Class<T> pEntityClassToAvoid, float pMaxDistance, double pWalkSpeedModifier, double pSprintSpeedModifier) {
+            super(pMob, pEntityClassToAvoid, pMaxDistance, pWalkSpeedModifier, pSprintSpeedModifier);
+            this.entity = pMob;
+        }
+
+
+        @Override
+        public boolean canUse() {
+            return !entity.isHanging() && super.canUse();
+        }
+    }
+
+    private static class MoveToLeavesGoal extends MoveToBlockGoal {
+
+        private final BearPear entity;
+
+        /**
+         * @param pMob the bear pear entity
+         * @param pSpeedModifier the movement speed modifier
+         * @param pSearchRange the horizontal search range
+         * @param verticalSearchRange the vertical search range, automatically adjusted to only look above the entity
+         */
+        public MoveToLeavesGoal(BearPear pMob, double pSpeedModifier, int pSearchRange, int verticalSearchRange) {
+            super(pMob, pSpeedModifier, pSearchRange, (verticalSearchRange / 2) + 1);
+            this.entity = pMob;
+            this.verticalSearchStart = verticalSearchRange / 2;
+        }
+
+        @Override
+        public boolean canUse() {
+            return !entity.isHanging() && super.canUse();
+        }
+
+        @Override
+        public void tick() {
+            final double acceptedDistance = this.acceptedDistance();
+            final double horizontalDistanceSq = Vec3.atCenterOf(blockPos).vectorTo(this.mob.position()).horizontalDistanceSqr();
+            final boolean isUnderTarget = this.mob.position().y() < blockPos.getY() && horizontalDistanceSq < (acceptedDistance * acceptedDistance);
+            if(isUnderTarget) {
+                final BlockPos targetPos = blockPos;
+                if(entity.canHangOn(targetPos)) {
+                    entity.setHangingPos(targetPos);
+                    entity.updateHangingPosition(targetPos);
+                }
+                stop();
+                return;
+            }
+            super.tick();
+        }
+
+        @Override
+        public double acceptedDistance() {
+            return super.acceptedDistance();
+        }
+
+        @Override
+        protected boolean isValidTarget(LevelReader pLevel, BlockPos pPos) {
+            return entity.canHangOn(pPos);
+        }
+    }
+
     private static class LookAwayFromPlayerGoal extends LookAtPlayerGoal {
 
         private final BearPear entity;
@@ -545,112 +745,6 @@ public class BearPear extends Animal implements IAnimatable {
         @Override
         public void stop() {
             this.lookAt = null;
-        }
-    }
-
-    private static class AttackGoal extends Goal {
-
-        private final BearPear mob;
-        private final float lookAtDistanceSq;
-
-        public int ticksUntilNextAttack;
-        private final int attackInterval = 20;
-        private long lastCanUseCheck;
-        private static final long COOLDOWN_BETWEEN_CAN_USE_CHECKS = 20L;
-
-        public AttackGoal(BearPear pMob, float lookAtDistance) {
-            this.mob = pMob;
-            this.lookAtDistanceSq = lookAtDistance * lookAtDistance;
-            setFlags(EnumSet.of(Flag.MOVE, Flag.LOOK));
-        }
-
-        @Override
-        public boolean requiresUpdateEveryTick() {
-            return true;
-        }
-
-        @Override
-        public boolean canUse() {
-            long i = this.mob.level.getGameTime();
-            if (i - this.lastCanUseCheck < COOLDOWN_BETWEEN_CAN_USE_CHECKS) {
-                return false;
-            } else {
-                this.lastCanUseCheck = i;
-                LivingEntity livingentity = this.mob.getTarget();
-                if (livingentity == null) {
-                    return false;
-                } else if (!livingentity.isAlive()) {
-                    return false;
-                } else {
-                    return this.getAttackReachSqr(livingentity) >= this.mob.getEyePosition().distanceToSqr(livingentity.getX(), livingentity.getEyeY(), livingentity.getZ());
-                }
-            }
-        }
-
-        @Override
-        public boolean canContinueToUse() {
-            LivingEntity livingentity = this.mob.getTarget();
-            if (livingentity == null) {
-                return false;
-            } else if (!livingentity.isAlive()) {
-                return false;
-            } else {
-                return !(livingentity instanceof Player) || !livingentity.isSpectator() && !((Player)livingentity).isCreative();
-            }
-        }
-
-        @Override
-        public void start() {
-            this.mob.setAggressive(true);
-            this.ticksUntilNextAttack = 0;
-        }
-
-        @Override
-        public void stop() {
-            LivingEntity livingentity = this.mob.getTarget();
-            if (!EntitySelector.NO_CREATIVE_OR_SPECTATOR.test(livingentity)) {
-                this.mob.setTarget(null);
-            }
-            this.mob.setAggressive(false);
-        }
-
-        @Override
-        public void tick() {
-            LivingEntity livingentity = this.mob.getTarget();
-            if (livingentity != null) {
-                double disSq = this.mob.distanceToSqr(livingentity.getX(), livingentity.getEyeY(), livingentity.getZ());
-                if(disSq < lookAtDistanceSq) {
-                    this.mob.getLookControl().setLookAt(livingentity, 180.0F, 30.0F);
-                    this.mob.markHurt();
-                } else {
-                    this.mob.lookAwayFrom(livingentity);
-                }
-
-                this.ticksUntilNextAttack = Math.max(this.ticksUntilNextAttack - 1, 0);
-                this.checkAndPerformAttack(livingentity, disSq);
-            }
-        }
-
-        protected void checkAndPerformAttack(LivingEntity pEnemy, double pDistToEnemySqr) {
-            double d0 = this.getAttackReachSqr(pEnemy);
-            if (pDistToEnemySqr <= d0 && isTimeToAttack()) {
-                this.resetAttackCooldown();
-                this.mob.swing(InteractionHand.MAIN_HAND);
-                this.mob.doHurtTarget(pEnemy);
-            }
-
-        }
-
-        protected void resetAttackCooldown() {
-            this.ticksUntilNextAttack = this.adjustedTickDelay(attackInterval);
-        }
-
-        protected boolean isTimeToAttack() {
-            return this.ticksUntilNextAttack <= 0;
-        }
-
-        protected double getAttackReachSqr(LivingEntity pAttackTarget) {
-            return (this.mob.getBbWidth() * 1.5F * this.mob.getBbWidth() * 1.5F + pAttackTarget.getBbWidth());
         }
     }
 
@@ -692,7 +786,7 @@ public class BearPear extends Animal implements IAnimatable {
 
         @Override
         public void start() {
-            this.cooldown = maxCooldown;
+            this.cooldown = maxCooldown + (entity.getId() * 31) % 25;
             this.entity.startDropping(droppingDistance);
             this.droppingDistance = 0;
             if(this.entity.getTarget() != null) {
