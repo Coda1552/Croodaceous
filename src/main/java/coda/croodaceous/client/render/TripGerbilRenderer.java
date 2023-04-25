@@ -1,16 +1,14 @@
-package coda.croodaceous.client.render.geo;
+package coda.croodaceous.client.render;
 
 import coda.croodaceous.CroodaceousMod;
 import coda.croodaceous.client.layer.TripGerbilTailLayer;
-import coda.croodaceous.client.model.geo.SimpleGeoModel;
+import coda.croodaceous.client.model.SimpleGeoModel;
 import coda.croodaceous.common.entities.TripGerbil;
 import com.mojang.blaze3d.vertex.PoseStack;
-import com.mojang.math.Vector3f;
 import net.minecraft.client.renderer.MultiBufferSource;
 import net.minecraft.client.renderer.entity.EntityRendererProvider;
 import software.bernie.geckolib3.renderers.geo.GeoEntityRenderer;
 import software.bernie.geckolib3.renderers.geo.GeoLayerRenderer;
-import software.bernie.geckolib3.renderers.geo.IGeoRenderer;
 
 public class TripGerbilRenderer extends GeoEntityRenderer<TripGerbil> {
 

@@ -2,8 +2,9 @@
   "type": "croodaceous:croodaceous",
   "generator": {
     "biome_source": {
-      "biomes": [{
-        "parameters": {
+      "biomes": [
+        {
+          "parameters": {
           "weirdness": [-1, -0.93333334],
           "continentalness": [-1.2, 1],
           "erosion": [-1, 1],
@@ -13,8 +14,9 @@
           "offset": 0
         },
         "biome": "minecraft:jungle"
-      }, {
-        "parameters": {
+      },
+        {
+          "parameters": {
           "weirdness": [-0.93333334, -0.7666667],
           "continentalness": [-1.2, 1],
           "erosion": [-1, 1],
@@ -24,8 +26,9 @@
           "offset": 0
         },
         "biome": "minecraft:mangrove_swamp"
-      }, {
-        "parameters": {
+        },
+        {
+          "parameters": {
           "weirdness": [-0.7666667, -0.56666666],
           "continentalness": [-1.2, 1],
           "erosion": [-1, 1],

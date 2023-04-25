@@ -1,4 +1,4 @@
-package coda.croodaceous.client.model.geo;
+package coda.croodaceous.client.model;
 
 import coda.croodaceous.CroodaceousMod;
 import coda.croodaceous.common.entities.Bearowl;

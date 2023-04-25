@@ -45,15 +45,15 @@ import software.bernie.geckolib3.util.GeckoLibUtil;
 
 import java.util.UUID;
 
-public class Liyote extends Wolf {
+public class Liyote extends Wolf implements IAnimatable {
 	private static final EntityDataAccessor<ItemStack> DATA_EI = SynchedEntityData.defineId(Liyote.class, EntityDataSerializers.ITEM_STACK);
-	/*private final AnimationFactory factory = GeckoLibUtil.createFactory(this);
+	private final AnimationFactory factory = GeckoLibUtil.createFactory(this);
 	private static final AnimationBuilder ANIM_WALK_EAT = new AnimationBuilder().addAnimation("animation.liyote.walk_eat", ILoopType.EDefaultLoopTypes.LOOP);
 	private static final AnimationBuilder ANIM_SITTING_EAT = new AnimationBuilder().addAnimation("animation.liyote.sitting_eat", ILoopType.EDefaultLoopTypes.LOOP);
 	private static final AnimationBuilder ANIM_IDLE_EAT = new AnimationBuilder().addAnimation("animation.liyote.idle_eat", ILoopType.EDefaultLoopTypes.LOOP);
 	private static final AnimationBuilder ANIM_WALK = new AnimationBuilder().addAnimation("animation.liyote.walk", ILoopType.EDefaultLoopTypes.LOOP);
 	private static final AnimationBuilder ANIM_SITTING = new AnimationBuilder().addAnimation("animation.liyote.sitting", ILoopType.EDefaultLoopTypes.LOOP);
-	private static final AnimationBuilder ANIM_IDLE = new AnimationBuilder().addAnimation("animation.liyote.idle", ILoopType.EDefaultLoopTypes.LOOP);*/
+	private static final AnimationBuilder ANIM_IDLE = new AnimationBuilder().addAnimation("animation.liyote.idle", ILoopType.EDefaultLoopTypes.LOOP);
 
 	private int eatingTicks = 0;
 	private ItemStack eatingItem = ItemStack.EMPTY;
@@ -141,9 +141,7 @@ public class Liyote extends Wolf {
 		return p_223316_1_.getBlockState(p_223316_3_.below()).is(BlockTags.SAND) && p_223316_1_.getRawBrightness(p_223316_3_, 0) > 8;
 	}
 
-
-	// Old GeckoLib stuff
-/*	private PlayState animControllerMain(AnimationEvent<?> e) {
+	private PlayState animControllerMain(AnimationEvent<?> e) {
 		if (!eatingItem.isEmpty() && this.isFood(eatingItem)) {
 			if (e.isMoving()) {
 				e.getController().setAnimation(ANIM_WALK_EAT);
@@ -171,7 +169,7 @@ public class Liyote extends Wolf {
 	public AnimationFactory getFactory() {
 		return factory;
 	}
-	*/
+
 	@Override
 	public void tick() {
 		super.tick();

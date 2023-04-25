@@ -1,0 +1,25 @@
+{
+  "replace": false,
+  "values": [
+    "croodaceous:hoodoo_shale",
+    "croodaceous:polished_hoodoo_shale",
+    "croodaceous:hoodoo_shale_tiles",
+    "croodaceous:hoodoo_shale_stairs",
+    "croodaceous:chiseled_hoodoo_shale",
+    "croodaceous:polished_hoodoo_shale_stairs",
+    "croodaceous:polished_hoodoo_shale_slab",
+    "croodaceous:hoodoo_shale_slab",
+    "croodaceous:hoodoo_shale_wall",
+    "croodaceous:desolate_sandstone",
+    "croodaceous:chiseled_desolate_sandstone",
+    "croodaceous:cut_desolate_sandstone",
+    "croodaceous:smooth_desolate_sandstone",
+    "croodaceous:desolate_sandstone_stairs",
+    "croodaceous:smooth_desolate_sandstone_stairs",
+    "croodaceous:desolate_sandstone_slab",
+    "croodaceous:cut_desolate_sandstone_slab",
+    "croodaceous:smooth_desolate_sandstone_slab",
+    "croodaceous:desolate_sandstone_wall"
+
+  ]
+}

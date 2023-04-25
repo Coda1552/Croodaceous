@@ -1,8 +1,7 @@
-package coda.croodaceous.client.model.geo;
+package coda.croodaceous.client.model;
 
 import coda.croodaceous.CroodaceousMod;
 import coda.croodaceous.common.entities.BearPear;
-import net.minecraft.client.Minecraft;
 import net.minecraft.util.Mth;
 import software.bernie.geckolib3.core.event.predicate.AnimationEvent;
 import software.bernie.geckolib3.core.processor.IBone;

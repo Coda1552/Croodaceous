@@ -6,15 +6,7 @@
       },
       {
         "model": "croodaceous:block/desolate_sand",
-        "y": 90
-      },
-      {
-        "model": "croodaceous:block/desolate_sand",
         "y": 180
-      },
-      {
-        "model": "croodaceous:block/desolate_sand",
-        "y": 270
       }
     ]
   }

@@ -1,10 +1,8 @@
-package coda.croodaceous.client.render.geo;
+package coda.croodaceous.client.render;
 
 import coda.croodaceous.CroodaceousMod;
-import coda.croodaceous.client.model.geo.BearPearModel;
-import coda.croodaceous.client.model.geo.SimpleGeoModel;
+import coda.croodaceous.client.model.BearPearModel;
 import coda.croodaceous.common.entities.BearPear;
-import com.mojang.blaze3d.vertex.PoseStack;
 import net.minecraft.client.renderer.entity.EntityRendererProvider;
 import net.minecraft.resources.ResourceLocation;
 import software.bernie.geckolib3.renderers.geo.GeoEntityRenderer;

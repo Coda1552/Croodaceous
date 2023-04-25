@@ -1,4 +1,4 @@
-package coda.croodaceous.client.model.geo;
+package coda.croodaceous.client.model;
 
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.entity.LivingEntity;
