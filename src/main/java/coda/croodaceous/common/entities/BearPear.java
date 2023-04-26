@@ -121,7 +121,7 @@ public class BearPear extends Animal implements IAnimatable {
         return Mob.createMobAttributes()
                 .add(Attributes.MAX_HEALTH, 12.0D)
                 .add(Attributes.ATTACK_DAMAGE, 1.5D)
-                .add(Attributes.KNOCKBACK_RESISTANCE, 1.0D)
+                //.add(Attributes.KNOCKBACK_RESISTANCE, 1.0D)
                 .add(Attributes.FOLLOW_RANGE, 10.0D)
                 .add(Attributes.MOVEMENT_SPEED, 0.29D);
     }
@@ -515,11 +515,11 @@ public class BearPear extends Animal implements IAnimatable {
         final TargetingConditions conditions = TargetingConditions.forCombat().ignoreLineOfSight().selector(e -> canAttackType(e.getType()) && canAttack(e) && isWithinMeleeAttackRange(e));
         final List<LivingEntity> targets = level.getEntitiesOfClass(LivingEntity.class, aabb, e -> conditions.test(this, e));
         // apply attack modifier
-        this.getAttribute(Attributes.ATTACK_DAMAGE).addTransientModifier(DROP_ATTACK_BONUS);
+        //this.getAttribute(Attributes.ATTACK_DAMAGE).addTransientModifier(DROP_ATTACK_BONUS);
         // attack each entity
         targets.forEach(this::doHurtTarget);
         // remove attack damage modifier
-        this.getAttribute(Attributes.ATTACK_DAMAGE).removeModifier(DROP_ATTACK_BONUS);
+        //this.getAttribute(Attributes.ATTACK_DAMAGE).removeModifier(DROP_ATTACK_BONUS);
     }
 
     //// SWINGING ////
