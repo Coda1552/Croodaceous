@@ -1,6 +1,5 @@
 package coda.croodaceous.common.entities;
 
-import coda.croodaceous.common.entities.goal.BearowlAttackGoal;
 import coda.croodaceous.registry.CEEntities;
 import coda.croodaceous.registry.CEItems;
 import net.minecraft.core.BlockPos;
@@ -44,7 +43,6 @@ public class Bearowl extends Animal implements IAnimatable {
 	private static final EntityDataAccessor<Boolean> DATA_SLEEPING = SynchedEntityData.defineId(Bearowl.class, EntityDataSerializers.BOOLEAN);
 	private static final EntityDataAccessor<Boolean> DATA_ROARING = SynchedEntityData.defineId(Bearowl.class, EntityDataSerializers.BOOLEAN);
 	private static final EntityDataAccessor<Boolean> DATA_HAS_KILLED = SynchedEntityData.defineId(Bearowl.class, EntityDataSerializers.BOOLEAN);
-	private static final EntityDataAccessor<Boolean> DATA_ATTACKING = SynchedEntityData.defineId(Bearowl.class, EntityDataSerializers.BOOLEAN);
 
 	private final AnimationFactory factory = GeckoLibUtil.createFactory(this);
 	private static final AnimationBuilder ANIM_SWIPE_RIGHT = new AnimationBuilder().addAnimation("animation.bearowl.swipe_right",  ILoopType.EDefaultLoopTypes.LOOP);
@@ -69,7 +67,7 @@ public class Bearowl extends Animal implements IAnimatable {
 	@Override
 	protected void registerGoals() {
 		this.goalSelector.addGoal(0, new FloatGoal(this));
-		this.goalSelector.addGoal(0, new BearowlAttackGoal(this, 20, 200, 10, 11, 4.0F));
+		this.goalSelector.addGoal(0, new MeleeAttackGoal(this, 1.0D, true));
 		this.goalSelector.addGoal(1, new WaterAvoidingRandomStrollGoal(this, 1.0D));
 		this.goalSelector.addGoal(2, new RandomLookAroundGoal(this));
 		this.targetSelector.addGoal(0, new HurtByTargetGoal(this));
@@ -95,7 +93,7 @@ public class Bearowl extends Animal implements IAnimatable {
 	}
 
 	private PlayState animControllerMain(AnimationEvent<?> e) {
-		if (isAttacking()) {
+		if (this.swingTime > 0) {
 			if (attackAnimationAttr == 0) {
 				e.getController().setAnimation(ANIM_SWIPE_RIGHT);
 			} else {
@@ -145,7 +143,7 @@ public class Bearowl extends Animal implements IAnimatable {
 	@Override
 	public void tick() {
 		super.tick();
-
+		updateSwingTime();
 		if (!level.isClientSide) {
 			if (this.homePos == null) {
 				this.homePos = this.blockPosition();
@@ -278,7 +276,6 @@ public class Bearowl extends Animal implements IAnimatable {
 		this.entityData.define(DATA_SLEEPING, false);
 		this.entityData.define(DATA_ROARING, false);
 		this.entityData.define(DATA_HAS_KILLED, false);
-		this.entityData.define(DATA_ATTACKING, false);
 	}
 
 	@Override
@@ -315,11 +312,4 @@ public class Bearowl extends Animal implements IAnimatable {
 
 	// TODO: Custom Sounds
 
-	public void setAttacking(boolean attacking) {
-		entityData.set(DATA_ATTACKING, attacking);
-	}
-
-	public boolean isAttacking() {
-		return entityData.get(DATA_ATTACKING);
-	}
 }
