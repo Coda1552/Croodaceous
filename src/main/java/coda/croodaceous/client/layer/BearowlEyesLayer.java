@@ -24,7 +24,7 @@ public class BearowlEyesLayer extends GeoLayerRenderer<Bearowl> {
 
     @Override
     protected ResourceLocation getEntityTexture(Bearowl entity) {
-        if(entity.sleeping) {
+        if(entity.isSleepingState()) {
             return EYES_SLEEPING;
         }
         return EYES;
