@@ -1,7 +1,6 @@
 package coda.croodaceous.common.entities;
 
 import coda.croodaceous.registry.CEEntities;
-import coda.croodaceous.registry.CEItems;
 import net.minecraft.core.BlockPos;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.NbtUtils;
@@ -22,15 +21,12 @@ import net.minecraft.world.entity.animal.Animal;
 import net.minecraft.world.entity.animal.WaterAnimal;
 import net.minecraft.world.entity.monster.Monster;
 import net.minecraft.world.entity.player.Player;
-import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.LevelAccessor;
 import net.minecraft.world.level.LevelReader;
 import net.minecraft.world.level.ServerLevelAccessor;
-import net.minecraft.world.phys.HitResult;
 import net.minecraft.world.phys.Vec3;
 import net.minecraftforge.common.ForgeMod;
-import org.stringtemplate.v4.ST;
 import software.bernie.geckolib3.core.IAnimatable;
 import software.bernie.geckolib3.core.PlayState;
 import software.bernie.geckolib3.core.builder.AnimationBuilder;
@@ -57,7 +53,6 @@ public class Bearowl extends Animal implements IAnimatable {
 	private static final byte STATE_ROAR = 3;
 	private static final byte STATE_SLEEP = 4;
 
-
 	// CLIENT EVENTS //
 	private static final byte START_SWIPING_EVENT = 9;
 	private static final byte START_ROARING_EVENT = 10;
@@ -75,6 +70,9 @@ public class Bearowl extends Animal implements IAnimatable {
 	private static final AnimationBuilder ANIM_IDLE = new AnimationBuilder().addAnimation("animation.bearowl.idle", ILoopType.EDefaultLoopTypes.LOOP);
 	private int animationTime;
 
+	// CONSTANTS //
+	private static final int ROAR_COOLDOWN = 380;
+
 	public Bearowl(EntityType<? extends Bearowl> type, Level level) {
 		super(type, level);
 	}
@@ -84,7 +82,7 @@ public class Bearowl extends Animal implements IAnimatable {
 		this.goalSelector.addGoal(0, new FloatGoal(this));
 		this.goalSelector.addGoal(1, new Bearowl.SleepingGoal(this));
 		this.goalSelector.addGoal(2, new Bearowl.MeleeGoal(this, 1.0D));
-		this.goalSelector.addGoal(2, new Bearowl.RoaringGoal(this));
+		this.goalSelector.addGoal(2, new Bearowl.RoaringGoal(this, ROAR_COOLDOWN));
 		this.goalSelector.addGoal(3, new Bearowl.StartSleepingGoal(this, 0.9D));
 		this.goalSelector.addGoal(4, new WaterAvoidingRandomStrollGoal(this, 1.0D));
 		this.goalSelector.addGoal(5, new RandomLookAroundGoal(this));
@@ -109,6 +107,9 @@ public class Bearowl extends Animal implements IAnimatable {
 
 	@Override
 	public boolean canAttack(LivingEntity pTarget) {
+		if(isSleepingState()) {
+			return false;
+		}
 		if(pTarget instanceof Player player) {
 			return !player.isCreative() && !player.isSpectator();
 		}
@@ -174,7 +175,7 @@ public class Bearowl extends Animal implements IAnimatable {
 	}
 
 	private boolean wantsSleep() {
-		return this.level.isDay() && this.getTarget() == null && (this.tickCount < 300 || this.getLastHurtByMobTimestamp() + 300 < this.tickCount);
+		return this.level.isDay() && this.getTarget() == null && (this.tickCount > 300 && this.getLastHurtByMobTimestamp() + 300 < this.tickCount);
 	}
 
 	@Override
@@ -207,12 +208,8 @@ public class Bearowl extends Animal implements IAnimatable {
 
 	@Override
 	public boolean hurt(DamageSource pSource, float pAmount) {
-		if(isSleepingState()) {
+		if(!level.isClientSide() && isSleepingState()) {
 			setBearowlState(STATE_IDLE);
-		}
-		if (pSource.getEntity() instanceof Bearowl) {
-			this.knockback(0.5F, pSource.getEntity().getX() - this.getX(), pSource.getEntity().getZ() - this.getZ());
-			return false;
 		}
 		return super.hurt(pSource, pAmount);
 	}
@@ -523,10 +520,14 @@ public class Bearowl extends Animal implements IAnimatable {
 	private static class RoaringGoal extends Goal {
 
 		private final Bearowl entity;
+		private final int maxCooldown;
+		private int cooldown;
 
-		public RoaringGoal(Bearowl entity) {
+		public RoaringGoal(Bearowl entity, int maxCooldown) {
 			this.setFlags(EnumSet.of(Flag.MOVE));
 			this.entity = entity;
+			this.maxCooldown = maxCooldown;
+			this.cooldown = 10;
 		}
 
 		@Override
@@ -536,6 +537,9 @@ public class Bearowl extends Animal implements IAnimatable {
 
 		@Override
 		public boolean canUse() {
+			if(cooldown > 0 && --cooldown > 0) {
+				return false;
+			}
 			return entity.getTarget() != null && entity.isIdle() && !entity.getTarget().position().closerThan(entity.position(), 16.0D);
 		}
 
@@ -559,6 +563,7 @@ public class Bearowl extends Animal implements IAnimatable {
 		@Override
 		public void stop() {
 			entity.setSprinting(true);
+			cooldown = maxCooldown;
 		}
 	}
 
