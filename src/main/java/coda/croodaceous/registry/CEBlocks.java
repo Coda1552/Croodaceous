@@ -30,10 +30,10 @@ public class CEBlocks {
 
     // Desert Baobab
     public static final RegistryObject<Block> DESERT_BAOBAB_SAPLING = register("desert_baobab_sapling", () -> new BaobabSaplingBlock(BlockBehaviour.Properties.of(Material.WOOD, MaterialColor.TERRACOTTA_ORANGE).strength(0).noCollission().sound(SoundType.GRASS)));
-    public static final RegistryObject<Block> STRIPPED_DESERT_BAOBAB_LOG = register("stripped_desert_baobab_log", () -> new RotatedPillarBlock(BlockBehaviour.Properties.copy(CEBlocks.DESERT_BAOBAB_LOG.get())));
-    public static final RegistryObject<Block> STRIPPED_DESERT_BAOBAB_WOOD = register("stripped_desert_baobab_wood", () -> new RotatedPillarBlock(BlockBehaviour.Properties.copy(CEBlocks.DESERT_BAOBAB_LOG.get())));
     public static final RegistryObject<Block> DESERT_BAOBAB_LOG = registerRotatedPillar("desert_baobab_log", CEBlocks.STRIPPED_DESERT_BAOBAB_LOG, BlockBehaviour.Properties.of(Material.WOOD, MaterialColor.TERRACOTTA_ORANGE).strength(2.0f).sound(SoundType.WOOD));
     public static final RegistryObject<Block> DESERT_BAOBAB_WOOD = registerRotatedPillar("desert_baobab_wood", CEBlocks.STRIPPED_DESERT_BAOBAB_WOOD, BlockBehaviour.Properties.of(Material.WOOD, MaterialColor.TERRACOTTA_ORANGE).strength(2.0f).sound(SoundType.WOOD));
+    public static final RegistryObject<Block> STRIPPED_DESERT_BAOBAB_LOG = register("stripped_desert_baobab_log", () -> new RotatedPillarBlock(BlockBehaviour.Properties.copy(CEBlocks.DESERT_BAOBAB_LOG.get())));
+    public static final RegistryObject<Block> STRIPPED_DESERT_BAOBAB_WOOD = register("stripped_desert_baobab_wood", () -> new RotatedPillarBlock(BlockBehaviour.Properties.copy(CEBlocks.DESERT_BAOBAB_LOG.get())));
     public static final RegistryObject<Block> DESERT_BAOBAB_PLANKS = register("desert_baobab_planks", () -> new Block(BlockBehaviour.Properties.copy(Blocks.OAK_PLANKS)));
     public static final RegistryObject<Block> DESERT_BAOBAB_STAIRS = register("desert_baobab_stairs", () -> new StairBlock(() -> DESERT_BAOBAB_PLANKS.get().defaultBlockState(), BlockBehaviour.Properties.copy(Blocks.OAK_STAIRS)));
     public static final RegistryObject<Block> DESERT_BAOBAB_FENCE = register("desert_baobab_fence", () -> new FenceBlock(BlockBehaviour.Properties.copy(Blocks.OAK_FENCE)));

@@ -144,7 +144,7 @@ public class Bearowl extends Animal implements IAnimatable {
 			setHasKilled(true);
 		}
 		// update sprinting
-		if(null == getTarget()) {
+		if(null == getTarget() || !getTarget().isAlive()) {
 			setSprinting(false);
 		}
 	}
