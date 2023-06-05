@@ -2,21 +2,29 @@ package coda.croodaceous.common.entities.goal;
 
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.util.Mth;
+import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EquipmentSlot;
+import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.Mob;
+import net.minecraft.world.entity.PathfinderMob;
+import net.minecraft.world.entity.TamableAnimal;
 import net.minecraft.world.entity.ai.goal.Goal;
+import net.minecraft.world.entity.ai.util.DefaultRandomPos;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.level.pathfinder.Path;
+import net.minecraft.world.phys.Vec3;
 
 import java.util.EnumSet;
+import java.util.function.Predicate;
 
 public class StealItemFromPlayerGoal extends Goal {
-	private final Mob mob;
+	private final TamableAnimal mob;
 	private final int chance;
 	private Player nearestPlayer;
 	private boolean stolen;
 	
-	public StealItemFromPlayerGoal(Mob mob, int chance) {
+	public StealItemFromPlayerGoal(TamableAnimal mob, int chance) {
 		super();
 		this.mob = mob;
 		this.chance = chance;
@@ -25,12 +33,18 @@ public class StealItemFromPlayerGoal extends Goal {
 	
 	@Override
 	public boolean canUse() {
+		// verify non-tamed
+		if(this.mob.isTame()) {
+			return false;
+		}
+		// check random chance
 		if (this.chance != 0 && this.mob.getRandom().nextInt(this.chance) != 0) {
 			return false;
-		} else {
-			this.nearestPlayer = this.mob.level.getNearestPlayer(this.mob, 10.0D);
-			return this.nearestPlayer != null;
 		}
+		final Vec3 pos = this.mob.position();
+		final Predicate<Entity> canStealPredicate = e -> e instanceof Player player && !player.isCreative() && !player.isSpectator() && mob.canAttack(player);
+		this.nearestPlayer = this.mob.level.getNearestPlayer(pos.x(), pos.y(), pos.z(), 10.0D, canStealPredicate);
+		return this.nearestPlayer != null;
 	}
 	
 	@Override
@@ -60,13 +74,17 @@ public class StealItemFromPlayerGoal extends Goal {
 		if (itemstack.isEmpty()) {
 			return;
 		}
-		this.mob.equipItemIfPossible(itemstack);
-		this.nearestPlayer.setItemSlot(EquipmentSlot.MAINHAND, ItemStack.EMPTY);
+		this.mob.equipItemIfPossible(itemstack.split(1));
 		this.stolen = true;
-		double x = mob.getX() + (mob.getRandom().nextDouble() - 0.5D) * 16.0D;
-		double y = Mth.clamp(mob.getY() + (mob.getRandom().nextInt(16) - 8), mob.level.getMinBuildHeight(), (mob.level.getMinBuildHeight() + ((ServerLevel)mob.level).getLogicalHeight() - 1));
-		double z = mob.getZ() + (mob.getRandom().nextDouble() - 0.5D) * 16.0D;
-		this.mob.getNavigation().moveTo(x, y, z, 2.0D);
+		// run away from target
+		final int radius = 16;
+		Vec3 target = DefaultRandomPos.getPosAway(this.mob, radius, 7, this.nearestPlayer.position());
+		if(null == target) {
+			target = new Vec3(mob.getX() + (mob.getRandom().nextDouble() - 0.5D) * 2.0D * radius,
+				Mth.clamp(mob.getY() + (mob.getRandom().nextInt(radius) - 8), mob.level.getMinBuildHeight(), (mob.level.getMinBuildHeight() + ((ServerLevel)mob.level).getLogicalHeight() - 1)),
+				mob.getZ() + (mob.getRandom().nextDouble() - 0.5D) * 2.0D * radius);
+		}
+		this.mob.getNavigation().moveTo(target.x(), target.y(), target.z(), 2.0D);
 	}
 	
 }

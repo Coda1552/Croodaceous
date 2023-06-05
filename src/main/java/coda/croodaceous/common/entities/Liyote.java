@@ -44,6 +44,7 @@ import software.bernie.geckolib3.core.manager.AnimationFactory;
 import software.bernie.geckolib3.util.GeckoLibUtil;
 
 import java.util.UUID;
+import java.util.function.Predicate;
 
 public class Liyote extends Wolf implements IAnimatable {
 	private static final EntityDataAccessor<ItemStack> DATA_EI = SynchedEntityData.defineId(Liyote.class, EntityDataSerializers.ITEM_STACK);
@@ -59,8 +60,11 @@ public class Liyote extends Wolf implements IAnimatable {
 	private ItemStack eatingItem = ItemStack.EMPTY;
 	private BlockPos targetNest;
 
+	private static final Predicate<ItemStack> IS_RAMU_EGG = itemStack -> itemStack.is(CEItems.RAMU_EGG.get());
+
 	public Liyote(EntityType<? extends Liyote> type, Level level) {
 		super(type, level);
+		this.setCanPickUpLoot(true);
 		this.setDropChance(EquipmentSlot.MAINHAND, 1F);
 	}
 
@@ -80,7 +84,7 @@ public class Liyote extends Wolf implements IAnimatable {
 		this.goalSelector.addGoal(12, new AvoidEntityGoal<>(this, Ramu.class, 10.0F, 1.0D, 1.2D) {
 			@Override
 			public boolean canUse() {
-				return eatingItem.getItem() == CEItems.RAMU_EGG.get() && super.canUse();
+				return IS_RAMU_EGG.test(eatingItem) && super.canUse();
 			}
 		});
 		this.goalSelector.addGoal(13, new StealItemFromPlayerGoal(this, 100));
@@ -92,16 +96,27 @@ public class Liyote extends Wolf implements IAnimatable {
 	public InteractionResult mobInteract(Player pPlayer, InteractionHand pHand) {
 		ItemStack itemstack = pPlayer.getItemInHand(pHand);
 		Item item = itemstack.getItem();
+		final boolean isFood = isFood(itemstack);
+		final boolean hasItem = !this.eatingItem.isEmpty();
+		// take food from player
+		if ((isFood || IS_RAMU_EGG.test(itemstack)) && !hasItem) {
+			this.eatingItem = itemstack.split(1);
+			return InteractionResult.SUCCESS;
+		}
 		if (this.isTame()) {
-			if (this.isFood(itemstack) && this.eatingItem.isEmpty()) {
-				if (!pPlayer.getAbilities().instabuild) {
-					itemstack.shrink(1);
-				}
-				
-				this.eatingItem = itemstack.copy();
+			// take any item from owner
+			if(!itemstack.isEmpty() && !hasItem) {
+				this.eatingItem = itemstack.split(1);
 				return InteractionResult.SUCCESS;
 			}
-			
+			// drop eating item when given food or ramu egg by owner
+			if (isFood && hasItem && isOwnedBy(pPlayer)) {
+				spawnAtLocation(this.eatingItem.copy(), 0.25F);
+				this.eatingItem = itemstack.split(1);
+				return InteractionResult.SUCCESS;
+			}
+
+			// toggle sitting behavior
 			InteractionResult interactionresult = super.mobInteract(pPlayer, pHand);
 			if ((!interactionresult.consumesAction()) && this.isOwnedBy(pPlayer)) {
 				this.setOrderedToSit(!this.isOrderedToSit());
@@ -112,7 +127,8 @@ public class Liyote extends Wolf implements IAnimatable {
 			}
 
 			return interactionresult;
-		} else if (itemstack.is(CEItems.RAMU_EGG.get()) && !this.isAngry()) {
+		} else if (IS_RAMU_EGG.test(itemstack) && !this.isAngry()) {
+			// attempt to tame when given a ramu egg
 			if (!pPlayer.getAbilities().instabuild) {
 				itemstack.shrink(1);
 			}
@@ -122,9 +138,9 @@ public class Liyote extends Wolf implements IAnimatable {
 				this.navigation.stop();
 				this.setTarget(null);
 				this.setOrderedToSit(true);
-				this.level.broadcastEntityEvent(this, (byte) 7);
+				this.level.broadcastEntityEvent(this, EntityEvent.TAMING_SUCCEEDED);
 			} else {
-				this.level.broadcastEntityEvent(this, (byte) 6);
+				this.level.broadcastEntityEvent(this, EntityEvent.TAMING_FAILED);
 			}
 			
 			return InteractionResult.SUCCESS;
@@ -142,8 +158,10 @@ public class Liyote extends Wolf implements IAnimatable {
 	}
 
 	private PlayState animControllerMain(AnimationEvent<?> e) {
+		e.getController().setAnimationSpeed(1.0D);
 		if (!eatingItem.isEmpty() && this.isFood(eatingItem)) {
 			if (e.isMoving()) {
+				// TODO rework animation: speed up walk cycle without interfering with eating animation
 				e.getController().setAnimation(ANIM_WALK_EAT);
 			} else if (isInSittingPose()) {
 				e.getController().setAnimation(ANIM_SITTING_EAT);
@@ -151,6 +169,8 @@ public class Liyote extends Wolf implements IAnimatable {
 				e.getController().setAnimation(ANIM_IDLE_EAT);
 			}
 		} else if (e.isMoving()) {
+			// TODO temporary fix; walk and walk_eat anims need to be faster
+			e.getController().setAnimationSpeed(2.0D);
 			e.getController().setAnimation(ANIM_WALK);
 		} else if (isInSittingPose()) {
 			e.getController().setAnimation(ANIM_SITTING);
@@ -190,11 +210,11 @@ public class Liyote extends Wolf implements IAnimatable {
 			if (eatingTicks >= 20 * 3) {
 				eatingItem = ItemStack.EMPTY;
 				eatingTicks = 0;
-				this.level.broadcastEntityEvent(this, (byte) 18);
+				this.level.broadcastEntityEvent(this, EntityEvent.IN_LOVE_HEARTS);
 				heal(4);
 			}
 		}
-		if (!this.level.isClientSide && !this.isInSittingPose() && eatingItem.isEmpty() && this.getHealth() > 5F && this.random.nextInt(1200) == 0) {
+		if (!this.level.isClientSide() && !this.isTame() && !this.isInSittingPose() && eatingItem.isEmpty() && this.getHealth() > 5F && this.random.nextInt(1200) == 0) {
 			PoiManager poiManager = ((ServerLevel) level).getPoiManager();
 			poiManager.findClosest(p -> {
 				assert CEPoiTypes.RAMU_NEST.getKey() != null;
@@ -235,7 +255,13 @@ public class Liyote extends Wolf implements IAnimatable {
 	public final Vec3 getRenderViewVector() {
 		return this.calculateViewVector(this.getViewXRot(1F), this.yBodyRot);
 	}
-	
+
+	@Override
+	public void tame(Player pPlayer) {
+		super.tame(pPlayer);
+		this.targetNest = null;
+	}
+
 	@Override
 	public Wolf getBreedOffspring(ServerLevel p_149088_, AgeableMob p_149089_) {
 		Liyote liyote = new Liyote(CEEntities.LIYOTE.get(), level);
@@ -249,7 +275,7 @@ public class Liyote extends Wolf implements IAnimatable {
 	
 	@Override
 	public boolean hurt(DamageSource pSource, float pAmount) {
-		if (eatingItem.getItem() == CEItems.RAMU_EGG.get()) {
+		if (IS_RAMU_EGG.test(eatingItem)) {
 			this.spawnAtLocation(eatingItem.copy());
 			this.eatingItem = ItemStack.EMPTY;
 		}
@@ -291,7 +317,7 @@ public class Liyote extends Wolf implements IAnimatable {
 	
 	@Override
 	public boolean canTakeItem(ItemStack pItemstack) {
-		return eatingItem.isEmpty() || (eatingItem.getItem() != CEItems.RAMU_EGG.get() && pItemstack.getItem() == CEItems.RAMU_EGG.get());
+		return eatingItem.isEmpty() || (!IS_RAMU_EGG.test(eatingItem) && IS_RAMU_EGG.test(pItemstack));
 	}
 	
 	@Override
@@ -306,7 +332,7 @@ public class Liyote extends Wolf implements IAnimatable {
 	
 	@Override
 	public boolean canPickUpLoot() {
-		return true;
+		return !isTame() && super.canPickUpLoot();
 	}
 	
 	@Override
