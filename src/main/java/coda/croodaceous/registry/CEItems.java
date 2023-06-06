@@ -27,7 +27,7 @@ public class CEItems {
     public static final RegistryObject<Item> BEAROWL_SPAWN_EGG = ITEMS.register("bearowl_spawn_egg", () -> new ForgeSpawnEggItem(CEEntities.BEAROWL, 0x463830, 0x8c867b, new Item.Properties().tab(TAB)));
     public static final RegistryObject<Item> RAMU_SPAWN_EGG = ITEMS.register("ramu_spawn_egg", () -> new ForgeSpawnEggItem(CEEntities.RAMU, 0x222522, 0xb18444, new Item.Properties().tab(TAB)));
     public static final RegistryObject<Item> FANG_FLY_SPAWN_EGG = ITEMS.register("fang_fly_spawn_egg", () -> new ForgeSpawnEggItem(CEEntities.FANG_FLY, 0xeb7626, 0x5a3629, new Item.Properties().tab(TAB)));
-    public static final RegistryObject<Item> JACKROBAT_SPAWN_EGG = ITEMS.register("jackrobat_spawn_egg", () -> new ForgeSpawnEggItem(CEEntities.JACKROBAT, 0xeb7626, 0x5a3629, new Item.Properties().tab(TAB)));
+    public static final RegistryObject<Item> JACKROBAT_SPAWN_EGG = ITEMS.register("jackrobat_spawn_egg", () -> new ForgeSpawnEggItem(CEEntities.JACKROBAT, 0x442f54, 0xc14915, new Item.Properties().tab(TAB)));
     public static final RegistryObject<Item> TRIP_GERBIL_SPAWN_EGG = ITEMS.register("trip_gerbil_spawn_egg", () -> new ForgeSpawnEggItem(CEEntities.TRIP_GERBIL, 0x393939, 0xe0b936, new Item.Properties().tab(TAB)));
     public static final RegistryObject<Item> BEAR_PEAR_SPAWN_EGG = ITEMS.register("bear_pear_spawn_egg", () -> new ForgeSpawnEggItem(CEEntities.BEAR_PEAR, 0xf1982b, 0xb85e25, new Item.Properties().tab(TAB)));
 
