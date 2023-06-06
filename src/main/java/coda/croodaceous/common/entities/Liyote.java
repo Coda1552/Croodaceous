@@ -99,10 +99,6 @@ public class Liyote extends Wolf implements IAnimatable {
 		final boolean isFood = isFood(itemstack);
 		final boolean hasItem = !this.eatingItem.isEmpty();
 		// take food from player
-		if ((isFood || IS_RAMU_EGG.test(itemstack)) && !hasItem) {
-			this.eatingItem = itemstack.split(1);
-			return InteractionResult.SUCCESS;
-		}
 		if (this.isTame()) {
 			// take any item from owner
 			if(!itemstack.isEmpty() && !hasItem) {
@@ -145,7 +141,12 @@ public class Liyote extends Wolf implements IAnimatable {
 			
 			return InteractionResult.SUCCESS;
 		}
-		
+
+		if ((isFood || IS_RAMU_EGG.test(itemstack)) && !hasItem) {
+			this.eatingItem = itemstack.split(1);
+			return InteractionResult.SUCCESS;
+		}
+
 		if (item instanceof DyeItem || item == Items.BONE) {
 			return InteractionResult.PASS;
 		}
