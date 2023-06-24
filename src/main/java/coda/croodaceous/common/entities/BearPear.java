@@ -191,22 +191,24 @@ public class BearPear extends Animal implements IAnimatable {
 
     @Override
     public void tick() {
-        super.tick();
-        Optional<BlockPos> hangingPos = getHangingPos();
-        // update position and movement
-        if(hangingPos.isPresent()) {
-            setDeltaMovement(Vec3.ZERO);
-            updateHangingPosition(hangingPos.get());
-        }
         // update hanging position
-        if(!level.isClientSide() && (tickCount + getId()) % 20 == 1) {
+        if(!level.isClientSide() && (firstTick || (tickCount + getId()) % 20 == 1)) {
+            Optional<BlockPos> hangingPos = getHangingPos();
             if(hangingPos.isPresent()) {
+                // calculate horizontal distance to hanging position
+                final double horizontalDisSq = Vec3.atBottomCenterOf(hangingPos.get()).vectorTo(this.position()).horizontalDistanceSqr();
+                final double maxHorizontalDis = 2.0D;
                 // validate hanging position
-                if(!canHangOn(hangingPos.get())) {
+                if(horizontalDisSq < (maxHorizontalDis * maxHorizontalDis) || !canHangOn(hangingPos.get())) {
                     resetHangingPos();
                     stopDropping();
                 }
             }
+        }
+        // update position and movement
+        if(isHanging()) {
+            setDeltaMovement(Vec3.ZERO);
+            updateHangingPosition(getHangingPos().orElse(blockPosition().above()));
         }
         // update dropping
         if(isDropping()) {
@@ -226,6 +228,7 @@ public class BearPear extends Animal implements IAnimatable {
                 startSwinging(entities.get(entities.size() - 1));
             }
         }
+        super.tick();
     }
 
     @Override
@@ -596,7 +599,7 @@ public class BearPear extends Animal implements IAnimatable {
 
     @Override
     public void registerControllers(AnimationData data) {
-        data.addAnimationController(new AnimationController<>(this, "controller", 2F, this::animControllerMain));
+        data.addAnimationController(new AnimationController<>(this, "controller", 0F, this::animControllerMain));
     }
 
     @Override
@@ -694,6 +697,7 @@ public class BearPear extends Animal implements IAnimatable {
                 if(entity.canHangOn(targetPos)) {
                     entity.setHangingPos(targetPos);
                     entity.updateHangingPosition(targetPos);
+                    entity.setJumping(false);
                 }
                 stop();
                 return;

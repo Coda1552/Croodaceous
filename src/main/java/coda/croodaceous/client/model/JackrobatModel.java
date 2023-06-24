@@ -6,14 +6,14 @@ import net.minecraft.util.Mth;
 import software.bernie.geckolib3.core.event.predicate.AnimationEvent;
 import software.bernie.geckolib3.core.processor.IBone;
 
-public class JackrobatModel extends SimpleGeoModel<Jackrobat> {
+public class JackrobatModel<T extends Jackrobat> extends SimpleGeoModel<T> {
 
     public JackrobatModel() {
         super(CroodaceousMod.MOD_ID, "jackrobat");
     }
 
     @Override
-    public void setCustomAnimations(Jackrobat animatable, int instanceId, AnimationEvent animationEvent) {
+    public void setCustomAnimations(T animatable, int instanceId, AnimationEvent animationEvent) {
         super.setCustomAnimations(animatable, instanceId, animationEvent);
         // calculate head rotation
         final float xRot = -Mth.lerp(animationEvent.getPartialTick(), animatable.xRotO, animatable.getXRot());

@@ -159,10 +159,8 @@ public class Liyote extends Wolf implements IAnimatable {
 	}
 
 	private PlayState animControllerMain(AnimationEvent<?> e) {
-		e.getController().setAnimationSpeed(1.0D);
 		if (!eatingItem.isEmpty() && this.isFood(eatingItem)) {
 			if (e.isMoving()) {
-				// TODO rework animation: speed up walk cycle without interfering with eating animation
 				e.getController().setAnimation(ANIM_WALK_EAT);
 			} else if (isInSittingPose()) {
 				e.getController().setAnimation(ANIM_SITTING_EAT);
@@ -170,8 +168,6 @@ public class Liyote extends Wolf implements IAnimatable {
 				e.getController().setAnimation(ANIM_IDLE_EAT);
 			}
 		} else if (e.isMoving()) {
-			// TODO temporary fix; walk and walk_eat anims need to be faster
-			e.getController().setAnimationSpeed(2.0D);
 			e.getController().setAnimation(ANIM_WALK);
 		} else if (isInSittingPose()) {
 			e.getController().setAnimation(ANIM_SITTING);
@@ -244,6 +240,10 @@ public class Liyote extends Wolf implements IAnimatable {
 	public ItemStack getEatingItem() {
 		return eatingItem;
 	}
+
+	public void setEatingItem(final ItemStack item) {
+		this.eatingItem = item;
+	}
 	
 	@Override
 	public ItemStack getItemBySlot(EquipmentSlot pSlot) {
@@ -276,7 +276,7 @@ public class Liyote extends Wolf implements IAnimatable {
 	
 	@Override
 	public boolean hurt(DamageSource pSource, float pAmount) {
-		if (IS_RAMU_EGG.test(eatingItem)) {
+		if (IS_RAMU_EGG.test(eatingItem) && !(pSource.getDirectEntity() instanceof Jackrobat)) {
 			this.spawnAtLocation(eatingItem.copy());
 			this.eatingItem = ItemStack.EMPTY;
 		}

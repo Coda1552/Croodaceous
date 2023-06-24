@@ -6,34 +6,38 @@ import coda.croodaceous.common.entities.Liyote;
 import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.blaze3d.vertex.VertexConsumer;
 import com.mojang.math.Vector3f;
-import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.MultiBufferSource;
 import net.minecraft.client.renderer.RenderType;
 import net.minecraft.client.renderer.block.model.ItemTransforms;
 import net.minecraft.client.renderer.entity.EntityRendererProvider;
+import net.minecraft.client.renderer.entity.ItemRenderer;
 import net.minecraft.resources.ResourceLocation;
-import net.minecraft.world.entity.EquipmentSlot;
+import net.minecraft.world.item.ItemStack;
 import software.bernie.geckolib3.geo.render.built.GeoBone;
 import software.bernie.geckolib3.renderers.geo.GeoEntityRenderer;
 
 import javax.annotation.Nullable;
 
 public class LiyoteRenderer extends GeoEntityRenderer<Liyote> {
+	private final ItemRenderer itemRenderer;
+
 	private MultiBufferSource renderTypeBuffer;
 	private Liyote animatable;
 	
 	public LiyoteRenderer(EntityRendererProvider.Context mgr) {
 		super(mgr, new SimpleGeoModel<>(CroodaceousMod.MOD_ID, "liyote"));
+		this.itemRenderer = mgr.getItemRenderer();
 	}
 
 	@Override
 	public void renderRecursively(GeoBone bone, PoseStack stack, VertexConsumer bufferIn, int packedLightIn, int packedOverlayIn, float red, float green, float blue, float alpha) {
-		if (bone.name.equals("snout")) {
-			if (!animatable.getItemBySlot(EquipmentSlot.MAINHAND).isEmpty()) {
+		if ("snout".equals(bone.name)) {
+			final ItemStack itemStack = animatable.getEatingItem();
+			if (!itemStack.isEmpty()) {
 				stack.pushPose();
 				stack.mulPose(Vector3f.XP.rotation(130));
 				stack.translate(0, 0.5, 0.8);
-				Minecraft.getInstance().getItemRenderer().renderStatic(animatable.getItemBySlot(EquipmentSlot.MAINHAND), ItemTransforms.TransformType.GROUND, packedLightIn, packedOverlayIn, stack, renderTypeBuffer, 0);
+				itemRenderer.renderStatic(itemStack, ItemTransforms.TransformType.GROUND, packedLightIn, packedOverlayIn, stack, renderTypeBuffer, 0);
 				RenderType type = getRenderType(animatable, 1F, stack, renderTypeBuffer, null, packedLightIn, getTextureLocation(animatable));
 				bufferIn = renderTypeBuffer.getBuffer(type);
 				stack.popPose();
