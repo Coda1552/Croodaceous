@@ -18,7 +18,7 @@ import software.bernie.geckolib3.renderers.geo.IGeoRenderer;
 
 public class TripGerbilTailLayer extends GeoLayerRenderer<TripGerbil> {
 
-    private static final ResourceLocation TRIP_GERBIL_TAIL_LOCATION = new ResourceLocation(CroodaceousMod.MOD_ID, "geo/trip_gerbil_tail.geo.json");
+    private static final ResourceLocation TRIP_GERBIL_TAIL_LOCATION = new ResourceLocation(CroodaceousMod.MOD_ID, "geo/entity/trip_gerbil_tail.geo.json");
 
     private final GeoModel tailModel;
 

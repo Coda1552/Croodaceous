@@ -15,32 +15,33 @@ import software.bernie.geckolib3.renderers.geo.GeoEntityRenderer;
 import javax.annotation.Nullable;
 
 public class SimpleGeoRenderer<T extends LivingEntity & IAnimatable> extends GeoEntityRenderer<T> {
-	private float scale = 1F;
-	
+
 	public SimpleGeoRenderer(EntityRendererProvider.Context mgr, String modId, String modelName) {
-		super(mgr, new SimpleGeoModel<>(modId, modelName));
+		this(mgr, new SimpleGeoModel<>(modId, modelName), 1.0F);
 	}
-	
+
 	public SimpleGeoRenderer(EntityRendererProvider.Context mgr, String modId, String modelName, float scale) {
-		this(mgr, modId, modelName);
-		this.scale = scale;
+		this(mgr, new SimpleGeoModel<>(modId, modelName), scale);
 	}
-	
+
 	public SimpleGeoRenderer(EntityRendererProvider.Context mgr, AnimatedGeoModel<T> modelProvider) {
-		super(mgr, modelProvider);
+		this(mgr, modelProvider, 1.0F);
 	}
 
 	public SimpleGeoRenderer(EntityRendererProvider.Context mgr, AnimatedGeoModel<T> modelProvider, float scale) {
-		this(mgr, modelProvider);
-		this.scale = scale;
+		super(mgr, modelProvider);
+		this.widthScale = scale;
+		this.heightScale = scale;
 	}
-	
+
 	@Override
-	public void render(T entity, float entityYaw, float partialTicks, PoseStack stack, MultiBufferSource bufferIn, int packedLightIn) {
-		if (scale != 1F) {
-			stack.scale(scale, scale, scale);
-		}
-		super.render(entity, entityYaw, partialTicks, stack, bufferIn, packedLightIn);
+	public float getWidthScale(T entity) {
+		return super.getWidthScale(entity) * (entity.isBaby() ? 0.5F : 1.0F);
+	}
+
+	@Override
+	public float getHeightScale(T entity) {
+		return super.getHeightScale(entity) * (entity.isBaby() ? 0.5F : 1.0F);
 	}
 
 	@Override

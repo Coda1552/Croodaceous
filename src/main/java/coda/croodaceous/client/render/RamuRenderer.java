@@ -20,7 +20,7 @@ import software.bernie.geckolib3.util.RenderUtils;
 
 import javax.annotation.Nullable;
 
-public class RamuRenderer extends GeoEntityRenderer<Ramu> {
+public class RamuRenderer extends SimpleGeoRenderer<Ramu> {
 	private MultiBufferSource renderTypeBuffer;
 	private Ramu animatable;
 	
@@ -56,10 +56,4 @@ public class RamuRenderer extends GeoEntityRenderer<Ramu> {
 		this.renderTypeBuffer = renderTypeBuffer;
 		this.animatable = animatable;
 	}
-	
-	@Override
-	public RenderType getRenderType(Ramu animatable, float partialTicks, PoseStack stack, @Nullable MultiBufferSource renderTypeBuffer, @Nullable VertexConsumer vertexBuilder, int packedLightIn, ResourceLocation textureLocation) {
-		return RenderType.entityTranslucent(textureLocation);
-	}
-	
 }

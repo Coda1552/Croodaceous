@@ -13,16 +13,10 @@ import software.bernie.geckolib3.renderers.geo.GeoEntityRenderer;
 
 import javax.annotation.Nullable;
 
-public class BearOwlRenderer extends GeoEntityRenderer<Bearowl> {
+public class BearOwlRenderer extends SimpleGeoRenderer<Bearowl> {
 
 	public BearOwlRenderer(EntityRendererProvider.Context mgr) {
 		super(mgr, new BearowlModel());
 		addLayer(new BearowlEyesLayer(this));
 	}
-
-	@Override
-	public RenderType getRenderType(Bearowl animatable, float partialTicks, PoseStack stack, @Nullable MultiBufferSource renderTypeBuffer, @Nullable VertexConsumer vertexBuilder, int packedLightIn, ResourceLocation textureLocation) {
-		return RenderType.entityTranslucent(textureLocation);
-	}
-	
 }

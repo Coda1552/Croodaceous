@@ -30,6 +30,7 @@ public class CEItems {
     public static final RegistryObject<Item> JACKROBAT_SPAWN_EGG = ITEMS.register("jackrobat_spawn_egg", () -> new ForgeSpawnEggItem(CEEntities.JACKROBAT, 0x442f54, 0xc14915, new Item.Properties().tab(TAB)));
     public static final RegistryObject<Item> TRIP_GERBIL_SPAWN_EGG = ITEMS.register("trip_gerbil_spawn_egg", () -> new ForgeSpawnEggItem(CEEntities.TRIP_GERBIL, 0x393939, 0xe0b936, new Item.Properties().tab(TAB)));
     public static final RegistryObject<Item> BEAR_PEAR_SPAWN_EGG = ITEMS.register("bear_pear_spawn_egg", () -> new ForgeSpawnEggItem(CEEntities.BEAR_PEAR, 0xf1982b, 0xb85e25, new Item.Properties().tab(TAB)));
+    public static final RegistryObject<Item> TURTLE_DOVE_SPAWN_EGG = ITEMS.register("turtle_dove_spawn_egg", () -> new ForgeSpawnEggItem(CEEntities.TURTLE_DOVE, 0x0, 0x0, new Item.Properties().tab(TAB)));
 
     // Other
     public static final RegistryObject<BlockItem> DESERT_BAOBAB_BRANCHES = ITEMS.register("desert_baobab_branches", () -> new StandingAndWallBlockItem(CEBlocks.DESERT_BAOBAB_BRANCHES.get(), CEBlocks.DESERT_BAOBAB_WALL_BRANCHES.get(), new Item.Properties().tab(TAB)));

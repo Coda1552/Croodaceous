@@ -13,7 +13,7 @@ import net.minecraft.resources.ResourceLocation;
 import org.jetbrains.annotations.Nullable;
 import software.bernie.geckolib3.renderers.geo.GeoEntityRenderer;
 
-public class FangFlyRenderer extends GeoEntityRenderer<FangFly> {
+public class FangFlyRenderer extends SimpleGeoRenderer<FangFly> {
 
 	public FangFlyRenderer(EntityRendererProvider.Context mgr) {
 		super(mgr, new SimpleGeoModel<>(CroodaceousMod.MOD_ID, "fang_fly"));
