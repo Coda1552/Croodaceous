@@ -3,8 +3,20 @@
     "with_egg=false": {
       "model": "croodaceous:block/ramu_nest"
     },
-    "with_egg=true": {
-      "model": "croodaceous:block/ramu_nest_with_egg"
-    }
+    "with_egg=true,hatch=0": [
+      {
+        "model": "croodaceous:block/ramu_nest_with_egg"
+      }
+    ],
+    "with_egg=true,hatch=1": [
+      {
+        "model": "croodaceous:block/ramu_nest_with_cracked_egg"
+      }
+    ],
+    "with_egg=true,hatch=2": [
+      {
+        "model": "croodaceous:block/ramu_nest_with_very_cracked_egg"
+      }
+    ]
   }
 }

@@ -3,7 +3,7 @@
 		"0": "croodaceous:block/ramu_nest_side",
 		"1": "croodaceous:block/ramu_nest_top",
 		"3": "croodaceous:block/hoodoo_shale",
-		"4": "croodaceous:block/ramu_nest_egg",
+		"4": "croodaceous:block/ramu_nest_very_cracked_egg",
 		"particle": "croodaceous:block/ramu_nest_top"
 	},
 	"elements": [
