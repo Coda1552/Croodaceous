@@ -135,7 +135,7 @@ public abstract class BiphibianAnimal extends Animal implements FlyingAnimal {
 
     @Override
     public boolean isFlying() {
-        return wantsToFly() && !isOnGround();
+        return !isOnGround();
     }
 
     public boolean wantsToFly() {

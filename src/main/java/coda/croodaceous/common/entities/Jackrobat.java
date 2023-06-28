@@ -11,6 +11,7 @@ import net.minecraft.server.level.ServerLevel;
 import net.minecraft.sounds.SoundEvent;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.tags.BlockTags;
+import net.minecraft.util.Mth;
 import net.minecraft.util.RandomSource;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.damagesource.DamageSource;
@@ -418,7 +419,7 @@ public class Jackrobat extends BiphibianAnimal implements IAnimatable {
         private final Jackrobat entity;
 
         public WanderGoal(final Jackrobat entity, final double speedModifier) {
-            super(entity, speedModifier, 0.5F);
+            super(entity, speedModifier, 0.42F);
             this.entity = entity;
         }
 
@@ -429,13 +430,15 @@ public class Jackrobat extends BiphibianAnimal implements IAnimatable {
 
         @Override
         protected Vec3 getPosition() {
-            if(this.entity.getLeader() != null && !this.entity.getLeader().position().closerThan(this.entity.position(), this.entity.getLeader().groupSize * 0.75D)) {
+            final Jackrobat leader = this.entity.getLeader();
+            if(leader != null && !leader.position().closerThan(this.entity.position(), this.entity.getMaxDistanceToLeader(leader.getGroupSize()))) {
                 BlockPos targetPos = this.entity.getLeader().getNavigation().getTargetPos();
                 if(targetPos != null) {
-                    double radius = this.entity.getMaxDistanceToLeader(this.entity.getLeader().getGroupSize());
-                    double dX = (this.entity.getRandom().nextDouble() - 0.5D) * 2.0D * radius;
-                    double dZ = (this.entity.getRandom().nextDouble() - 0.5D) * 2.0D * radius;
-                    return Vec3.atBottomCenterOf(targetPos).add(dX, 0, dZ);
+                    final Vec3 targetVec = Vec3.atBottomCenterOf(targetPos);
+                    final Vec3 vec = DefaultRandomPos.getPosTowards(this.entity, 10, 7, targetVec, Mth.HALF_PI);
+                    if(vec != null) {
+                        return vec;
+                    }
                 }
             }
             return super.getPosition();

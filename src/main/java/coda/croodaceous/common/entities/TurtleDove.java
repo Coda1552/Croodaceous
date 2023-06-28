@@ -15,13 +15,14 @@ import net.minecraft.world.InteractionHand;
 import net.minecraft.world.InteractionResult;
 import net.minecraft.world.damagesource.DamageSource;
 import net.minecraft.world.entity.AgeableMob;
+import net.minecraft.world.entity.EntityDimensions;
 import net.minecraft.world.entity.EntityEvent;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.Mob;
 import net.minecraft.world.entity.MobSpawnType;
+import net.minecraft.world.entity.Pose;
 import net.minecraft.world.entity.ai.attributes.AttributeSupplier;
 import net.minecraft.world.entity.ai.attributes.Attributes;
-import net.minecraft.world.entity.ai.control.BodyRotationControl;
 import net.minecraft.world.entity.ai.control.FlyingMoveControl;
 import net.minecraft.world.entity.ai.control.MoveControl;
 import net.minecraft.world.entity.ai.goal.BreedGoal;
@@ -33,13 +34,14 @@ import net.minecraft.world.entity.ai.navigation.PathNavigation;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
-import net.minecraft.world.item.Items;
 import net.minecraft.world.item.crafting.Ingredient;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.LevelAccessor;
 import net.minecraftforge.registries.ForgeRegistries;
 import software.bernie.geckolib3.core.IAnimatable;
 import software.bernie.geckolib3.core.PlayState;
+import software.bernie.geckolib3.core.builder.AnimationBuilder;
+import software.bernie.geckolib3.core.builder.ILoopType;
 import software.bernie.geckolib3.core.controller.AnimationController;
 import software.bernie.geckolib3.core.event.predicate.AnimationEvent;
 import software.bernie.geckolib3.core.manager.AnimationData;
@@ -48,12 +50,15 @@ import software.bernie.geckolib3.util.GeckoLibUtil;
 
 public class TurtleDove extends BiphibianAnimal implements IAnimatable {
 
-    // GECKOLIB //
-    private final AnimationFactory factory = GeckoLibUtil.createFactory(this);
-
     // ANIMAL //
     private static final TagKey<Item> IS_FOOD = ForgeRegistries.ITEMS.tags().createTagKey(new ResourceLocation(CroodaceousMod.MOD_ID, "turtle_dove_food"));
     private static final float FALL_IN_LOVE_CHANCE = 0.125F;
+
+    // GECKOLIB //
+    private final AnimationFactory factory = GeckoLibUtil.createFactory(this);
+    private static final AnimationBuilder ANIM_FLIGHT = new AnimationBuilder().addAnimation("animation.turtle_dove.flight", ILoopType.EDefaultLoopTypes.LOOP);
+    private static final AnimationBuilder ANIM_CRAWL = new AnimationBuilder().addAnimation("animation.turtle_dove.crawl", ILoopType.EDefaultLoopTypes.LOOP);
+    private static final AnimationBuilder ANIM_IDLE = new AnimationBuilder().addAnimation("animation.turtle_dove.idle", ILoopType.EDefaultLoopTypes.LOOP);
 
     // GOALS //
     private BiphibianWanderGoal wanderGoal;
@@ -117,6 +122,11 @@ public class TurtleDove extends BiphibianAnimal implements IAnimatable {
         return 80;
     }
 
+    @Override
+    protected float getStandingEyeHeight(Pose pPose, EntityDimensions pDimensions) {
+        return pDimensions.height * 0.5F;
+    }
+
     //// ANIMAL ////
 
     @Override
@@ -162,7 +172,7 @@ public class TurtleDove extends BiphibianAnimal implements IAnimatable {
 
     @Override
     protected MoveControl createFlyingMoveControl() {
-        return new FlyingMoveControl(this, 8, false);
+        return new FlyingMoveControl(this, 4, false);
     }
 
     @Override
@@ -231,12 +241,19 @@ public class TurtleDove extends BiphibianAnimal implements IAnimatable {
     //// ANIMATIONS ////
 
     private PlayState animationPredicate(AnimationEvent<TurtleDove> event) {
+        if(!isOnGround()) {
+            event.getController().setAnimation(ANIM_FLIGHT);
+        } else if(event.isMoving()) {
+            event.getController().setAnimation(ANIM_CRAWL);
+        } else {
+            event.getController().setAnimation(ANIM_IDLE);
+        }
         return PlayState.CONTINUE;
     }
 
     @Override
     public void registerControllers(AnimationData data) {
-        data.addAnimationController(new AnimationController<>(this, "controller", 2F, this::animationPredicate));
+        data.addAnimationController(new AnimationController<>(this, "controller", 5F, this::animationPredicate));
     }
 
     @Override

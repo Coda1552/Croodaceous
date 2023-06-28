@@ -199,7 +199,7 @@ public class BearPear extends Animal implements IAnimatable {
                 final double horizontalDisSq = Vec3.atBottomCenterOf(hangingPos.get()).vectorTo(this.position()).horizontalDistanceSqr();
                 final double maxHorizontalDis = 2.0D;
                 // validate hanging position
-                if(horizontalDisSq < (maxHorizontalDis * maxHorizontalDis) || !canHangOn(hangingPos.get())) {
+                if(horizontalDisSq > (maxHorizontalDis * maxHorizontalDis) || !canHangOn(hangingPos.get())) {
                     resetHangingPos();
                     stopDropping();
                 }
