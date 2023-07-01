@@ -4,6 +4,8 @@ import net.minecraft.core.BlockPos;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.world.damagesource.DamageSource;
 import net.minecraft.world.entity.EntityType;
+import net.minecraft.world.entity.MoverType;
+import net.minecraft.world.entity.ai.attributes.Attributes;
 import net.minecraft.world.entity.ai.control.MoveControl;
 import net.minecraft.world.entity.ai.navigation.GroundPathNavigation;
 import net.minecraft.world.entity.ai.navigation.PathNavigation;
@@ -99,6 +101,9 @@ public abstract class BiphibianAnimal extends Animal implements FlyingAnimal {
     @Override
     public void tick() {
         super.tick();
+        // ground
+        BlockPos ground = new BlockPos(this.getX(), this.getY() - 1.0D, this.getZ());
+        this.setOnGround(this.isOnGround() || this.verticalCollisionBelow || level.getBlockState(ground).entityCanStandOn(level, ground, this));
         // slow falling
         if(isSlowFalling() && this.getDeltaMovement().y() < 0.0D) {
             this.setDeltaMovement(this.getDeltaMovement().multiply(1.0D, 0.6D, 1.0D));
@@ -106,6 +111,27 @@ public abstract class BiphibianAnimal extends Animal implements FlyingAnimal {
     }
 
     //// FLYING ANIMAL ////
+
+
+    @Override
+    public void travel(Vec3 pTravelVector) {
+        if(isFlying()) {
+            flyingTravel(pTravelVector);
+        } else {
+            super.travel(pTravelVector);
+        }
+    }
+
+    public void flyingTravel(Vec3 pTravelVector) {
+        if (this.isEffectiveAi() || this.isControlledByLocalInstance()) {
+            final float friction = 0.91F;
+            final float moveAmount = getSpeed() * 0.2F * 2.0F;
+            this.moveRelative(moveAmount, pTravelVector);
+            this.move(MoverType.SELF, this.getDeltaMovement());
+            this.setDeltaMovement(this.getDeltaMovement().scale(friction));
+        }
+        this.calculateEntityAnimation(this, false);
+    }
 
     @Override
     public boolean causeFallDamage(float pFallDistance, float pMultiplier, DamageSource pSource) {

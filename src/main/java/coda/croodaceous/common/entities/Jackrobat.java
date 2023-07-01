@@ -105,7 +105,7 @@ public class Jackrobat extends BiphibianAnimal implements IAnimatable {
                 .add(Attributes.MAX_HEALTH, 10.0D)
                 .add(Attributes.ATTACK_DAMAGE, 1.0D)
                 .add(Attributes.MOVEMENT_SPEED, 0.22D)
-                .add(Attributes.FLYING_SPEED, 0.85D)
+                .add(Attributes.FLYING_SPEED, 0.38D)
                 .add(Attributes.FOLLOW_RANGE, 24.0D);
     }
 
@@ -419,7 +419,7 @@ public class Jackrobat extends BiphibianAnimal implements IAnimatable {
         private final Jackrobat entity;
 
         public WanderGoal(final Jackrobat entity, final double speedModifier) {
-            super(entity, speedModifier, 0.42F);
+            super(entity, speedModifier, 0.29F);
             this.entity = entity;
         }
 

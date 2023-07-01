@@ -56,8 +56,15 @@ public class BiphibianWanderGoal extends WaterAvoidingRandomFlyingGoal {
     protected Vec3 getPosition() {
         if (this.entity.getRandom().nextFloat() < flyingChance) {
             Vec3 vec3 = this.mob.getViewVector(0.0F);
-            Vec3 vec31 = HoverRandomPos.getPos(this.mob, 10, this.verticalSearchRange, vec3.x, vec3.z, Mth.HALF_PI, 3, 1);
-            return vec31 != null ? vec31 : AirAndWaterRandomPos.getPos(this.mob, 8, 4, -2, vec3.x, vec3.z, Mth.HALF_PI);
+            Vec3 vec31;
+            int tries = 30;
+            do {
+                vec31 = HoverRandomPos.getPos(this.mob, 16, this.verticalSearchRange, vec3.x, vec3.z, Mth.HALF_PI, 3, 1);
+                if(null == vec31) {
+                    vec31 = AirAndWaterRandomPos.getPos(this.mob, 16, 4, -2, vec3.x, vec3.z, Mth.HALF_PI);
+                }
+            } while((null == vec31 || this.entity.position().closerThan(vec31, 6)) && --tries > 0);
+            return vec31;
         }
         if (this.mob.isInWaterOrBubble()) {
             Vec3 vec3 = LandRandomPos.getPos(this.mob, 15, 7);

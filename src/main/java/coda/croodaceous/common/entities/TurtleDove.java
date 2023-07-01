@@ -4,13 +4,17 @@ import coda.croodaceous.CroodaceousMod;
 import coda.croodaceous.common.entities.goal.BiphibianWanderGoal;
 import coda.croodaceous.registry.CEEntities;
 import net.minecraft.core.BlockPos;
+import net.minecraft.core.Direction;
 import net.minecraft.nbt.CompoundTag;
+import net.minecraft.nbt.NbtUtils;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.sounds.SoundEvent;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.tags.TagKey;
+import net.minecraft.util.Mth;
 import net.minecraft.util.RandomSource;
+import net.minecraft.world.DifficultyInstance;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.InteractionResult;
 import net.minecraft.world.damagesource.DamageSource;
@@ -21,6 +25,7 @@ import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.Mob;
 import net.minecraft.world.entity.MobSpawnType;
 import net.minecraft.world.entity.Pose;
+import net.minecraft.world.entity.SpawnGroupData;
 import net.minecraft.world.entity.ai.attributes.AttributeSupplier;
 import net.minecraft.world.entity.ai.attributes.Attributes;
 import net.minecraft.world.entity.ai.control.FlyingMoveControl;
@@ -28,6 +33,7 @@ import net.minecraft.world.entity.ai.control.MoveControl;
 import net.minecraft.world.entity.ai.goal.BreedGoal;
 import net.minecraft.world.entity.ai.goal.FollowParentGoal;
 import net.minecraft.world.entity.ai.goal.LookAtPlayerGoal;
+import net.minecraft.world.entity.ai.goal.RandomLookAroundGoal;
 import net.minecraft.world.entity.ai.goal.TemptGoal;
 import net.minecraft.world.entity.ai.navigation.FlyingPathNavigation;
 import net.minecraft.world.entity.ai.navigation.PathNavigation;
@@ -37,7 +43,10 @@ import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.crafting.Ingredient;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.LevelAccessor;
+import net.minecraft.world.level.ServerLevelAccessor;
+import net.minecraft.world.phys.Vec3;
 import net.minecraftforge.registries.ForgeRegistries;
+import org.jetbrains.annotations.Nullable;
 import software.bernie.geckolib3.core.IAnimatable;
 import software.bernie.geckolib3.core.PlayState;
 import software.bernie.geckolib3.core.builder.AnimationBuilder;
@@ -53,12 +62,19 @@ public class TurtleDove extends BiphibianAnimal implements IAnimatable {
     // ANIMAL //
     private static final TagKey<Item> IS_FOOD = ForgeRegistries.ITEMS.tags().createTagKey(new ResourceLocation(CroodaceousMod.MOD_ID, "turtle_dove_food"));
     private static final float FALL_IN_LOVE_CHANCE = 0.125F;
+    private static final int MAX_WANDER_DISTANCE = 64;
 
     // GECKOLIB //
     private final AnimationFactory factory = GeckoLibUtil.createFactory(this);
     private static final AnimationBuilder ANIM_FLIGHT = new AnimationBuilder().addAnimation("animation.turtle_dove.flight", ILoopType.EDefaultLoopTypes.LOOP);
+    private static final AnimationBuilder ANIM_FLIGHT_LEFT = new AnimationBuilder().addAnimation("animation.turtle_dove.flight_left", ILoopType.EDefaultLoopTypes.LOOP);
+    private static final AnimationBuilder ANIM_FLIGHT_RIGHT = new AnimationBuilder().addAnimation("animation.turtle_dove.flight_right", ILoopType.EDefaultLoopTypes.LOOP);
     private static final AnimationBuilder ANIM_CRAWL = new AnimationBuilder().addAnimation("animation.turtle_dove.crawl", ILoopType.EDefaultLoopTypes.LOOP);
     private static final AnimationBuilder ANIM_IDLE = new AnimationBuilder().addAnimation("animation.turtle_dove.idle", ILoopType.EDefaultLoopTypes.LOOP);
+    private static final byte ANIM_FLAG_FLY_CENTER = 0;
+    private static final byte ANIM_FLAG_FLY_LEFT = -1;
+    private static final byte ANIM_FLAG_FLY_RIGHT = 1;
+    private byte flightAnimFlag;
 
     // GOALS //
     private BiphibianWanderGoal wanderGoal;
@@ -74,24 +90,22 @@ public class TurtleDove extends BiphibianAnimal implements IAnimatable {
                 .add(Attributes.ATTACK_DAMAGE, 1.0D)
                 .add(Attributes.FOLLOW_RANGE, 64.0D)
                 .add(Attributes.MOVEMENT_SPEED,0.20F)
-                .add(Attributes.FLYING_SPEED, 1.20D)
+                .add(Attributes.FLYING_SPEED, 0.49D)
                 .add(Attributes.KNOCKBACK_RESISTANCE, 0.9D);
     }
 
     public static boolean canSpawn(EntityType<? extends TurtleDove> entityType, LevelAccessor level, MobSpawnType spawnType, BlockPos pos, RandomSource random) {
-        if(level.getRawBrightness(pos, 0) <= 8) {
-            return false;
-        }
-        return true;
+        return level.getRawBrightness(pos, 0) > 8;
     }
 
     @Override
     protected void registerGoals() {
         this.goalSelector.addGoal(2, new BreedGoal(this, 1.0D));
-        this.goalSelector.addGoal(3, new TemptGoal(this, 1.25D, Ingredient.of(IS_FOOD), false));
-        this.goalSelector.addGoal(4, new FollowParentGoal(this, 1.25D));
+        this.goalSelector.addGoal(3, new TemptGoal(this, 1.0D, Ingredient.of(IS_FOOD), false));
+        this.goalSelector.addGoal(4, new FollowParentGoal(this, 1.1D));
         this.goalSelector.addGoal(7, this.wanderGoal = new BiphibianWanderGoal(this, 0.9D, 0.76D));
         this.goalSelector.addGoal(8, new LookAtPlayerGoal(this, Player.class,8.0F));
+        this.goalSelector.addGoal(8, new RandomLookAroundGoal(this));
     }
 
     @Override
@@ -101,6 +115,7 @@ public class TurtleDove extends BiphibianAnimal implements IAnimatable {
 
     @Override
     protected void customServerAiStep() {
+        // trigger wander goal
         if(this.getNavigation().isDone() && this.wantsToFly()) {
             this.wanderGoal.trigger();
         }
@@ -110,6 +125,16 @@ public class TurtleDove extends BiphibianAnimal implements IAnimatable {
     @Override
     public void tick() {
         super.tick();
+        // calculate flight animation
+        if(this.level.isClientSide()) {
+            final float deltaYRot = yHeadRot - yBodyRot;
+            final float minDeltaYRot = 7;
+            if(Mth.abs(deltaYRot) > minDeltaYRot) {
+                flightAnimFlag = (byte) Mth.sign(deltaYRot);
+            } else {
+                flightAnimFlag = ANIM_FLAG_FLY_CENTER;
+            }
+        }
     }
 
     @Override
@@ -119,12 +144,29 @@ public class TurtleDove extends BiphibianAnimal implements IAnimatable {
 
     @Override
     public int getMaxHeadYRot() {
-        return 80;
+        return 90;
+    }
+
+    @Override
+    public void setYBodyRot(float pOffset) {
+        super.setYBodyRot(pOffset);
     }
 
     @Override
     protected float getStandingEyeHeight(Pose pPose, EntityDimensions pDimensions) {
         return pDimensions.height * 0.5F;
+    }
+
+    @Override
+    public SpawnGroupData finalizeSpawn(ServerLevelAccessor pLevel, DifficultyInstance pDifficulty, MobSpawnType pReason, @Nullable SpawnGroupData pSpawnData, @Nullable CompoundTag pDataTag) {
+        final SpawnGroupData data = super.finalizeSpawn(pLevel, pDifficulty, pReason, pSpawnData, pDataTag);
+        // update home position
+        if(!this.hasRestriction()) {
+            BlockPos.MutableBlockPos terrainHeight = blockPosition().mutable();
+            while(this.level.getBlockState(terrainHeight).getMaterial().blocksMotion() && !this.level.isOutsideBuildHeight(terrainHeight.move(Direction.DOWN)));
+            this.restrictTo(terrainHeight, MAX_WANDER_DISTANCE);
+        }
+        return data;
     }
 
     //// ANIMAL ////
@@ -182,7 +224,7 @@ public class TurtleDove extends BiphibianAnimal implements IAnimatable {
 
     @Override
     double getMaxWalkingDistance() {
-        return isBaby() ? 5.0D : 7.0D;
+        return isBaby() ? 8.0D : 7.0D;
     }
 
     @Override
@@ -228,22 +270,46 @@ public class TurtleDove extends BiphibianAnimal implements IAnimatable {
 
     //// NBT ////
 
+    private static final String KEY_RESTRICTION = "Restriction";
+    private static final String KEY_WANDER_DISTANCE = "WanderDistance";
+
     @Override
     public void readAdditionalSaveData(CompoundTag pCompound) {
         super.readAdditionalSaveData(pCompound);
+        if(pCompound.contains(KEY_RESTRICTION)) {
+            final BlockPos restrictCenter = NbtUtils.readBlockPos(pCompound.getCompound(KEY_RESTRICTION));
+            final int restrictDistance = pCompound.getInt(KEY_WANDER_DISTANCE);
+            restrictTo(restrictCenter, restrictDistance);
+        }
     }
 
     @Override
     public void addAdditionalSaveData(CompoundTag pCompound) {
         super.addAdditionalSaveData(pCompound);
+        if(hasRestriction()) {
+            pCompound.put(KEY_RESTRICTION, NbtUtils.writeBlockPos(getRestrictCenter()));
+            pCompound.putInt(KEY_WANDER_DISTANCE, (int) getRestrictRadius());
+        }
     }
 
     //// ANIMATIONS ////
 
     private PlayState animationPredicate(AnimationEvent<TurtleDove> event) {
+        final boolean isMoving = event.isMoving();// this.getDeltaMovement().horizontalDistanceSqr() > 0.0025D;
         if(!isOnGround()) {
-            event.getController().setAnimation(ANIM_FLIGHT);
-        } else if(event.isMoving()) {
+            switch (flightAnimFlag) {
+                default:
+                case ANIM_FLAG_FLY_CENTER:
+                    event.getController().setAnimation(ANIM_FLIGHT);
+                    break;
+                case ANIM_FLAG_FLY_LEFT:
+                    event.getController().setAnimation(ANIM_FLIGHT_LEFT);
+                    break;
+                case ANIM_FLAG_FLY_RIGHT:
+                    event.getController().setAnimation(ANIM_FLIGHT_RIGHT);
+                    break;
+            }
+        } else if(isMoving) {
             event.getController().setAnimation(ANIM_CRAWL);
         } else {
             event.getController().setAnimation(ANIM_IDLE);

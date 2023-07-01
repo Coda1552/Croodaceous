@@ -12,7 +12,7 @@ import org.slf4j.Logger;
 @Mod(CroodaceousMod.MOD_ID)
 public class CroodaceousMod {
 	public static final String MOD_ID = "croodaceous";
-	private static final Logger LOGGER = LogUtils.getLogger();
+	public static final Logger LOGGER = LogUtils.getLogger();
 
 	public CroodaceousMod() {
 		IEventBus bus = FMLJavaModLoadingContext.get().getModEventBus();
