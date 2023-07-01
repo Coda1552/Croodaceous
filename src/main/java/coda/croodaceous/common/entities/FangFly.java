@@ -137,6 +137,11 @@ public class FangFly extends Animal implements IAnimatable, FlyingAnimal {
     }
 
     @Override
+    public float getVoicePitch() {
+        return 0.65F;
+    }
+
+    @Override
     public AgeableMob getBreedOffspring(ServerLevel p_241840_1_, AgeableMob p_241840_2_) {
         return null;
     }
