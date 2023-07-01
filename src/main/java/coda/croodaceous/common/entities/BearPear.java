@@ -695,7 +695,7 @@ public class BearPear extends Animal implements IAnimatable {
             if(isUnderTarget) {
                 final BlockPos targetPos = blockPos;
                 if(entity.canHangOn(targetPos)) {
-                    entity.setHangingPos(targetPos);
+                    entity.setHangingPos(targetPos.immutable());
                     entity.updateHangingPosition(targetPos);
                     entity.setJumping(false);
                 }

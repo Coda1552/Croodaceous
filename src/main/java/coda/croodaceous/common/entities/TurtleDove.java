@@ -44,7 +44,6 @@ import net.minecraft.world.item.crafting.Ingredient;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.LevelAccessor;
 import net.minecraft.world.level.ServerLevelAccessor;
-import net.minecraft.world.phys.Vec3;
 import net.minecraftforge.registries.ForgeRegistries;
 import org.jetbrains.annotations.Nullable;
 import software.bernie.geckolib3.core.IAnimatable;
@@ -67,14 +66,10 @@ public class TurtleDove extends BiphibianAnimal implements IAnimatable {
     // GECKOLIB //
     private final AnimationFactory factory = GeckoLibUtil.createFactory(this);
     private static final AnimationBuilder ANIM_FLIGHT = new AnimationBuilder().addAnimation("animation.turtle_dove.flight", ILoopType.EDefaultLoopTypes.LOOP);
-    private static final AnimationBuilder ANIM_FLIGHT_LEFT = new AnimationBuilder().addAnimation("animation.turtle_dove.flight_left", ILoopType.EDefaultLoopTypes.LOOP);
-    private static final AnimationBuilder ANIM_FLIGHT_RIGHT = new AnimationBuilder().addAnimation("animation.turtle_dove.flight_right", ILoopType.EDefaultLoopTypes.LOOP);
     private static final AnimationBuilder ANIM_CRAWL = new AnimationBuilder().addAnimation("animation.turtle_dove.crawl", ILoopType.EDefaultLoopTypes.LOOP);
     private static final AnimationBuilder ANIM_IDLE = new AnimationBuilder().addAnimation("animation.turtle_dove.idle", ILoopType.EDefaultLoopTypes.LOOP);
-    private static final byte ANIM_FLAG_FLY_CENTER = 0;
-    private static final byte ANIM_FLAG_FLY_LEFT = -1;
-    private static final byte ANIM_FLAG_FLY_RIGHT = 1;
-    private byte flightAnimFlag;
+    public float yBodyRollO;
+    public float yBodyRoll;
 
     // GOALS //
     private BiphibianWanderGoal wanderGoal;
@@ -127,12 +122,19 @@ public class TurtleDove extends BiphibianAnimal implements IAnimatable {
         super.tick();
         // calculate flight animation
         if(this.level.isClientSide()) {
-            final float deltaYRot = yHeadRot - yBodyRot;
+            this.yBodyRollO = this.yBodyRoll;
+            final float deltaRoll = 0.05F;
+            final float deltaYRot = Mth.wrapDegrees(yHeadRot - yBodyRot);
             final float minDeltaYRot = 7;
-            if(Mth.abs(deltaYRot) > minDeltaYRot) {
-                flightAnimFlag = (byte) Mth.sign(deltaYRot);
+            final boolean rollToCenter = !isFlying() || getDeltaMovement().horizontalDistanceSqr() < 0.0002F || Mth.abs(deltaYRot) < minDeltaYRot;
+            if(rollToCenter) {
+                if(this.yBodyRoll > 0) {
+                    this.yBodyRoll -= deltaRoll;
+                } else {
+                    this.yBodyRoll += deltaRoll;
+                }
             } else {
-                flightAnimFlag = ANIM_FLAG_FLY_CENTER;
+                this.yBodyRoll = Mth.clamp(this.yBodyRoll + deltaRoll * Mth.sign(deltaYRot), -1.0F, 1.0F);
             }
         }
     }
@@ -295,20 +297,9 @@ public class TurtleDove extends BiphibianAnimal implements IAnimatable {
     //// ANIMATIONS ////
 
     private PlayState animationPredicate(AnimationEvent<TurtleDove> event) {
-        final boolean isMoving = event.isMoving();// this.getDeltaMovement().horizontalDistanceSqr() > 0.0025D;
-        if(!isOnGround()) {
-            switch (flightAnimFlag) {
-                default:
-                case ANIM_FLAG_FLY_CENTER:
-                    event.getController().setAnimation(ANIM_FLIGHT);
-                    break;
-                case ANIM_FLAG_FLY_LEFT:
-                    event.getController().setAnimation(ANIM_FLIGHT_LEFT);
-                    break;
-                case ANIM_FLAG_FLY_RIGHT:
-                    event.getController().setAnimation(ANIM_FLIGHT_RIGHT);
-                    break;
-            }
+        final boolean isMoving = this.getDeltaMovement().horizontalDistanceSqr() > 0.0004F;
+        if(!isOnGround() && Math.abs(this.getDeltaMovement().y()) > 0.0002F) {
+            event.getController().setAnimation(ANIM_FLIGHT);
         } else if(isMoving) {
             event.getController().setAnimation(ANIM_CRAWL);
         } else {
@@ -319,7 +310,7 @@ public class TurtleDove extends BiphibianAnimal implements IAnimatable {
 
     @Override
     public void registerControllers(AnimationData data) {
-        data.addAnimationController(new AnimationController<>(this, "controller", 5F, this::animationPredicate));
+        data.addAnimationController(new AnimationController<>(this, "controller", 4F, this::animationPredicate));
     }
 
     @Override

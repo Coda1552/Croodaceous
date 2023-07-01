@@ -49,7 +49,7 @@ public class CEEntities {
     public static final RegistryObject<EntityType<FangFly>> FANG_FLY = ENTITIES.register("fang_fly", () -> EntityType.Builder.of(FangFly::new, MobCategory.CREATURE).sized(0.5F, 0.5F).clientTrackingRange(8).updateInterval(1).build("fang_fly"));
     public static final RegistryObject<EntityType<Jackrobat>> JACKROBAT = ENTITIES.register("jackrobat", () -> EntityType.Builder.of(Jackrobat::new, MobCategory.CREATURE).sized(0.5F, 0.5F).clientTrackingRange(8).updateInterval(1).build("jackrobat"));
     public static final RegistryObject<EntityType<TripGerbil>> TRIP_GERBIL = ENTITIES.register("trip_gerbil", () -> EntityType.Builder.of(TripGerbil::new, MobCategory.CREATURE).sized(0.5F, 0.5F).build("trip_gerbil"));
-    public static final RegistryObject<EntityType<BearPear>> BEAR_PEAR = ENTITIES.register("bear_pear", () -> EntityType.Builder.of(BearPear::new, MobCategory.CREATURE).sized(0.4375F, 0.6875F).build("bear_pear"));
+    public static final RegistryObject<EntityType<BearPear>> BEAR_PEAR = ENTITIES.register("bear_pear", () -> EntityType.Builder.of(BearPear::new, MobCategory.CREATURE).sized(0.4375F, 0.6875F).updateInterval(1).build("bear_pear"));
     public static final RegistryObject<EntityType<TurtleDove>> TURTLE_DOVE = ENTITIES.register("turtle_dove", () -> EntityType.Builder.of(TurtleDove::new, MobCategory.CREATURE).sized(1.825F, 0.98F).clientTrackingRange(12).updateInterval(1).build("turtle_dove"));
 
 }

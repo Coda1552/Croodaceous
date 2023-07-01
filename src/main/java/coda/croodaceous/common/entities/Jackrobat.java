@@ -163,7 +163,7 @@ public class Jackrobat extends BiphibianAnimal implements IAnimatable {
             eatEggCooldown--;
         }
         // check and stop flying
-        if(this.getNavigation().isDone() && this.isFlying() && this.isOnGround()) {
+        if(this.getNavigation().isDone() && this.isFlying() && (this.isOnGround() || this.getRandom().nextFloat() < 0.04F)) {
             this.setWantsToFly(false);
             this.isNavigationDirty = true;
         }
@@ -372,8 +372,7 @@ public class Jackrobat extends BiphibianAnimal implements IAnimatable {
     //// ANIMATIONS ////
 
     private PlayState animControllerMain(AnimationEvent<?> e) {
-        // TODO jackrobat animations
-        if(!isOnGround()) {
+        if(!isOnGround() && Math.abs(this.getDeltaMovement().y()) > 0.0002F) {
             e.getController().setAnimation(ANIM_FLY);
         } else if(e.isMoving()) {
             e.getController().setAnimation(ANIM_HOP);
@@ -419,7 +418,7 @@ public class Jackrobat extends BiphibianAnimal implements IAnimatable {
         private final Jackrobat entity;
 
         public WanderGoal(final Jackrobat entity, final double speedModifier) {
-            super(entity, speedModifier, 0.29F);
+            super(entity, speedModifier, 0.19F);
             this.entity = entity;
         }
 

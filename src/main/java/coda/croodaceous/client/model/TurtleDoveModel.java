@@ -2,8 +2,10 @@ package coda.croodaceous.client.model;
 
 import coda.croodaceous.CroodaceousMod;
 import coda.croodaceous.common.entities.TurtleDove;
+import net.minecraft.client.Minecraft;
 import net.minecraft.util.Mth;
 import software.bernie.geckolib3.core.event.predicate.AnimationEvent;
+import software.bernie.geckolib3.core.manager.AnimationData;
 import software.bernie.geckolib3.core.processor.IBone;
 
 public class TurtleDoveModel<T extends TurtleDove> extends SimpleGeoModel<T> {
@@ -20,8 +22,14 @@ public class TurtleDoveModel<T extends TurtleDove> extends SimpleGeoModel<T> {
     }
 
     protected void rotateBody(final T animatable, final int instanceId, final AnimationEvent animationEvent, final String boneName) {
-        final float multiplier = Mth.clamp(((float)animatable.getDeltaMovement().horizontalDistanceSqr()) * 18.0F, 0.0F, 1.0F);
+        final float zRot = calculateRoll(animatable, instanceId, animationEvent);
         final IBone bone = getBone(boneName);
-        bone.setRotationZ(bone.getRotationZ() * multiplier);
+        //bone.setRotationZ(zRot);
+    }
+
+    protected float calculateRoll(final T entity, final int instanceId, final AnimationEvent event) {
+        final float bodyRollPercent = Mth.lerp(event.getPartialTick(), entity.yBodyRollO, entity.yBodyRoll);
+        final float maxRotation = Mth.PI / 4.0F;
+        return bodyRollPercent * maxRotation;
     }
 }

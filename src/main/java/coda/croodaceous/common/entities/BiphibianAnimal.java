@@ -16,6 +16,7 @@ import net.minecraft.world.level.LevelReader;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.pathfinder.BlockPathTypes;
 import net.minecraft.world.phys.Vec3;
+import net.minecraftforge.common.ForgeMod;
 
 public abstract class BiphibianAnimal extends Animal implements FlyingAnimal {
 
@@ -103,7 +104,7 @@ public abstract class BiphibianAnimal extends Animal implements FlyingAnimal {
         super.tick();
         // ground
         BlockPos ground = new BlockPos(this.getX(), this.getY() - 1.0D, this.getZ());
-        this.setOnGround(this.isOnGround() || this.verticalCollisionBelow || level.getBlockState(ground).entityCanStandOn(level, ground, this));
+        //this.setOnGround(this.isOnGround() || this.verticalCollisionBelow || level.getBlockState(ground).entityCanStandOn(level, ground, this));
         // slow falling
         if(isSlowFalling() && this.getDeltaMovement().y() < 0.0D) {
             this.setDeltaMovement(this.getDeltaMovement().multiply(1.0D, 0.6D, 1.0D));
@@ -119,6 +120,9 @@ public abstract class BiphibianAnimal extends Animal implements FlyingAnimal {
             flyingTravel(pTravelVector);
         } else {
             super.travel(pTravelVector);
+        }
+        if(this.verticalCollisionBelow && !this.isNoGravity()) {
+            this.push(0, -this.getAttributeValue(ForgeMod.ENTITY_GRAVITY.get()), 0);
         }
     }
 
