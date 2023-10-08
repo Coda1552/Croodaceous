@@ -27,20 +27,20 @@ import net.minecraft.world.level.LevelReader;
 import net.minecraft.world.level.ServerLevelAccessor;
 import net.minecraft.world.phys.Vec3;
 import net.minecraftforge.common.ForgeMod;
-import software.bernie.geckolib3.core.IAnimatable;
-import software.bernie.geckolib3.core.PlayState;
-import software.bernie.geckolib3.core.builder.AnimationBuilder;
-import software.bernie.geckolib3.core.builder.ILoopType;
-import software.bernie.geckolib3.core.controller.AnimationController;
-import software.bernie.geckolib3.core.event.predicate.AnimationEvent;
-import software.bernie.geckolib3.core.manager.AnimationData;
-import software.bernie.geckolib3.core.manager.AnimationFactory;
-import software.bernie.geckolib3.util.GeckoLibUtil;
+import software.bernie.geckolib.animatable.GeoEntity;
+import software.bernie.geckolib.core.animatable.GeoAnimatable;
+import software.bernie.geckolib.core.animatable.instance.AnimatableInstanceCache;
+import software.bernie.geckolib.core.animation.AnimatableManager;
+import software.bernie.geckolib.core.animation.AnimationController;
+import software.bernie.geckolib.core.animation.AnimationState;
+import software.bernie.geckolib.core.animation.RawAnimation;
+import software.bernie.geckolib.core.object.PlayState;
+import software.bernie.geckolib.util.GeckoLibUtil;
 
 import javax.annotation.Nullable;
 import java.util.EnumSet;
 
-public class Bearowl extends Animal implements IAnimatable {
+public class Bearowl extends Animal implements GeoEntity {
 
 	// DATA //
 	private static final EntityDataAccessor<Byte> DATA_STATE = SynchedEntityData.defineId(Bearowl.class, EntityDataSerializers.BYTE);
@@ -60,14 +60,14 @@ public class Bearowl extends Animal implements IAnimatable {
 	// ANIMATIONS //
 	private static final int SWIPE_DURATION = 20;
 	private static final int ROAR_DURATION = 40;
-	private final AnimationFactory factory = GeckoLibUtil.createFactory(this);
-	private static final AnimationBuilder ANIM_SWIPE_RIGHT = new AnimationBuilder().addAnimation("animation.bearowl.swipe_right",  ILoopType.EDefaultLoopTypes.LOOP);
-	private static final AnimationBuilder ANIM_SWIPE_LEFT = new AnimationBuilder().addAnimation("animation.bearowl.swipe_left",  ILoopType.EDefaultLoopTypes.LOOP);
-	private static final AnimationBuilder ANIM_ROAR = new AnimationBuilder().addAnimation("animation.bearowl.roar", ILoopType.EDefaultLoopTypes.LOOP);
-	private static final AnimationBuilder ANIM_RUN = new AnimationBuilder().addAnimation("animation.bearowl.run", ILoopType.EDefaultLoopTypes.LOOP);
-	private static final AnimationBuilder ANIM_WALK = new AnimationBuilder().addAnimation("animation.bearowl.walk", ILoopType.EDefaultLoopTypes.LOOP);
-	private static final AnimationBuilder ANIM_SLEEP = new AnimationBuilder().addAnimation("animation.bearowl.sleep", ILoopType.EDefaultLoopTypes.LOOP);
-	private static final AnimationBuilder ANIM_IDLE = new AnimationBuilder().addAnimation("animation.bearowl.idle", ILoopType.EDefaultLoopTypes.LOOP);
+	private final AnimatableInstanceCache cache = GeckoLibUtil.createInstanceCache(this);
+	private static final RawAnimation ANIM_SWIPE_RIGHT = RawAnimation.begin().thenLoop("animation.bearowl.swipe_right");
+	private static final RawAnimation ANIM_SWIPE_LEFT = RawAnimation.begin().thenLoop("animation.bearowl.swipe_left");
+	private static final RawAnimation ANIM_ROAR = RawAnimation.begin().thenLoop("animation.bearowl.roar");
+	private static final RawAnimation ANIM_RUN = RawAnimation.begin().thenLoop("animation.bearowl.run");
+	private static final RawAnimation ANIM_WALK = RawAnimation.begin().thenLoop("animation.bearowl.walk");
+	private static final RawAnimation ANIM_SLEEP = RawAnimation.begin().thenLoop("animation.bearowl.sleep");
+	private static final RawAnimation ANIM_IDLE = RawAnimation.begin().thenLoop("animation.bearowl.idle");
 	private int animationTime;
 
 	// CONSTANTS //
@@ -175,7 +175,7 @@ public class Bearowl extends Animal implements IAnimatable {
 	}
 
 	private boolean wantsSleep() {
-		return this.level.isDay() && this.getTarget() == null && (this.tickCount > 300 && this.getLastHurtByMobTimestamp() + 300 < this.tickCount);
+		return this.level().isDay() && this.getTarget() == null && (this.tickCount > 300 && this.getLastHurtByMobTimestamp() + 300 < this.tickCount);
 	}
 
 	@Override
@@ -208,7 +208,7 @@ public class Bearowl extends Animal implements IAnimatable {
 
 	@Override
 	public boolean hurt(DamageSource pSource, float pAmount) {
-		if(!level.isClientSide() && isSleepingState()) {
+		if(!level().isClientSide() && isSleepingState()) {
 			setBearowlState(STATE_IDLE);
 		}
 		return super.hurt(pSource, pAmount);
@@ -227,10 +227,11 @@ public class Bearowl extends Animal implements IAnimatable {
 		this.swing(pHand, false);
 	}
 
-	@Override
+	// todo - update this method
+/*	@Override
 	public int getCurrentSwingDuration() {
 		return 20;
-	}
+	}*/
 
 	// TODO: Custom Sounds
 
@@ -277,22 +278,22 @@ public class Bearowl extends Animal implements IAnimatable {
 	}
 
 	public void setStateAndBroadcast(final byte state, final byte event) {
-		if(!level.isClientSide()) {
+		if(!level().isClientSide()) {
 			setBearowlState(state);
-			level.broadcastEntityEvent(this, event);
+			level().broadcastEntityEvent(this, event);
 		}
 	}
 
 	protected void onTickAnimation(final byte state) {
 		// update melee attack
-		if(isSwiping() && animationTime == (SWIPE_DURATION - 10) && !level.isClientSide()) {
+		if(isSwiping() && animationTime == (SWIPE_DURATION - 10) && !level().isClientSide()) {
 			finishMeleeAttack();
 		}
 	}
 
 	protected void onFinishAnimation(final byte state) {
 		animationTime = 0;
-		if(!level.isClientSide()) {
+		if(!level().isClientSide()) {
 			// update state
 			setBearowlState(STATE_IDLE);
 		}
@@ -332,30 +333,30 @@ public class Bearowl extends Animal implements IAnimatable {
 
 	//// ANIMATIONS ////
 
-	private PlayState animControllerMain(AnimationEvent<?> e) {
+	private <T extends GeoAnimatable> PlayState predicate(AnimationState<T> e) {
 		final byte state = getBearowlState();
 		switch (state) {
 			case STATE_SWIPE_LEFT:
-				e.getController().setAnimation(ANIM_SWIPE_LEFT);
+				e.setAndContinue(ANIM_SWIPE_LEFT);
 				break;
 			case STATE_SWIPE_RIGHT:
-				e.getController().setAnimation(ANIM_SWIPE_RIGHT);
+				e.setAndContinue(ANIM_SWIPE_RIGHT);
 				break;
 			case STATE_ROAR:
-				e.getController().setAnimation(ANIM_ROAR);
+				e.setAndContinue(ANIM_ROAR);
 				break;
 			case STATE_SLEEP:
-				e.getController().setAnimation(ANIM_SLEEP);
+				e.setAndContinue(ANIM_SLEEP);
 				break;
 			case STATE_IDLE: default:
 				if (e.isMoving()) {
 					if (this.isSprinting()) {
-						e.getController().setAnimation(ANIM_RUN);
+						e.setAndContinue(ANIM_RUN);
 					} else {
-						e.getController().setAnimation(ANIM_WALK);
+						e.setAndContinue(ANIM_WALK);
 					}
 				} else {
-					e.getController().setAnimation(ANIM_IDLE);
+					e.setAndContinue(ANIM_IDLE);
 				}
 				break;
 		}
@@ -363,13 +364,13 @@ public class Bearowl extends Animal implements IAnimatable {
 	}
 
 	@Override
-	public void registerControllers(AnimationData data) {
-		data.addAnimationController(new AnimationController<>(this, "controller", 2F, this::animControllerMain));
+	public void registerControllers(AnimatableManager.ControllerRegistrar data) {
+		data.add(new AnimationController<>(this, "controller", 2, this::predicate));
 	}
 
 	@Override
-	public AnimationFactory getFactory() {
-		return factory;
+	public AnimatableInstanceCache getAnimatableInstanceCache() {
+		return cache;
 	}
 
 	//// NBT ////

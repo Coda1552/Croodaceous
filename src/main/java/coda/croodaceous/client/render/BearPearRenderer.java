@@ -13,7 +13,6 @@ import org.jetbrains.annotations.Nullable;
 import software.bernie.geckolib3.renderers.geo.GeoEntityRenderer;
 
 public class BearPearRenderer extends SimpleGeoRenderer<BearPear> {
-
 	private static final ResourceLocation TEXTURE_IDLE = new ResourceLocation(CroodaceousMod.MOD_ID, "textures/entity/bear_pear/idle.png");
 	private static final ResourceLocation TEXTURE_HOSTILE = new ResourceLocation(CroodaceousMod.MOD_ID, "textures/entity/bear_pear/hostile.png");
 

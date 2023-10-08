@@ -1,4 +1,4 @@
-package coda.croodaceous.client.layer;
+package coda.croodaceous.client.render.layer;
 
 import coda.croodaceous.CroodaceousMod;
 import coda.croodaceous.common.entities.TripGerbil;
@@ -17,9 +17,7 @@ import software.bernie.geckolib3.renderers.geo.GeoLayerRenderer;
 import software.bernie.geckolib3.renderers.geo.IGeoRenderer;
 
 public class TripGerbilTailLayer extends GeoLayerRenderer<TripGerbil> {
-
     private static final ResourceLocation TRIP_GERBIL_TAIL_LOCATION = new ResourceLocation(CroodaceousMod.MOD_ID, "geo/entity/trip_gerbil_tail.geo.json");
-
     private final GeoModel tailModel;
 
     public TripGerbilTailLayer(IGeoRenderer<TripGerbil> entityRendererIn) {

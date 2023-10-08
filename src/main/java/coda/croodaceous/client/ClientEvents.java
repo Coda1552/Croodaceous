@@ -26,7 +26,6 @@ public class ClientEvents {
         event.registerEntityRenderer(CEEntities.JACKROBAT.get(), JackrobatRenderer::new);
         event.registerEntityRenderer(CEEntities.TRIP_GERBIL.get(), TripGerbilRenderer::new);
         event.registerEntityRenderer(CEEntities.BEAR_PEAR.get(), BearPearRenderer::new);
-        event.registerEntityRenderer(CEEntities.TRIP_GERBIL.get(), TripGerbilRenderer::new);
         event.registerEntityRenderer(CEEntities.TURTLE_DOVE.get(), TurtleDoveRenderer::new);
     }
 }

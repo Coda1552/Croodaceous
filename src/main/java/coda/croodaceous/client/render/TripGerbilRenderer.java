@@ -1,7 +1,7 @@
 package coda.croodaceous.client.render;
 
 import coda.croodaceous.CroodaceousMod;
-import coda.croodaceous.client.layer.TripGerbilTailLayer;
+import coda.croodaceous.client.render.layer.TripGerbilTailLayer;
 import coda.croodaceous.client.model.SimpleGeoModel;
 import coda.croodaceous.common.entities.TripGerbil;
 import com.mojang.blaze3d.vertex.PoseStack;
