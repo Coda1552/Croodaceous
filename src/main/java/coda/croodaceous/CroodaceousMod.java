@@ -26,6 +26,7 @@ public class CroodaceousMod {
 		CEBlocks.BLOCKS.register(bus);
 		CEPoiTypes.POIS.register(bus);
 		CEFeatures.FEATURES.register(bus);
+		CEChunkGenerators.REGISTER.register(bus);
 
 		CENetwork.register();
 

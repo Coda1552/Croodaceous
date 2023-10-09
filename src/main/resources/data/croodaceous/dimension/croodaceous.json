@@ -2,6 +2,7 @@
   "type": "croodaceous:croodaceous",
   "generator": {
     "biome_source": {
+			"type": "minecraft:multi_noise",
       "biomes": [
         {
           "parameters": {
@@ -40,28 +41,6 @@
         "biome": "minecraft:river"
       }, {
         "parameters": {
-          "weirdness": [-0.56666666, -0.4],
-          "continentalness": [-1.2, 1],
-          "erosion": [-1, 1],
-          "temperature": [-1, 1],
-          "humidity": [-1, 1],
-          "depth": [0, 0],
-          "offset": 0
-        },
-        "biome": "minecraft:mangrove_swamp"
-      }, {
-        "parameters": {
-          "weirdness": [-0.4, -0.26666668],
-          "continentalness": [-1.2, 1],
-          "erosion": [-1, 1],
-          "temperature": [-1, 1],
-          "humidity": [-1, 1],
-          "depth": [0, 0],
-          "offset": 0
-        },
-        "biome": "minecraft:jungle"
-      }, {
-        "parameters": {
           "weirdness": [-0.26666668, 0.05],
           "continentalness": [-1.2, 1],
           "erosion": [-1, 1],
@@ -71,17 +50,6 @@
           "offset": 0
         },
         "biome": "minecraft:sparse_jungle"
-      }, {
-        "parameters": {
-          "weirdness": [0.05, 0.4],
-          "continentalness": [-1.2, 1],
-          "erosion": [-1, 1],
-          "temperature": [-1, 1],
-          "humidity": [-1, 1],
-          "depth": [0, 0],
-          "offset": 0
-        },
-        "biome": "minecraft:jungle"
       }, {
         "parameters": {
           "weirdness": [0.4, 0.56666666],
@@ -115,10 +83,9 @@
           "offset": 0
         },
         "biome": "croodaceous:nesting_grounds"
-      }],
-      "type": "minecraft:multi_noise"
+      }]
     },
     "settings": "croodaceous:croodaceous",
-    "type": "minecraft:noise"
+    "type": "croodaceous:croodaceous_chunk_generator"
   }
 }
