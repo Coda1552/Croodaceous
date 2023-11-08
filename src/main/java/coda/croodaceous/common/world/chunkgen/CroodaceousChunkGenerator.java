@@ -53,7 +53,7 @@ public class CroodaceousChunkGenerator extends ChunkGenerator {
 	protected final Holder<NoiseGeneratorSettings> settings;
 	private final Climate.Sampler sampler;
 	private long seed = 0L;
-	private static final FastNoise noise = new FastNoise(0);
+	public static final FastNoise noise = new FastNoise(0);
 	static {
 		noise.SetNoiseType(FastNoise.NoiseType.Simplex);
 	}
@@ -104,7 +104,6 @@ public class CroodaceousChunkGenerator extends ChunkGenerator {
 					if (pChunk.getBlockState(pos) == this.settings.value().defaultBlock()) {
 						if (!isInSolid) {
 							ResourceLocation biome = pLevel.getBiome(pos).unwrapKey().get().location();
-							System.out.println(biome);
 							SurfaceDecorators.getSurfaceDecorator(biome).buildSurface(pos, this.getSeaLevel(), visibleToSun, pChunk, settings.value());
 							isInSolid = true;
 							visibleToSun = false;

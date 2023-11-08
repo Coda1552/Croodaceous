@@ -23,6 +23,8 @@ public class SurfaceDecorators {
 				new NoiseBasedSurfaceDecorator(CEBlocks.DESOLATE_SAND.get().defaultBlockState(), CEBlocks.DESOLATE_SANDSTONE.get().defaultBlockState(), CEBlocks.DESOLATE_SAND.get().defaultBlockState(), CEBlocks.DESOLATE_SANDSTONE.get().defaultBlockState(), CEBlocks.DESOLATE_SANDSTONE.get().defaultBlockState(), CEBlocks.DESOLATE_SAND.get().defaultBlockState(), Blocks.BLACK_WOOL.defaultBlockState(), Blocks.BLACK_WOOL.defaultBlockState(), Blocks.BLUE_WOOL.defaultBlockState(), -0.3D, 1, 4, noise));
 		register (new ResourceLocation("sparse_jungle"),
 				new BasicSurfaceDecorator(Blocks.GRASS_BLOCK.defaultBlockState(), Blocks.DIRT.defaultBlockState(), Blocks.DIRT.defaultBlockState(), 4));
+		register (new ResourceLocation("jungle"),
+				new BasicSurfaceDecorator(Blocks.GRASS_BLOCK.defaultBlockState(), Blocks.DIRT.defaultBlockState(), Blocks.DIRT.defaultBlockState(), 4));
 	}
 	
 	public static void setFastNoise(FastNoise noise) {

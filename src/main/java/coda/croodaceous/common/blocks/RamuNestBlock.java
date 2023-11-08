@@ -71,10 +71,10 @@ public class RamuNestBlock extends Block {
 	@Override
 	public InteractionResult use(BlockState pState, Level pLevel, BlockPos pPos, Player pPlayer, InteractionHand pHand, BlockHitResult pHit) {
 		if (pState.getValue(WITH_EGG)) {
-			if (pLevel.isClientSide) {
+			//if (pLevel.isClientSide) {
 				pLevel.playSound(pPlayer, pPos, SoundEvents.GRASS_FALL, SoundSource.BLOCKS, 1.0F, 1.0F);
-				return InteractionResult.SUCCESS;
-			}
+				//return InteractionResult.SUCCESS;
+			//}
 
 			pLevel.setBlock(pPos, this.getStateDefinition().any().setValue(WITH_EGG, Boolean.FALSE), 3);
 			pPlayer.addItem(new ItemStack(CEItems.RAMU_EGG.get()));
