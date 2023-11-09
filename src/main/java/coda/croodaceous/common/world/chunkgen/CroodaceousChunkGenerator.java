@@ -11,7 +11,9 @@ import com.mojang.serialization.Codec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
 
 import coda.croodaceous.common.util.FastNoise;
+import coda.croodaceous.common.world.biome.biomesource.CroodaceousBiomeSource;
 import coda.croodaceous.common.world.biome.surfacedecorators.SurfaceDecorators;
+import coda.croodaceous.registry.CEBiomes;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.core.Holder;
@@ -27,6 +29,7 @@ import net.minecraft.world.level.StructureManager;
 import net.minecraft.world.level.biome.Biome;
 import net.minecraft.world.level.biome.BiomeManager;
 import net.minecraft.world.level.biome.BiomeSource;
+import net.minecraft.world.level.biome.Biomes;
 import net.minecraft.world.level.biome.Climate;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.state.BlockState;
@@ -49,7 +52,7 @@ public class CroodaceousChunkGenerator extends ChunkGenerator {
 			BiomeSource.CODEC.fieldOf("biome_source").forGetter((generator) -> generator.biomeSource),
 			NoiseGeneratorSettings.CODEC.fieldOf("settings").forGetter((generator) -> generator.settings)))
 			.apply(codec, codec.stable(CroodaceousChunkGenerator::new)));
-	
+
 	protected final Holder<NoiseGeneratorSettings> settings;
 	private final Climate.Sampler sampler;
 	private long seed = 0L;
@@ -58,11 +61,11 @@ public class CroodaceousChunkGenerator extends ChunkGenerator {
 		noise.SetNoiseType(FastNoise.NoiseType.Simplex);
 	}
 	private float[][][] terrainShapeSamplePoints;
-	
+
 	public CroodaceousChunkGenerator(Registry<StructureSet> pStructureSets, BiomeSource pBiomeSource, Holder<NoiseGeneratorSettings> settings) {
 		this(pStructureSets, pBiomeSource, settings, 0L);
 	}
-	
+
 	public CroodaceousChunkGenerator(Registry<StructureSet> pStructureSets, BiomeSource pBiomeSource, Holder<NoiseGeneratorSettings> settings, long seed) {
 		super (pStructureSets, Optional.empty(), pBiomeSource);
 		this.settings = settings;
@@ -77,7 +80,7 @@ public class CroodaceousChunkGenerator extends ChunkGenerator {
 				new ArrayList<>());
 		initializeNoise(seed);
 	}
-	
+
 	public void initializeNoise(long seed) {
 		int seedBits = (int) (seed >> 32);
 		if (noise.GetSeed() != seedBits) {
@@ -85,12 +88,12 @@ public class CroodaceousChunkGenerator extends ChunkGenerator {
 		}
 		SurfaceDecorators.setFastNoise(noise);
 	}
-	
+
 	@Override
 	protected Codec<? extends ChunkGenerator> codec() {
 		return CODEC;
 	}
-	
+
 	@Override
 	public void buildSurface(WorldGenRegion pLevel, StructureManager pStructureManager, RandomState pRandom, ChunkAccess pChunk) {
 		BlockPos.MutableBlockPos pos = new BlockPos.MutableBlockPos();
@@ -107,6 +110,7 @@ public class CroodaceousChunkGenerator extends ChunkGenerator {
 							SurfaceDecorators.getSurfaceDecorator(biome).buildSurface(pos, this.getSeaLevel(), visibleToSun, pChunk, settings.value());
 							isInSolid = true;
 							visibleToSun = false;
+							break;
 						}
 					} else {
 						isInSolid = false;
@@ -116,7 +120,7 @@ public class CroodaceousChunkGenerator extends ChunkGenerator {
 			}
 		}
 	}
-	
+
 	@Override
 	public void spawnOriginalMobs(WorldGenRegion region) {
 		ChunkPos chunkpos = region.getCenter();
@@ -125,13 +129,13 @@ public class CroodaceousChunkGenerator extends ChunkGenerator {
 		worldgenrandom.setDecorationSeed(region.getSeed(), chunkpos.getMinBlockX(), chunkpos.getMinBlockZ());
 		NaturalSpawner.spawnMobsForChunkGeneration(region, holder, chunkpos, worldgenrandom);
 	}
-	
+
 	@Override
 	public CompletableFuture<ChunkAccess> fillFromNoise(Executor executor, Blender blender, RandomState state, StructureManager structureFeatureManager, ChunkAccess chunk) {
 		fillNoiseSampleArrays(chunk);
 		Heightmap[] heightmaps = {chunk.getOrCreateHeightmapUnprimed(Heightmap.Types.OCEAN_FLOOR_WG), chunk.getOrCreateHeightmapUnprimed(Heightmap.Types.WORLD_SURFACE_WG)};
 		BlockPos.MutableBlockPos pos = new BlockPos.MutableBlockPos();
-		
+
 		for (int x = 0; x < 16; x++) {
 			for (int z = 0; z < 16; z++) {
 				for (int y = this.getMaxY(); y >= this.getMinY(); y--) {
@@ -169,11 +173,13 @@ public class CroodaceousChunkGenerator extends ChunkGenerator {
 
 		return CompletableFuture.completedFuture(chunk);
 	}
-	
+
 	private float sampleDensity(float x, float y, float z) {
 		int seaLevel = this.settings.value().seaLevel();
 		if (y > seaLevel) y = y + 3;
-		
+		BiomeManager biomeManager = new BiomeManager((CroodaceousBiomeSource)this.getBiomeSource(), this.seed);
+		Holder<Biome> biome = biomeManager.getBiome(new BlockPos(x, y, z));
+
 		float frequency1 = 0.3F;
 		float sample = noise.GetNoise(x * frequency1, y * frequency1 * 0.8F, z * frequency1);
 
@@ -199,7 +205,14 @@ public class CroodaceousChunkGenerator extends ChunkGenerator {
 		float lumpFrequency = 4.3F;
 		float cliffLumpiness = noise.GetNoise(x * lumpFrequency, y * lumpFrequency * 0.8F, z * lumpFrequency);
 		cliffLumpiness *= hugeCliffWobble * 0.1F;
-		sample += cliffLumpiness;
+		if (biome.is(CEBiomes.ROCKY_RIDGE.getKey())) {
+			sample += cliffLumpiness;
+		}
+		
+		float flatsFrequency = 3F;
+		float flatsNoise = noise.GetNoise((float) x * flatsFrequency, 0, (float) z * flatsFrequency);
+		flatsNoise = (1.0F - flatsNoise * flatsNoise);
+		flatsNoise *= (y - seaLevel);
 
 		float frequency2 = 2.5F;
 		sample += Mth.abs(noise.GetNoise(x * frequency2, y * frequency2, z * frequency2) * 0.2F);
@@ -210,7 +223,7 @@ public class CroodaceousChunkGenerator extends ChunkGenerator {
 		float riverNoise = noise.GetNoise(x * riverFrequency, 0, z * riverFrequency);
 		riverNoise = 1.0F - riverNoise * riverNoise;
 		riverNoise *= 0.3;
-		
+
 		float swampFrequency = 0.1F;
 		float swampNoise = noise.GetNoise(x * swampFrequency, 0, z * swampFrequency);
 		swampNoise = (1.0F - swampNoise * swampNoise);
@@ -222,11 +235,23 @@ public class CroodaceousChunkGenerator extends ChunkGenerator {
 		pebbleNoise *= 1;
 
 		sample += pebbleNoise;
-		sample -= riverNoise;
+		if (biome.is(CEBiomes.DESOLATE_DESERT.getKey()) || biome.is(CEBiomes.NESTING_GROUNDS.getKey()) || biome.is(Biomes.JUNGLE) || biome.is(Biomes.SPARSE_JUNGLE)) {
+			sample -= flatsNoise;
+		}
+		if (biome.is(Biomes.RIVER)) {
+			sample -= flatsNoise;
+			sample -= 4;
+			sample -= riverNoise;
+		}
 		sample -= 0.15F;
-		sample -= ((y - this.settings.value().seaLevel() - hugeCliffNoise * 64) / (16.0F / bigRockNoise * (hugeCliffWobble + 1)));
-		if (y <= this.getSeaLevel()) sample -= swampNoise;
-
+		if (biome.is(CEBiomes.ROCKY_RIDGE.getKey())) {
+			sample -= ((y - this.settings.value().seaLevel() - hugeCliffNoise * 64) / (16.0F / bigRockNoise * (hugeCliffWobble + 1)));
+		}
+		if (biome.is(Biomes.MANGROVE_SWAMP)) {
+			sample -= flatsNoise;
+			sample -= 2;
+			sample -= swampNoise;
+		}
 
 		float caveSample;
 		float sample1 = noise.GetNoise(x, y, z);
@@ -248,14 +273,14 @@ public class CroodaceousChunkGenerator extends ChunkGenerator {
 
 		return sample;
 	}
-	
+
 	public void fillNoiseSampleArrays(ChunkAccess chunk) {
 		int hSamplePoints = (int) Math.ceil(16 * 0.3F);
 		int vSamplePoints = (int) Math.ceil(this.getGenDepth() * 0.15F);
-		
+
 		float hOffset = (16.0F / (float) hSamplePoints);
 		float vOffset = ((float)this.getGenDepth() / (float) vSamplePoints);
-		
+
 		this.terrainShapeSamplePoints = new float[hSamplePoints + 1][vSamplePoints][hSamplePoints + 1];
 		for (int sX = 0; sX < hSamplePoints + 1; sX++) {
 			for (int sZ = 0; sZ < hSamplePoints + 1; sZ++) {
@@ -271,7 +296,7 @@ public class CroodaceousChunkGenerator extends ChunkGenerator {
 			}
 		}
 	}
-	
+
 	public float sampleDensityFromArray(float[][][] densityArray, int localX, int localY, int localZ) {
 		int maxXZ = 16;
 		int maxY = this.getGenDepth();
@@ -303,12 +328,12 @@ public class CroodaceousChunkGenerator extends ChunkGenerator {
 
 		return yLerp;
 	}
-	
+
 	@Override
 	public int getSeaLevel() {
 		return settings.value().seaLevel();
 	}
-	
+
 	@Override
 	public int getMinY() {
 		return -64;
@@ -345,8 +370,8 @@ public class CroodaceousChunkGenerator extends ChunkGenerator {
 
 	@Override
 	public void addDebugScreenInfo(List<String> pInfo, RandomState pRandom, BlockPos pPos) {
-		
+
 	}
 
-	
+
 }
