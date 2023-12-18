@@ -8,7 +8,6 @@ import net.minecraftforge.registries.DeferredRegister;
 import net.minecraftforge.registries.ForgeRegistries;
 import net.minecraftforge.registries.RegistryObject;
 
-@SuppressWarnings("unused")
 public class CEItems {
     public static final CreativeModeTab TAB = new CreativeModeTab(CroodaceousMod.MOD_ID) {
         @Override

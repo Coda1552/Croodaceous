@@ -15,54 +15,33 @@ import net.minecraft.util.Mth;
 import net.minecraft.util.RandomSource;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.damagesource.DamageSource;
-import net.minecraft.world.entity.AgeableMob;
-import net.minecraft.world.entity.Entity;
-import net.minecraft.world.entity.EntityDimensions;
-import net.minecraft.world.entity.EntityType;
-import net.minecraft.world.entity.EquipmentSlot;
-import net.minecraft.world.entity.LivingEntity;
-import net.minecraft.world.entity.Mob;
-import net.minecraft.world.entity.MobSpawnType;
-import net.minecraft.world.entity.Pose;
+import net.minecraft.world.entity.*;
 import net.minecraft.world.entity.ai.attributes.AttributeSupplier;
 import net.minecraft.world.entity.ai.attributes.Attributes;
-import net.minecraft.world.entity.ai.behavior.BehaviorUtils;
 import net.minecraft.world.entity.ai.control.FlyingMoveControl;
 import net.minecraft.world.entity.ai.control.MoveControl;
-import net.minecraft.world.entity.ai.goal.AvoidEntityGoal;
-import net.minecraft.world.entity.ai.goal.Goal;
-import net.minecraft.world.entity.ai.goal.LookAtPlayerGoal;
-import net.minecraft.world.entity.ai.goal.MeleeAttackGoal;
-import net.minecraft.world.entity.ai.goal.PanicGoal;
-import net.minecraft.world.entity.ai.goal.RandomLookAroundGoal;
-import net.minecraft.world.entity.ai.goal.WaterAvoidingRandomStrollGoal;
+import net.minecraft.world.entity.ai.goal.*;
 import net.minecraft.world.entity.ai.goal.target.NearestAttackableTargetGoal;
 import net.minecraft.world.entity.ai.goal.target.TargetGoal;
 import net.minecraft.world.entity.ai.navigation.FlyingPathNavigation;
-import net.minecraft.world.entity.ai.navigation.GroundPathNavigation;
 import net.minecraft.world.entity.ai.navigation.PathNavigation;
 import net.minecraft.world.entity.ai.targeting.TargetingConditions;
 import net.minecraft.world.entity.ai.util.DefaultRandomPos;
-import net.minecraft.world.entity.animal.Animal;
-import net.minecraft.world.entity.animal.FlyingAnimal;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.LevelAccessor;
-import net.minecraft.world.level.LevelReader;
-import net.minecraft.world.level.block.state.BlockState;
-import net.minecraft.world.level.pathfinder.BlockPathTypes;
 import net.minecraft.world.phys.AABB;
 import net.minecraft.world.phys.Vec3;
-import software.bernie.geckolib3.core.IAnimatable;
-import software.bernie.geckolib3.core.PlayState;
-import software.bernie.geckolib3.core.builder.AnimationBuilder;
-import software.bernie.geckolib3.core.builder.ILoopType;
-import software.bernie.geckolib3.core.controller.AnimationController;
-import software.bernie.geckolib3.core.event.predicate.AnimationEvent;
-import software.bernie.geckolib3.core.manager.AnimationData;
-import software.bernie.geckolib3.core.manager.AnimationFactory;
-import software.bernie.geckolib3.util.GeckoLibUtil;
+import software.bernie.geckolib.animatable.GeoEntity;
+import software.bernie.geckolib.core.animatable.GeoAnimatable;
+import software.bernie.geckolib.core.animatable.instance.AnimatableInstanceCache;
+import software.bernie.geckolib.core.animation.AnimatableManager;
+import software.bernie.geckolib.core.animation.AnimationController;
+import software.bernie.geckolib.core.animation.AnimationState;
+import software.bernie.geckolib.core.animation.RawAnimation;
+import software.bernie.geckolib.core.object.PlayState;
+import software.bernie.geckolib.util.GeckoLibUtil;
 
 import javax.annotation.Nullable;
 import java.util.Comparator;
@@ -71,7 +50,7 @@ import java.util.List;
 import java.util.UUID;
 import java.util.function.Predicate;
 
-public class Jackrobat extends BiphibianAnimal implements IAnimatable {
+public class Jackrobat extends BiphibianAnimal implements GeoEntity {
 
     // LEADER //
     private static final int MAX_GROUP_SIZE = 24;
@@ -89,10 +68,10 @@ public class Jackrobat extends BiphibianAnimal implements IAnimatable {
     private static final Predicate<LivingEntity> IS_LIYOTE_WITH_EGG = (e) -> !e.isInvulnerable() && e instanceof Liyote liyote && liyote.getEatingItem().is(CEItems.RAMU_EGG.get());
 
     // ANIMATIONS //
-    private final AnimationFactory factory = GeckoLibUtil.createFactory(this);
-    private static final AnimationBuilder ANIM_FLY = new AnimationBuilder().addAnimation("animation.jackrobat.fly", ILoopType.EDefaultLoopTypes.LOOP);
-    private static final AnimationBuilder ANIM_HOP = new AnimationBuilder().addAnimation("animation.jackrobat.hop", ILoopType.EDefaultLoopTypes.LOOP);
-    private static final AnimationBuilder ANIM_IDLE = new AnimationBuilder().addAnimation("animation.jackrobat.idle", ILoopType.EDefaultLoopTypes.LOOP);
+    private final AnimatableInstanceCache cache = GeckoLibUtil.createInstanceCache(this);
+    private static final RawAnimation ANIM_FLY = RawAnimation.begin().thenLoop("animation.jackrobat.fly");
+    private static final RawAnimation ANIM_HOP = RawAnimation.begin().thenLoop("animation.jackrobat.hop");
+    private static final RawAnimation ANIM_IDLE = RawAnimation.begin().thenLoop("animation.jackrobat.idle");
 
     public Jackrobat(EntityType<? extends Jackrobat> type, Level worldIn) {
         super(type, worldIn);
@@ -130,7 +109,7 @@ public class Jackrobat extends BiphibianAnimal implements IAnimatable {
     @Override
     public boolean doHurtTarget(Entity pEntity) {
         if(super.doHurtTarget(pEntity)) {
-            if(!level.isClientSide() && !isHoldingEgg() && pEntity instanceof Liyote liyote && IS_LIYOTE_WITH_EGG.test(liyote)) {
+            if(!level().isClientSide() && !isHoldingEgg() && pEntity instanceof Liyote liyote && IS_LIYOTE_WITH_EGG.test(liyote)) {
                 this.setItemInHand(InteractionHand.MAIN_HAND, liyote.getEatingItem().copy());
                 liyote.setEatingItem(ItemStack.EMPTY);
             }
@@ -163,7 +142,7 @@ public class Jackrobat extends BiphibianAnimal implements IAnimatable {
             eatEggCooldown--;
         }
         // check and stop flying
-        if(this.getNavigation().isDone() && this.isFlying() && (this.isOnGround() || this.getRandom().nextFloat() < 0.04F)) {
+        if(this.getNavigation().isDone() && this.isFlying() && (this.onGround() || this.getRandom().nextFloat() < 0.04F)) {
             this.setWantsToFly(false);
             this.isNavigationDirty = true;
         }
@@ -298,7 +277,7 @@ public class Jackrobat extends BiphibianAnimal implements IAnimatable {
             return;
         }
         // send particles
-        if(level instanceof ServerLevel serverLevel) {
+        if(level() instanceof ServerLevel serverLevel) {
             Vec3 look = this.calculateViewVector(this.getViewXRot(1F), this.yBodyRot);
             Vec3 pos = getPosition(1F);
             Vec3 vec = pos.add(look.x, look.y, look.z);
@@ -349,7 +328,7 @@ public class Jackrobat extends BiphibianAnimal implements IAnimatable {
         groupSize = pCompound.getInt(KEY_GROUP_SIZE);
         eatEggCooldown = pCompound.getInt(KEY_EAT_EGG_COOLDOWN);
         remainingEgg = pCompound.getFloat(KEY_REMAINING_EGG);
-        if(pCompound.contains(KEY_LEADER) && level instanceof ServerLevel serverLevel) {
+        if(pCompound.contains(KEY_LEADER) && level() instanceof ServerLevel serverLevel) {
             // attempt to load leader by UUID
             final UUID leaderId = pCompound.getUUID(KEY_LEADER);
             final Jackrobat leader = (Jackrobat) serverLevel.getEntity(leaderId);
@@ -371,8 +350,8 @@ public class Jackrobat extends BiphibianAnimal implements IAnimatable {
 
     //// ANIMATIONS ////
 
-    private PlayState animControllerMain(AnimationEvent<?> e) {
-        if(!isOnGround() && Math.abs(this.getDeltaMovement().y()) > 0.0002F) {
+    private <T extends GeoAnimatable> PlayState predicate(AnimationState<T> e) {
+        if(!onGround() && Math.abs(this.getDeltaMovement().y()) > 0.0002F) {
             e.getController().setAnimation(ANIM_FLY);
         } else if(e.isMoving()) {
             e.getController().setAnimation(ANIM_HOP);
@@ -383,13 +362,13 @@ public class Jackrobat extends BiphibianAnimal implements IAnimatable {
     }
 
     @Override
-    public void registerControllers(AnimationData data) {
-        data.addAnimationController(new AnimationController<>(this, "controller", 2F, this::animControllerMain));
+    public void registerControllers(AnimatableManager.ControllerRegistrar controllerRegistrar) {
+        controllerRegistrar.add(new AnimationController<>(this, "controller", 2, this::predicate));
     }
 
     @Override
-    public AnimationFactory getFactory() {
-        return factory;
+    public AnimatableInstanceCache getAnimatableInstanceCache() {
+        return cache;
     }
 
     //// GOALS ////
@@ -478,7 +457,7 @@ public class Jackrobat extends BiphibianAnimal implements IAnimatable {
             }
             // locate nearby entities
             AABB aabb = entity.getBoundingBox().inflate(this.range);
-            List<Jackrobat> list = entity.level.getEntitiesOfClass(Jackrobat.class, aabb, e -> e != this.entity && e.getGroupSize() < MAX_GROUP_SIZE);
+            List<Jackrobat> list = entity.level().getEntitiesOfClass(Jackrobat.class, aabb, e -> e != this.entity && e.getGroupSize() < MAX_GROUP_SIZE);
             // verify at least one entity was found
             if(list.isEmpty()) {
                 return;
@@ -547,7 +526,7 @@ public class Jackrobat extends BiphibianAnimal implements IAnimatable {
             }
             // find target
             final AABB aabb = this.entity.getBoundingBox().inflate(within);
-            this.target = this.entity.level.getNearestEntity(Jackrobat.class, this.selector, null, this.entity.getX(), this.entity.getY(), this.entity.getZ(), aabb);
+            this.target = this.entity.level().getNearestEntity(Jackrobat.class, this.selector, null, this.entity.getX(), this.entity.getY(), this.entity.getZ(), aabb);
             return this.target != null;
         }
 

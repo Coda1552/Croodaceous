@@ -5,6 +5,7 @@ import coda.croodaceous.common.entities.Bearowl;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.util.Mth;
 import software.bernie.geckolib.core.animation.AnimationState;
+import software.bernie.geckolib.model.DefaultedGeoModel;
 import software.bernie.geckolib.model.GeoModel;
 
 public class BearowlModel extends GeoModel<Bearowl> {

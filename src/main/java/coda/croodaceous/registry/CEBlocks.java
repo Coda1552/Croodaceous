@@ -21,7 +21,6 @@ import org.jetbrains.annotations.Nullable;
 import java.util.function.BiFunction;
 import java.util.function.Supplier;
 
-@SuppressWarnings("unused")
 public class CEBlocks {
 	public static final DeferredRegister<Block> BLOCKS = DeferredRegister.create(ForgeRegistries.BLOCKS, CroodaceousMod.MOD_ID);
 

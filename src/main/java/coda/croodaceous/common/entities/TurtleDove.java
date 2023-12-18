@@ -46,17 +46,16 @@ import net.minecraft.world.level.LevelAccessor;
 import net.minecraft.world.level.ServerLevelAccessor;
 import net.minecraftforge.registries.ForgeRegistries;
 import org.jetbrains.annotations.Nullable;
-import software.bernie.geckolib3.core.IAnimatable;
-import software.bernie.geckolib3.core.PlayState;
-import software.bernie.geckolib3.core.builder.AnimationBuilder;
-import software.bernie.geckolib3.core.builder.ILoopType;
-import software.bernie.geckolib3.core.controller.AnimationController;
-import software.bernie.geckolib3.core.event.predicate.AnimationEvent;
-import software.bernie.geckolib3.core.manager.AnimationData;
-import software.bernie.geckolib3.core.manager.AnimationFactory;
-import software.bernie.geckolib3.util.GeckoLibUtil;
+import software.bernie.geckolib.animatable.GeoEntity;
+import software.bernie.geckolib.core.animatable.instance.AnimatableInstanceCache;
+import software.bernie.geckolib.core.animation.AnimatableManager;
+import software.bernie.geckolib.core.animation.AnimationController;
+import software.bernie.geckolib.core.animation.AnimationState;
+import software.bernie.geckolib.core.animation.RawAnimation;
+import software.bernie.geckolib.core.object.PlayState;
+import software.bernie.geckolib.util.GeckoLibUtil;
 
-public class TurtleDove extends BiphibianAnimal implements IAnimatable {
+public class TurtleDove extends BiphibianAnimal implements GeoEntity {
 
     // ANIMAL //
     private static final TagKey<Item> IS_FOOD = ForgeRegistries.ITEMS.tags().createTagKey(new ResourceLocation(CroodaceousMod.MOD_ID, "turtle_dove_food"));
@@ -64,10 +63,10 @@ public class TurtleDove extends BiphibianAnimal implements IAnimatable {
     private static final int MAX_WANDER_DISTANCE = 64;
 
     // GECKOLIB //
-    private final AnimationFactory factory = GeckoLibUtil.createFactory(this);
-    private static final AnimationBuilder ANIM_FLIGHT = new AnimationBuilder().addAnimation("animation.turtle_dove.flight", ILoopType.EDefaultLoopTypes.LOOP);
-    private static final AnimationBuilder ANIM_CRAWL = new AnimationBuilder().addAnimation("animation.turtle_dove.crawl", ILoopType.EDefaultLoopTypes.LOOP);
-    private static final AnimationBuilder ANIM_IDLE = new AnimationBuilder().addAnimation("animation.turtle_dove.idle", ILoopType.EDefaultLoopTypes.LOOP);
+    private final AnimatableInstanceCache cache = GeckoLibUtil.createInstanceCache(this);
+    private static final RawAnimation ANIM_FLIGHT = RawAnimation.begin().thenLoop("animation.turtle_dove.flight");
+    private static final RawAnimation ANIM_CRAWL = RawAnimation.begin().thenLoop("animation.turtle_dove.crawl");
+    private static final RawAnimation ANIM_IDLE = RawAnimation.begin().thenLoop("animation.turtle_dove.idle");
     public float yBodyRollO;
     public float yBodyRoll;
 
@@ -121,7 +120,7 @@ public class TurtleDove extends BiphibianAnimal implements IAnimatable {
     public void tick() {
         super.tick();
         // calculate flight animation
-        if(this.level.isClientSide()) {
+        if(this.level().isClientSide()) {
             this.yBodyRollO = this.yBodyRoll;
             final float deltaRoll = 0.05F;
             final float deltaYRot = Mth.wrapDegrees(yHeadRot - yBodyRot);
@@ -165,7 +164,7 @@ public class TurtleDove extends BiphibianAnimal implements IAnimatable {
         // update home position
         if(!this.hasRestriction()) {
             BlockPos.MutableBlockPos terrainHeight = blockPosition().mutable();
-            while(this.level.getBlockState(terrainHeight).getMaterial().blocksMotion() && !this.level.isOutsideBuildHeight(terrainHeight.move(Direction.DOWN)));
+            while(this.level().getBlockState(terrainHeight).blocksMotion() && !this.level().isOutsideBuildHeight(terrainHeight.move(Direction.DOWN)));
             this.restrictTo(terrainHeight, MAX_WANDER_DISTANCE);
         }
         return data;
@@ -188,12 +187,12 @@ public class TurtleDove extends BiphibianAnimal implements IAnimatable {
         ItemStack itemstack = pPlayer.getItemInHand(pHand);
         if (this.isFood(itemstack)) {
             int i = this.getAge();
-            if (!this.level.isClientSide && i == 0 && this.canFallInLove()) {
+            if (!this.level().isClientSide && i == 0 && this.canFallInLove()) {
                 this.usePlayerItem(pPlayer, pHand, itemstack);
                 if(this.getRandom().nextFloat() < FALL_IN_LOVE_CHANCE) {
                     this.setInLove(pPlayer);
                 } else {
-                    this.level.broadcastEntityEvent(this, EntityEvent.TAMING_FAILED);
+                    this.level().broadcastEntityEvent(this, EntityEvent.TAMING_FAILED);
                 }
                 return InteractionResult.SUCCESS;
             }
@@ -201,10 +200,10 @@ public class TurtleDove extends BiphibianAnimal implements IAnimatable {
             if (this.isBaby()) {
                 this.usePlayerItem(pPlayer, pHand, itemstack);
                 this.ageUp(getSpeedUpSecondsWhenFeeding(-i), true);
-                return InteractionResult.sidedSuccess(this.level.isClientSide);
+                return InteractionResult.sidedSuccess(this.level().isClientSide);
             }
 
-            if (this.level.isClientSide) {
+            if (this.level().isClientSide) {
                 return InteractionResult.CONSUME;
             }
         }
@@ -296,9 +295,9 @@ public class TurtleDove extends BiphibianAnimal implements IAnimatable {
 
     //// ANIMATIONS ////
 
-    private PlayState animationPredicate(AnimationEvent<TurtleDove> event) {
+    private PlayState animationPredicate(AnimationState<TurtleDove> event) {
         final boolean isMoving = this.getDeltaMovement().horizontalDistanceSqr() > 0.0004F;
-        if(!isOnGround() && Math.abs(this.getDeltaMovement().y()) > 0.0002F) {
+        if(!onGround() && Math.abs(this.getDeltaMovement().y()) > 0.0002F) {
             event.getController().setAnimation(ANIM_FLIGHT);
         } else if(isMoving) {
             event.getController().setAnimation(ANIM_CRAWL);
@@ -309,12 +308,13 @@ public class TurtleDove extends BiphibianAnimal implements IAnimatable {
     }
 
     @Override
-    public void registerControllers(AnimationData data) {
-        data.addAnimationController(new AnimationController<>(this, "controller", 4F, this::animationPredicate));
+    public void registerControllers(AnimatableManager.ControllerRegistrar controllerRegistrar) {
+        controllerRegistrar.add(new AnimationController<>(this, "controller", 4, this::animationPredicate));
+
     }
 
     @Override
-    public AnimationFactory getFactory() {
-        return factory;
+    public AnimatableInstanceCache getAnimatableInstanceCache() {
+        return cache;
     }
 }
