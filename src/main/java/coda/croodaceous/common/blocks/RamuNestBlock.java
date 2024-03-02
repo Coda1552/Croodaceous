@@ -12,8 +12,6 @@ import net.minecraft.sounds.SoundSource;
 import net.minecraft.util.RandomSource;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.InteractionResult;
-import net.minecraft.world.entity.EntityType;
-import net.minecraft.world.entity.animal.Turtle;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.BlockGetter;
@@ -26,9 +24,8 @@ import net.minecraft.world.level.block.state.StateDefinition;
 import net.minecraft.world.level.block.state.properties.BlockStateProperties;
 import net.minecraft.world.level.block.state.properties.BooleanProperty;
 import net.minecraft.world.level.block.state.properties.IntegerProperty;
-import net.minecraft.world.level.material.Material;
-import net.minecraft.world.level.material.MaterialColor;
-import net.minecraft.world.level.storage.loot.LootContext;
+import net.minecraft.world.level.material.MapColor;
+import net.minecraft.world.level.storage.loot.LootParams;
 import net.minecraft.world.phys.AABB;
 import net.minecraft.world.phys.BlockHitResult;
 import net.minecraft.world.phys.shapes.CollisionContext;
@@ -43,7 +40,7 @@ public class RamuNestBlock extends Block {
 	public static final IntegerProperty HATCH = BlockStateProperties.HATCH;
 
 	public RamuNestBlock() {
-		super(BlockBehaviour.Properties.of(Material.GRASS, MaterialColor.COLOR_YELLOW).strength(0.5F).sound(SoundType.GRASS).randomTicks());
+		super(BlockBehaviour.Properties.of().mapColor(MapColor.COLOR_YELLOW).strength(0.5F).sound(SoundType.GRASS).randomTicks());
 		this.registerDefaultState(this.stateDefinition.any().setValue(HATCH, 0).setValue(WITH_EGG, Boolean.FALSE));
 	}
 
@@ -124,9 +121,9 @@ public class RamuNestBlock extends Block {
 		});
 		super.onRemove(pState, pLevel, pPos, pNewState, pIsMoving);
 	}
-	
+
 	@Override
-	public List<ItemStack> getDrops(BlockState pState, LootContext.Builder pBuilder) {
+	public List<ItemStack> getDrops(BlockState pState, LootParams.Builder pParams) {
 		ArrayList<ItemStack> drops = new ArrayList<>();
 		if (pState.getValue(WITH_EGG)) {
 			drops.add(new ItemStack(CEItems.RAMU_EGG.get()));
@@ -134,5 +131,4 @@ public class RamuNestBlock extends Block {
 		drops.add(new ItemStack(CEBlocks.RAMU_NEST.get().asItem()));
 		return drops;
 	}
-	
 }

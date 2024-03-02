@@ -317,7 +317,7 @@ public class BearPear extends Animal implements GeoEntity {
      * @return the first valid position to start hanging, if any was found
      */
     public Optional<BlockPos> findHangingPos(final Vec3 position) {
-        BlockPos.MutableBlockPos mPos = new BlockPos(position).mutable();
+        BlockPos.MutableBlockPos mPos = BlockPos.containing(position).mutable();
         for(int i = 1; i <= MAX_DROPPING_DISTANCE; i++) {
             mPos.move(Direction.UP);
             if(canHangOn(mPos)) {

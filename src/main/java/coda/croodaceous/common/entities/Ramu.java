@@ -18,10 +18,21 @@ import net.minecraft.world.DifficultyInstance;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.InteractionResult;
 import net.minecraft.world.damagesource.DamageSource;
-import net.minecraft.world.entity.*;
+import net.minecraft.world.entity.AgeableMob;
+import net.minecraft.world.entity.Entity;
+import net.minecraft.world.entity.EntityType;
+import net.minecraft.world.entity.EquipmentSlot;
+import net.minecraft.world.entity.LivingEntity;
+import net.minecraft.world.entity.MobSpawnType;
+import net.minecraft.world.entity.SpawnGroupData;
 import net.minecraft.world.entity.ai.attributes.AttributeSupplier;
 import net.minecraft.world.entity.ai.attributes.Attributes;
-import net.minecraft.world.entity.ai.goal.*;
+import net.minecraft.world.entity.ai.goal.BreedGoal;
+import net.minecraft.world.entity.ai.goal.FloatGoal;
+import net.minecraft.world.entity.ai.goal.Goal;
+import net.minecraft.world.entity.ai.goal.MeleeAttackGoal;
+import net.minecraft.world.entity.ai.goal.RandomLookAroundGoal;
+import net.minecraft.world.entity.ai.goal.WaterAvoidingRandomStrollGoal;
 import net.minecraft.world.entity.ai.goal.target.HurtByTargetGoal;
 import net.minecraft.world.entity.ai.goal.target.NearestAttackableTargetGoal;
 import net.minecraft.world.entity.ai.village.poi.PoiManager;
@@ -35,27 +46,26 @@ import net.minecraft.world.level.Level;
 import net.minecraft.world.level.LevelAccessor;
 import net.minecraft.world.level.ServerLevelAccessor;
 import net.minecraft.world.phys.Vec3;
-import software.bernie.geckolib3.core.IAnimatable;
-import software.bernie.geckolib3.core.PlayState;
-import software.bernie.geckolib3.core.builder.AnimationBuilder;
-import software.bernie.geckolib3.core.builder.ILoopType;
-import software.bernie.geckolib3.core.controller.AnimationController;
-import software.bernie.geckolib3.core.event.predicate.AnimationEvent;
-import software.bernie.geckolib3.core.manager.AnimationData;
-import software.bernie.geckolib3.core.manager.AnimationFactory;
-import software.bernie.geckolib3.util.GeckoLibUtil;
+import software.bernie.geckolib.animatable.GeoEntity;
+import software.bernie.geckolib.core.animatable.instance.AnimatableInstanceCache;
+import software.bernie.geckolib.core.animation.AnimatableManager;
+import software.bernie.geckolib.core.animation.AnimationController;
+import software.bernie.geckolib.core.animation.AnimationState;
+import software.bernie.geckolib.core.animation.RawAnimation;
+import software.bernie.geckolib.core.object.PlayState;
+import software.bernie.geckolib.util.GeckoLibUtil;
 
 import javax.annotation.Nullable;
 import java.util.Optional;
 
-public class Ramu extends Animal implements IAnimatable {
+public class Ramu extends Animal implements GeoEntity {
 	private static final EntityDataAccessor<Boolean> DATA_SITTING = SynchedEntityData.defineId(Ramu.class, EntityDataSerializers.BOOLEAN);
 	private static final EntityDataAccessor<Boolean> DATA_CE = SynchedEntityData.defineId(Ramu.class, EntityDataSerializers.BOOLEAN);
-	private final AnimationFactory factory = GeckoLibUtil.createFactory(this);
-	private static final AnimationBuilder ANIM_CHARGE = new AnimationBuilder().addAnimation("animation.ramu.charge", ILoopType.EDefaultLoopTypes.LOOP);
-	private static final AnimationBuilder ANIM_WALK = new AnimationBuilder().addAnimation("animation.ramu.walk", ILoopType.EDefaultLoopTypes.LOOP);
-	private static final AnimationBuilder ANIM_SIT = new AnimationBuilder().addAnimation("animation.ramu.sit", ILoopType.EDefaultLoopTypes.LOOP);
-	private static final AnimationBuilder ANIM_IDLE = new AnimationBuilder().addAnimation("animation.ramu.idle", ILoopType.EDefaultLoopTypes.LOOP);
+	private final AnimatableInstanceCache factory = GeckoLibUtil.createInstanceCache(this);
+	private static final RawAnimation ANIM_CHARGE = RawAnimation.begin().thenLoop("animation.ramu.charge");
+	private static final RawAnimation ANIM_WALK = RawAnimation.begin().thenLoop("animation.ramu.walk");
+	private static final RawAnimation ANIM_SIT = RawAnimation.begin().thenLoop("animation.ramu.sit");
+	private static final RawAnimation ANIM_IDLE = RawAnimation.begin().thenLoop("animation.ramu.idle");
 
 	private boolean sitting;
 	private boolean wantsSit;
@@ -97,7 +107,7 @@ public class Ramu extends Animal implements IAnimatable {
 		return livingEntity.getPosition(1F).distanceTo(new Vec3(nestPos.getX(), nestPos.getY(), nestPos.getZ())) < 4 || livingEntity.getMainHandItem().getItem() == CEItems.RAMU_EGG.get();
 	}
 	
-	private PlayState animControllerMain(AnimationEvent<?> e) {
+	private PlayState animControllerMain(AnimationState<?> e) {
 		if (e.isMoving()) {
 			if (this.isSprinting()) {
 				e.getController().setAnimation(ANIM_CHARGE);
@@ -113,12 +123,12 @@ public class Ramu extends Animal implements IAnimatable {
 	}
 
 	@Override
-	public void registerControllers(AnimationData data) {
-		data.addAnimationController(new AnimationController<>(this, "controller", 2F, this::animControllerMain));
+	public void registerControllers(AnimatableManager.ControllerRegistrar controllerRegistrar) {
+		controllerRegistrar.add(new AnimationController<GeoEntity>(this, "controller", 2, this::animControllerMain));
 	}
-	
+
 	@Override
-	public AnimationFactory getFactory() {
+	public AnimatableInstanceCache getAnimatableInstanceCache() {
 		return factory;
 	}
 
@@ -143,8 +153,8 @@ public class Ramu extends Animal implements IAnimatable {
 	@Override
 	public void tick() {
 		super.tick();
-		if (!level.isClientSide) {
-			if (nestPos != null && level.getBlockState(nestPos).getBlock() != CEBlocks.RAMU_NEST.get()) {
+		if (!level().isClientSide) {
+			if (nestPos != null && level().getBlockState(nestPos).getBlock() != CEBlocks.RAMU_NEST.get()) {
 				nestPos = null;
 			}
 			if (this.isSitting()) {
@@ -177,7 +187,7 @@ public class Ramu extends Animal implements IAnimatable {
 			}
 			if (willLayEgg && isOnNest()) {
 				if (!hasEggOnNest()) {
-					this.level.setBlock(nestPos, CEBlocks.RAMU_NEST.get().defaultBlockState().setValue(RamuNestBlock.WITH_EGG, true), 3);
+					this.level().setBlock(nestPos, CEBlocks.RAMU_NEST.get().defaultBlockState().setValue(RamuNestBlock.WITH_EGG, true), 3);
 					willLayEgg = false;
 					carryingEgg = false;
 				}
@@ -186,7 +196,7 @@ public class Ramu extends Animal implements IAnimatable {
 				findNest();
 			}
 			if (!sitting && !willLayEgg && nestPos != null && !hasEggOnNest()) {
-				this.level.getEntitiesOfClass(ItemEntity.class, this.getBoundingBox().inflate(8F), e -> e.getItem().getItem() == CEItems.RAMU_EGG.get())
+				this.level().getEntitiesOfClass(ItemEntity.class, this.getBoundingBox().inflate(8F), e -> e.getItem().getItem() == CEItems.RAMU_EGG.get())
 				          .stream()
 				          .findFirst()
 				          .ifPresent(e -> {
@@ -213,11 +223,11 @@ public class Ramu extends Animal implements IAnimatable {
 	}
 	
 	private boolean hasEggOnNest() {
-		return this.level.getBlockState(nestPos).getValue(RamuNestBlock.WITH_EGG);
+		return this.level().getBlockState(nestPos).getValue(RamuNestBlock.WITH_EGG);
 	}
 	
 	private void findNest() {
-		PoiManager poiManager = ((ServerLevel) level).getPoiManager();
+		PoiManager poiManager = ((ServerLevel) level()).getPoiManager();
 		Optional<BlockPos> poi = poiManager.findClosest(e -> {
 			assert CEPoiTypes.RAMU_NEST.getKey() != null;
 
@@ -236,7 +246,7 @@ public class Ramu extends Animal implements IAnimatable {
 	
 	@Override
 	public InteractionResult mobInteract(Player pPlayer, InteractionHand pHand) {
-		if (level.isClientSide) {
+		if (level().isClientSide) {
 			return InteractionResult.SUCCESS;
 		}
 		ItemStack itemStack = pPlayer.getMainHandItem();
@@ -353,8 +363,8 @@ public class Ramu extends Animal implements IAnimatable {
 	
 	@Override
 	protected void tickDeath() {
-		if (!level.isClientSide && this.deathTime == 0 && nestPos != null) {
-			((ServerLevel) level).getPoiManager().release(nestPos);
+		if (!level().isClientSide && this.deathTime == 0 && nestPos != null) {
+			((ServerLevel) level()).getPoiManager().release(nestPos);
 		}
 		super.tickDeath();
 	}

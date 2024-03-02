@@ -173,6 +173,6 @@ public class OldDesertBaobabFeature extends Feature<NoneFeatureConfiguration> {
         if (pos.getY() > reader.getMaxBuildHeight() || pos.getY() < 0) {
             return false;
         }
-        return reader.getBlockState(pos).getBlock().equals(CEBlocks.DESERT_BAOBAB_SAPLING.get()) || reader.isEmptyBlock(pos) || reader.getBlockState(pos).getMaterial().isReplaceable();
+        return reader.getBlockState(pos).getBlock().equals(CEBlocks.DESERT_BAOBAB_SAPLING.get()) || reader.isEmptyBlock(pos) || reader.getBlockState(pos).canBeReplaced();
     }
 }

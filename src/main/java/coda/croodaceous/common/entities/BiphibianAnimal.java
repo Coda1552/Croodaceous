@@ -57,7 +57,7 @@ public abstract class BiphibianAnimal extends Animal implements FlyingAnimal {
     abstract double getMaxWalkingDistance();
 
     public boolean prefersToFly(final double x, final double y, final double z) {
-        if(this.level.getBlockState(new BlockPos(x, y - 1, z)).isAir()) {
+        if(this.level().getBlockState(BlockPos.containing(x, y - 1, z)).isAir()) {
             return true;
         }
         final double maxWalkingDis = getMaxWalkingDistance();
@@ -103,7 +103,7 @@ public abstract class BiphibianAnimal extends Animal implements FlyingAnimal {
     public void tick() {
         super.tick();
         // ground
-        BlockPos ground = new BlockPos(this.getX(), this.getY() - 1.0D, this.getZ());
+        BlockPos ground = BlockPos.containing(this.getX(), this.getY() - 1.0D, this.getZ());
         //this.setOnGround(this.isOnGround() || this.verticalCollisionBelow || level.getBlockState(ground).entityCanStandOn(level, ground, this));
         // slow falling
         if(isSlowFalling() && this.getDeltaMovement().y() < 0.0D) {
@@ -134,7 +134,7 @@ public abstract class BiphibianAnimal extends Animal implements FlyingAnimal {
             this.move(MoverType.SELF, this.getDeltaMovement());
             this.setDeltaMovement(this.getDeltaMovement().scale(friction));
         }
-        this.calculateEntityAnimation(this, false);
+        this.calculateEntityAnimation(false);
     }
 
     @Override
@@ -165,7 +165,7 @@ public abstract class BiphibianAnimal extends Animal implements FlyingAnimal {
 
     @Override
     public boolean isFlying() {
-        return !isOnGround();
+        return !onGround();
     }
 
     public boolean wantsToFly() {

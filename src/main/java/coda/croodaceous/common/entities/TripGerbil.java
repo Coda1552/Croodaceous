@@ -3,7 +3,6 @@ package coda.croodaceous.common.entities;
 import coda.croodaceous.CroodaceousMod;
 import coda.croodaceous.common.network.CENetwork;
 import coda.croodaceous.common.network.ClientBoundTripGerbilPartnerPacket;
-import coda.croodaceous.registry.CEBlocks;
 import coda.croodaceous.registry.CEEntities;
 import net.minecraft.core.BlockPos;
 import net.minecraft.nbt.CompoundTag;
@@ -25,7 +24,6 @@ import net.minecraft.world.effect.MobEffects;
 import net.minecraft.world.entity.AgeableMob;
 import net.minecraft.world.entity.EntityDimensions;
 import net.minecraft.world.entity.EntityType;
-import net.minecraft.world.entity.EquipmentSlot;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.Mob;
 import net.minecraft.world.entity.MobSpawnType;
@@ -44,23 +42,20 @@ import net.minecraft.world.entity.animal.Animal;
 import net.minecraft.world.entity.animal.FlyingAnimal;
 import net.minecraft.world.entity.animal.WaterAnimal;
 import net.minecraft.world.entity.player.Player;
-import net.minecraft.world.entity.projectile.ProjectileUtil;
-import net.minecraft.world.item.Items;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.LevelAccessor;
 import net.minecraft.world.level.ServerLevelAccessor;
-import net.minecraft.world.level.levelgen.structure.BoundingBox;
 import net.minecraft.world.phys.AABB;
 import net.minecraft.world.phys.Vec3;
 import net.minecraftforge.network.PacketDistributor;
 import net.minecraftforge.registries.ForgeRegistries;
-import software.bernie.geckolib3.core.IAnimatable;
-import software.bernie.geckolib3.core.PlayState;
-import software.bernie.geckolib3.core.controller.AnimationController;
-import software.bernie.geckolib3.core.event.predicate.AnimationEvent;
-import software.bernie.geckolib3.core.manager.AnimationData;
-import software.bernie.geckolib3.core.manager.AnimationFactory;
-import software.bernie.geckolib3.util.GeckoLibUtil;
+import software.bernie.geckolib.animatable.GeoEntity;
+import software.bernie.geckolib.core.animatable.instance.AnimatableInstanceCache;
+import software.bernie.geckolib.core.animation.AnimatableManager;
+import software.bernie.geckolib.core.animation.AnimationController;
+import software.bernie.geckolib.core.animation.AnimationState;
+import software.bernie.geckolib.core.object.PlayState;
+import software.bernie.geckolib.util.GeckoLibUtil;
 
 import javax.annotation.Nullable;
 import java.util.EnumSet;
@@ -69,7 +64,7 @@ import java.util.Optional;
 import java.util.UUID;
 import java.util.function.Predicate;
 
-public class TripGerbil extends Animal implements IAnimatable {
+public class TripGerbil extends Animal implements GeoEntity {
 
     // SYNCED DATA //
     private static final EntityDataAccessor<Optional<UUID>> DATA_PARTNER = SynchedEntityData.defineId(TripGerbil.class, EntityDataSerializers.OPTIONAL_UUID);
@@ -93,7 +88,7 @@ public class TripGerbil extends Animal implements IAnimatable {
 
 
     // ANIMATIONS //
-    private final AnimationFactory factory = GeckoLibUtil.createFactory(this);
+    private final AnimatableInstanceCache factory = GeckoLibUtil.createInstanceCache(this);
 
     public TripGerbil(EntityType<? extends TripGerbil> type, Level worldIn) {
         super(type, worldIn);
@@ -162,18 +157,18 @@ public class TripGerbil extends Animal implements IAnimatable {
     protected void customServerAiStep() {
         super.customServerAiStep();
         // sync partner to client
-        if(!level.isClientSide() && this.isPartnerDirty && tickCount > 1) {
+        if(!this.level().isClientSide() && this.isPartnerDirty && tickCount > 1) {
             this.isPartnerDirty = false;
             final Optional<UUID> oId = getPartnerId();
             if(oId.isPresent()) {
-                this.partner = (TripGerbil) ((ServerLevel) this.level).getEntity(oId.get());
+                this.partner = (TripGerbil) ((ServerLevel) this.level()).getEntity(oId.get());
             }
             CENetwork.CHANNEL.send(PacketDistributor.TRACKING_ENTITY_AND_SELF.with(() -> this), new ClientBoundTripGerbilPartnerPacket(this.getId(), this.partner != null ? this.partner.getId() : -1));
         }
         // attempt to trip nearby entities
-        if(!level.isClientSide() && this.isLeader() && this.partner != null) {
+        if(!level().isClientSide() && this.isLeader() && this.partner != null) {
             getEntitiesToTrip(this.position(), this.partner.position()).forEach(e -> {
-                e.hurt(DamageSource.indirectMobAttack(this, this), 1.0F);
+                e.hurt(this.level().damageSources().indirectMagic(this, this), 1.0F);
                 e.setDeltaMovement(e.getDeltaMovement().multiply(0, 1, 0).add(0, 0.02D, 0));
                 e.hurtMarked = true;
                 e.addEffect(new MobEffectInstance(MobEffects.MOVEMENT_SLOWDOWN, 20, 4, false, false, false));
@@ -287,7 +282,7 @@ public class TripGerbil extends Animal implements IAnimatable {
     public void readAdditionalSaveData(CompoundTag pCompound) {
         super.readAdditionalSaveData(pCompound);
         setLeader(pCompound.getBoolean(KEY_LEADER));
-        if(pCompound.contains(KEY_PARTNER) && level instanceof ServerLevel serverLevel) {
+        if(pCompound.contains(KEY_PARTNER) && level() instanceof ServerLevel serverLevel) {
             // attempt to load partner by UUID
             final UUID partnerId = pCompound.getUUID(KEY_PARTNER);
             this.getEntityData().set(DATA_PARTNER, Optional.of(partnerId));
@@ -306,18 +301,18 @@ public class TripGerbil extends Animal implements IAnimatable {
 
     //// ANIMATIONS ////
 
-    private PlayState animControllerMain(AnimationEvent<?> e) {
+    private PlayState animControllerMain(AnimationState<?> e) {
         // TODO trip gerbil animations
         return PlayState.CONTINUE;
     }
 
     @Override
-    public void registerControllers(AnimationData data) {
-        data.addAnimationController(new AnimationController<>(this, "controller", 2F, this::animControllerMain));
+    public void registerControllers(AnimatableManager.ControllerRegistrar controllerRegistrar) {
+        controllerRegistrar.add(new AnimationController<GeoEntity>(this, "controller", 2, this::animControllerMain));
     }
 
     @Override
-    public AnimationFactory getFactory() {
+    public AnimatableInstanceCache getAnimatableInstanceCache() {
         return factory;
     }
 
@@ -327,7 +322,7 @@ public class TripGerbil extends Animal implements IAnimatable {
         final double dY = 0.4D;
         final AABB aabb = fromCorners(first.add(0, -dY, 0), second.add(0, dY, 0));
         final TargetingConditions conditions = CAN_TRIP_CONDITIONS.copy().selector(CAN_TRIP_PREDICATE.and(e -> intersects(first, second, aabb)));
-        return level.getNearbyEntities(LivingEntity.class, conditions, this, aabb);
+        return level().getNearbyEntities(LivingEntity.class, conditions, this, aabb);
     }
 
     private static AABB fromCorners(final Vec3 pFirst, final Vec3 pSecond) {

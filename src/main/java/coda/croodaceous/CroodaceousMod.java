@@ -29,6 +29,7 @@ public class CroodaceousMod {
 		CEEntities.ENTITIES.register(bus);
 		CEItems.ITEMS.register(bus);
 		CEBlocks.BLOCKS.register(bus);
+		CECreativeModeTabs.CREATIVE_MODE_TABS.register(bus);
 		CEPoiTypes.POIS.register(bus);
 		CEFeatures.FEATURES.register(bus);
 
