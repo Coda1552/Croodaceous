@@ -1,6 +1,5 @@
 package coda.croodaceous.client.model;
 
-import coda.croodaceous.CroodaceousMod;
 import coda.croodaceous.common.entities.TurtleDove;
 import net.minecraft.util.Mth;
 import software.bernie.geckolib.constant.DataTickets;
@@ -9,7 +8,7 @@ import software.bernie.geckolib.core.animation.AnimationState;
 public class TurtleDoveModel<T extends TurtleDove> extends SimpleGeoModel<T> {
 
     public TurtleDoveModel() {
-        super(CroodaceousMod.MOD_ID, "turtle_dove");
+        super("turtle_dove");
     }
 
     @Override

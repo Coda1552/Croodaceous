@@ -43,7 +43,7 @@ public class StealItemFromPlayerGoal extends Goal {
 		}
 		final Vec3 pos = this.mob.position();
 		final Predicate<Entity> canStealPredicate = e -> e instanceof Player player && !player.isCreative() && !player.isSpectator() && mob.canAttack(player);
-		this.nearestPlayer = this.mob.level.getNearestPlayer(pos.x(), pos.y(), pos.z(), 10.0D, canStealPredicate);
+		this.nearestPlayer = this.mob.level().getNearestPlayer(pos.x(), pos.y(), pos.z(), 10.0D, canStealPredicate);
 		return this.nearestPlayer != null;
 	}
 	
@@ -81,7 +81,7 @@ public class StealItemFromPlayerGoal extends Goal {
 		Vec3 target = DefaultRandomPos.getPosAway(this.mob, radius, 7, this.nearestPlayer.position());
 		if(null == target) {
 			target = new Vec3(mob.getX() + (mob.getRandom().nextDouble() - 0.5D) * 2.0D * radius,
-				Mth.clamp(mob.getY() + (mob.getRandom().nextInt(radius) - 8), mob.level.getMinBuildHeight(), (mob.level.getMinBuildHeight() + ((ServerLevel)mob.level).getLogicalHeight() - 1)),
+				Mth.clamp(mob.getY() + (mob.getRandom().nextInt(radius) - 8), mob.level().getMinBuildHeight(), (mob.level().getMinBuildHeight() + ((ServerLevel)mob.level()).getLogicalHeight() - 1)),
 				mob.getZ() + (mob.getRandom().nextDouble() - 0.5D) * 2.0D * radius);
 		}
 		this.mob.getNavigation().moveTo(target.x(), target.y(), target.z(), 2.0D);

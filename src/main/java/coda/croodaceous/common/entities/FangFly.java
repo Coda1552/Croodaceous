@@ -1,58 +1,63 @@
 package coda.croodaceous.common.entities;
 
-import coda.croodaceous.registry.CEBlocks;
 import coda.croodaceous.registry.CEItems;
 import net.minecraft.core.BlockPos;
-import net.minecraft.core.Direction;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.sounds.SoundEvent;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.tags.BlockTags;
 import net.minecraft.util.RandomSource;
 import net.minecraft.world.damagesource.DamageSource;
-import net.minecraft.world.entity.*;
+import net.minecraft.world.entity.AgeableMob;
+import net.minecraft.world.entity.AnimationState;
+import net.minecraft.world.entity.EntityDimensions;
+import net.minecraft.world.entity.EntityType;
+import net.minecraft.world.entity.LivingEntity;
+import net.minecraft.world.entity.Mob;
+import net.minecraft.world.entity.MobSpawnType;
+import net.minecraft.world.entity.MobType;
+import net.minecraft.world.entity.Pose;
 import net.minecraft.world.entity.ai.attributes.AttributeSupplier;
 import net.minecraft.world.entity.ai.attributes.Attributes;
 import net.minecraft.world.entity.ai.control.FlyingMoveControl;
-import net.minecraft.world.entity.ai.goal.*;
+import net.minecraft.world.entity.ai.goal.Goal;
+import net.minecraft.world.entity.ai.goal.LookAtPlayerGoal;
+import net.minecraft.world.entity.ai.goal.PanicGoal;
+import net.minecraft.world.entity.ai.goal.RandomLookAroundGoal;
 import net.minecraft.world.entity.ai.goal.target.NearestAttackableTargetGoal;
 import net.minecraft.world.entity.ai.navigation.FlyingPathNavigation;
 import net.minecraft.world.entity.ai.navigation.PathNavigation;
 import net.minecraft.world.entity.ai.util.AirAndWaterRandomPos;
 import net.minecraft.world.entity.ai.util.HoverRandomPos;
 import net.minecraft.world.entity.animal.Animal;
-import net.minecraft.world.entity.animal.Chicken;
 import net.minecraft.world.entity.animal.FlyingAnimal;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.LevelAccessor;
 import net.minecraft.world.level.LevelReader;
-import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.levelgen.Heightmap;
 import net.minecraft.world.level.pathfinder.BlockPathTypes;
 import net.minecraft.world.phys.HitResult;
 import net.minecraft.world.phys.Vec3;
-import software.bernie.geckolib3.core.IAnimatable;
-import software.bernie.geckolib3.core.PlayState;
-import software.bernie.geckolib3.core.builder.AnimationBuilder;
-import software.bernie.geckolib3.core.builder.ILoopType;
-import software.bernie.geckolib3.core.controller.AnimationController;
-import software.bernie.geckolib3.core.event.predicate.AnimationEvent;
-import software.bernie.geckolib3.core.manager.AnimationData;
-import software.bernie.geckolib3.core.manager.AnimationFactory;
-import software.bernie.geckolib3.util.GeckoLibUtil;
+import software.bernie.geckolib.animatable.GeoEntity;
+import software.bernie.geckolib.core.animatable.instance.AnimatableInstanceCache;
+import software.bernie.geckolib.core.animation.AnimatableManager;
+import software.bernie.geckolib.core.animation.AnimationController;
+import software.bernie.geckolib.core.animation.RawAnimation;
+import software.bernie.geckolib.core.object.PlayState;
+import software.bernie.geckolib.util.GeckoLibUtil;
 
 import javax.annotation.Nullable;
 import java.util.EnumSet;
 
-public class FangFly extends Animal implements IAnimatable, FlyingAnimal {
+public class FangFly extends Animal implements GeoEntity, FlyingAnimal {
 
     public final AnimationState flyIdleAnimationState = new AnimationState();
 
-    private final AnimationFactory factory = GeckoLibUtil.createFactory(this);
-    private static final AnimationBuilder ANIM_FLY = new AnimationBuilder().addAnimation("animation.fang_fly.fly", ILoopType.EDefaultLoopTypes.LOOP);
+    private final AnimatableInstanceCache factory = GeckoLibUtil.createInstanceCache(this);
+    private static final RawAnimation ANIM_FLY = RawAnimation.begin().thenLoop("animation.fang_fly.fly");
     private int underWaterTicks;
 
     public FangFly(EntityType<? extends FangFly> type, Level worldIn) {
@@ -160,14 +165,14 @@ public class FangFly extends Animal implements IAnimatable, FlyingAnimal {
         }
 
         if (this.underWaterTicks > 20) {
-            this.hurt(DamageSource.DROWN, 1.0F);
+            this.hurt(this.level().damageSources().drown(), 1.0F);
         }
     }
 
     @Override
     public void tick() {
         super.tick();
-        if(this.level.isClientSide()) {
+        if(this.level().isClientSide()) {
             this.flyIdleAnimationState.startIfStopped(this.tickCount);
         }
     }
@@ -186,14 +191,14 @@ public class FangFly extends Animal implements IAnimatable, FlyingAnimal {
         return p_223316_1_.getBlockState(p_223316_3_.below()).is(BlockTags.SAND) && p_223316_1_.getRawBrightness(p_223316_3_, 0) > 8;
     }
 
-    private PlayState animControllerMain(AnimationEvent<?> e) {
+    private PlayState animControllerMain(software.bernie.geckolib.core.animation.AnimationState<?> e) {
         e.getController().setAnimation(ANIM_FLY);
         return PlayState.CONTINUE;
     }
 
     @Override
-    public void registerControllers(AnimationData data) {
-        data.addAnimationController(new AnimationController<>(this, "controller", 2F, this::animControllerMain));
+    public void registerControllers(AnimatableManager.ControllerRegistrar controllerRegistrar) {
+        controllerRegistrar.add(new AnimationController<GeoEntity>(this, "controller", 2, this::animControllerMain));
     }
 
     @Override
@@ -206,7 +211,7 @@ public class FangFly extends Animal implements IAnimatable, FlyingAnimal {
     }
 
     @Override
-    public AnimationFactory getFactory() {
+    public AnimatableInstanceCache getAnimatableInstanceCache() {
         return factory;
     }
 
@@ -232,7 +237,7 @@ public class FangFly extends Animal implements IAnimatable, FlyingAnimal {
         public void start() {
             Vec3 vec3 = this.findPos();
             if (vec3 != null) {
-                FangFly.this.navigation.moveTo(FangFly.this.navigation.createPath(new BlockPos(vec3), 1), 1.0D);
+                FangFly.this.navigation.moveTo(FangFly.this.navigation.createPath(BlockPos.containing(vec3), 1), 1.0D);
             }
         }
 
@@ -272,7 +277,7 @@ public class FangFly extends Animal implements IAnimatable, FlyingAnimal {
                     fly.getTarget().startRiding(fly);
                     fly.navigation.moveTo(getX(), getY() + 2.0D, getZ(), 1.0D);
 
-                    int y = level.getHeight(Heightmap.Types.MOTION_BLOCKING_NO_LEAVES, blockPosition().getX(), blockPosition().getZ());
+                    int y = level().getHeight(Heightmap.Types.MOTION_BLOCKING_NO_LEAVES, blockPosition().getX(), blockPosition().getZ());
 
                     if (position().y() > y + 8) {
                         fly.ejectPassengers();
