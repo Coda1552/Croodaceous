@@ -45,4 +45,12 @@ public class JackrobatRenderer<T extends Jackrobat> extends GeoEntityRenderer<T>
 	public RenderType getRenderType(T animatable, ResourceLocation texture, @Nullable MultiBufferSource bufferSource, float partialTick) {
 		return RenderType.entityCutout(texture);
 	}
+
+	@Override
+	public void render(T entity, float entityYaw, float partialTick, PoseStack poseStack, MultiBufferSource bufferSource, int packedLight) {
+		if (entity.isBaby()) {
+			poseStack.scale(0.5F, 0.5F, 0.5F);
+		}
+		super.render(entity, entityYaw, partialTick, poseStack, bufferSource, packedLight);
+	}
 }

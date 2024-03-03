@@ -3,6 +3,7 @@ package coda.croodaceous.client.render;
 import coda.croodaceous.CroodaceousMod;
 import coda.croodaceous.client.model.BearPearModel;
 import coda.croodaceous.common.entities.BearPear;
+import com.mojang.blaze3d.vertex.PoseStack;
 import net.minecraft.client.renderer.MultiBufferSource;
 import net.minecraft.client.renderer.RenderType;
 import net.minecraft.client.renderer.entity.EntityRendererProvider;
@@ -29,5 +30,13 @@ public class BearPearRenderer extends GeoEntityRenderer<BearPear> {
 	@Override
 	public RenderType getRenderType(BearPear animatable, ResourceLocation texture, @Nullable MultiBufferSource bufferSource, float partialTick) {
 		return RenderType.entityCutoutNoCull(texture);
+	}
+
+	@Override
+	public void render(BearPear entity, float entityYaw, float partialTick, PoseStack poseStack, MultiBufferSource bufferSource, int packedLight) {
+		if (entity.isBaby()) {
+			poseStack.scale(0.5F, 0.5F, 0.5F);
+		}
+		super.render(entity, entityYaw, partialTick, poseStack, bufferSource, packedLight);
 	}
 }
