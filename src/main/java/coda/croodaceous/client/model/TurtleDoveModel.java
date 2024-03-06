@@ -21,7 +21,7 @@ public class TurtleDoveModel<T extends TurtleDove> extends SimpleGeoModel<T> {
     protected void rotateBody(final T animatable, final long instanceId, final AnimationState<T> animationEvent, final String boneName) {
         final float zRot = calculateRoll(animatable, instanceId, animationEvent);
         final var bone = getBone(boneName);
-        //bone.setRotationZ(zRot);
+        bone.ifPresent(e -> e.setRotZ(zRot));
     }
 
     protected float calculateRoll(final T entity, final long instanceId, final AnimationState<T> event) {

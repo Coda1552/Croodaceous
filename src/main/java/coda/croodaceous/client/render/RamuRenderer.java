@@ -45,4 +45,11 @@ public class RamuRenderer extends GeoEntityRenderer<Ramu> {
 		super.renderRecursively(poseStack, animatable, bone, renderType, bufferSource, buffer, isReRender, partialTick, packedLight, packedOverlay, red, green, blue, alpha);
 	}
 
+	@Override
+	public void render(Ramu entity, float entityYaw, float partialTick, PoseStack poseStack, MultiBufferSource bufferSource, int packedLight) {
+		if (entity.isBaby()) {
+			poseStack.scale(0.5F, 0.5F, 0.5F);
+		}
+		super.render(entity, entityYaw, partialTick, poseStack, bufferSource, packedLight);
+	}
 }

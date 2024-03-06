@@ -8,15 +8,7 @@ import net.minecraft.sounds.SoundEvents;
 import net.minecraft.tags.BlockTags;
 import net.minecraft.util.RandomSource;
 import net.minecraft.world.damagesource.DamageSource;
-import net.minecraft.world.entity.AgeableMob;
-import net.minecraft.world.entity.AnimationState;
-import net.minecraft.world.entity.EntityDimensions;
-import net.minecraft.world.entity.EntityType;
-import net.minecraft.world.entity.LivingEntity;
-import net.minecraft.world.entity.Mob;
-import net.minecraft.world.entity.MobSpawnType;
-import net.minecraft.world.entity.MobType;
-import net.minecraft.world.entity.Pose;
+import net.minecraft.world.entity.*;
 import net.minecraft.world.entity.ai.attributes.AttributeSupplier;
 import net.minecraft.world.entity.ai.attributes.Attributes;
 import net.minecraft.world.entity.ai.control.FlyingMoveControl;
@@ -39,6 +31,7 @@ import net.minecraft.world.level.LevelReader;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.levelgen.Heightmap;
 import net.minecraft.world.level.pathfinder.BlockPathTypes;
+import net.minecraft.world.level.pathfinder.Path;
 import net.minecraft.world.phys.HitResult;
 import net.minecraft.world.phys.Vec3;
 import software.bernie.geckolib.animatable.GeoEntity;
@@ -275,12 +268,14 @@ public class FangFly extends Animal implements GeoEntity, FlyingAnimal {
 
                 if (fly.distanceToSqr(fly.getTarget()) <= 1.0) {
                     fly.getTarget().startRiding(fly);
-                    fly.navigation.moveTo(getX(), getY() + 2.0D, getZ(), 1.0D);
+
+                    Path path = fly.navigation.createPath(new BlockPos(blockPosition().getX(), blockPosition().getY() + 2, blockPosition().getZ()), 1);
+                    fly.navigation.moveTo(path, 1.0D);
 
                     int y = level().getHeight(Heightmap.Types.MOTION_BLOCKING_NO_LEAVES, blockPosition().getX(), blockPosition().getZ());
 
                     if (position().y() > y + 8) {
-                        fly.ejectPassengers();
+                        fly.ejectPassengers(); // todo - fix
                     }
                 }
             }

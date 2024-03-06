@@ -49,4 +49,11 @@ public class LiyoteRenderer extends GeoEntityRenderer<Liyote> {
 		stack.popPose();
 	}
 
+	@Override
+	public void render(Liyote entity, float entityYaw, float partialTick, PoseStack poseStack, MultiBufferSource bufferSource, int packedLight) {
+		if (entity.isBaby()) {
+			poseStack.scale(0.5F, 0.5F, 0.5F);
+		}
+		super.render(entity, entityYaw, partialTick, poseStack, bufferSource, packedLight);
+	}
 }
