@@ -548,8 +548,8 @@
 						"0.25": [52.5, 0, 0],
 						"0.4167": [2.86595, -4.99378, -0.24968],
 						"0.5833": ["8.2958+Math.sin((query.anim_time + 0.) * 10) * -100", "Math.sin((query.anim_time + 0.0) * 10) * -50", "Math.sin((query.anim_time + 0.0) * 10) * -50"],
-						"1.0": ["11.3526+Math.sin((query.anim_time + 0.5) * 25) * -80", "Math.sin((query.anim_time + 0.5) * 25) * -50", "+Math.sin((query.anim_time + 0.5) * 25) * -25"],
-						"1.5": ["11.3526+Math.sin((query.anim_time + 0.5) * 25) * -80", "Math.sin((query.anim_time + 0.5) * 25) * -50", "+Math.sin((query.anim_time + 0.5) * 25) * -25"],
+						"1.0": ["11.3526+Math.sin((query.anim_time + 0.5) * 25) * -80", "Math.sin((query.anim_time + 0.5) * 25) * -50", "Math.sin((query.anim_time + 0.5) * 25) * -25"],
+						"1.5": ["11.3526+Math.sin((query.anim_time + 0.5) * 25) * -80", "Math.sin((query.anim_time + 0.5) * 25) * -50", "Math.sin((query.anim_time + 0.5) * 25) * -25"],
 						"2.0": ["-3+Math.sin((query.anim_time + 1.9) * 180) * -1", 0, 0]
 					},
 					"position": {
@@ -586,8 +586,8 @@
 						"0.25": [52.5, 0, 0],
 						"0.4167": [-2.86595, 4.99378, -0.24968],
 						"0.5833": ["-8.2958+Math.sin((query.anim_time + 0.) * 10) * -100", "-(Math.sin((query.anim_time + 0.0) * 10) * -50)", "Math.sin((query.anim_time + 0.0) * 10) * 50"],
-						"1.0": ["-11.3526+Math.sin((query.anim_time + 0.5) * 25) * -80", "-(Math.sin((query.anim_time + 0.5) * 20) * -50)", "+Math.sin((query.anim_time + 0.5) * 20) * 25"],
-						"1.5": ["-11.3526+Math.sin((query.anim_time + 0.5) * 25) * -80", "-(Math.sin((query.anim_time + 0.5) * 20) * -50)", "+Math.sin((query.anim_time + 0.5) * 20) * 25"],
+						"1.0": ["-11.3526+Math.sin((query.anim_time + 0.5) * 25) * -80", "-(Math.sin((query.anim_time + 0.5) * 20) * -50)", "Math.sin((query.anim_time + 0.5) * 20) * 25"],
+						"1.5": ["-11.3526+Math.sin((query.anim_time + 0.5) * 25) * -80", "-(Math.sin((query.anim_time + 0.5) * 20) * -50)", "Math.sin((query.anim_time + 0.5) * 20) * 25"],
 						"2.0": ["-3+Math.sin((query.anim_time + 1.9) * 180) * -1", 0, 0]
 					},
 					"position": {
