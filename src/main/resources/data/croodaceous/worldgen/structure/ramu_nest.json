@@ -1,0 +1,15 @@
+{
+  "type": "minecraft:jigsaw",
+  "biomes": "croodaceous:nesting_grounds",
+  "max_distance_from_center": 32,
+  "project_start_to_heightmap": "WORLD_SURFACE_WG",
+  "size": 1,
+  "spawn_overrides": {},
+  "start_height": {
+    "absolute": 0
+  },
+  "terrain_adaptation": "beard_thin",
+  "start_pool": "croodaceous:ramu_nest",
+  "step": "surface_structures",
+  "use_expansion_hack": false
+}

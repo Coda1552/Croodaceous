@@ -1,0 +1,15 @@
+{
+  "structures": [
+    {
+      "structure": "croodaceous:ramu_nest",
+      "weight": 1
+    }
+  ],
+  "placement": {
+    "type": "minecraft:random_spread",
+    "spacing": 32,
+    "separation": 8,
+    "salt": 1235786,
+    "spread_type": "linear"
+  }
+}

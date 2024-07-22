@@ -165,7 +165,7 @@ public abstract class BiphibianAnimal extends Animal implements FlyingAnimal {
 
     @Override
     public boolean isFlying() {
-        return !onGround();
+        return !onGround() && Math.abs(this.getDeltaMovement().y()) > 0.0002F;
     }
 
     public boolean wantsToFly() {

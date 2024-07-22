@@ -1,0 +1,17 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "category": "building",
+  "key": {
+    "#": {
+      "item": "croodaceous:hoodoo_shale_slab"
+    }
+  },
+  "pattern": [
+    "#",
+    "#"
+  ],
+  "result": {
+    "item": "croodaceous:chiseled_hoodoo_shale"
+  },
+  "show_notification": true
+}

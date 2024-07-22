@@ -3,6 +3,7 @@ package coda.croodaceous.common.entities;
 import coda.croodaceous.common.entities.goal.BiphibianWanderGoal;
 import coda.croodaceous.registry.CEEntities;
 import coda.croodaceous.registry.CEItems;
+import com.mojang.datafixers.DataFixUtils;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.particles.ItemParticleOption;
 import net.minecraft.core.particles.ParticleTypes;
@@ -13,6 +14,7 @@ import net.minecraft.sounds.SoundEvents;
 import net.minecraft.tags.BlockTags;
 import net.minecraft.util.Mth;
 import net.minecraft.util.RandomSource;
+import net.minecraft.world.DifficultyInstance;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.damagesource.DamageSource;
 import net.minecraft.world.entity.*;
@@ -31,6 +33,7 @@ import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.LevelAccessor;
+import net.minecraft.world.level.ServerLevelAccessor;
 import net.minecraft.world.phys.AABB;
 import net.minecraft.world.phys.Vec3;
 import software.bernie.geckolib.animatable.GeoEntity;
@@ -49,6 +52,7 @@ import java.util.EnumSet;
 import java.util.List;
 import java.util.UUID;
 import java.util.function.Predicate;
+import java.util.stream.Stream;
 
 public class Jackrobat extends BiphibianAnimal implements GeoEntity {
 
@@ -56,7 +60,7 @@ public class Jackrobat extends BiphibianAnimal implements GeoEntity {
     private static final int MAX_GROUP_SIZE = 24;
     @Nullable
     private Jackrobat leader;
-    private int groupSize;
+    private int groupSize = 1;
     private Jackrobat.WanderGoal wanderGoal;
     // EGG //
     private static final int EAT_EGG_COOLDOWN = 100;
@@ -101,6 +105,7 @@ public class Jackrobat extends BiphibianAnimal implements GeoEntity {
         this.goalSelector.addGoal(4, wanderGoal = new Jackrobat.WanderGoal(this, 0.9D));
         this.goalSelector.addGoal(5, new LookAtPlayerGoal(this, Player.class, 6.0F));
         this.goalSelector.addGoal(6, new RandomLookAroundGoal(this));
+        this.goalSelector.addGoal(7, new Jackrobat.FollowFlockLeaderGoal(this));
         this.targetSelector.addGoal(0, new Jackrobat.FindLeaderGoal(this));
         this.targetSelector.addGoal(1, new Jackrobat.TargetWithLeaderGoal(this));
         this.targetSelector.addGoal(3, new NearestAttackableTargetGoal<>(this, Liyote.class, 10, false, false, IS_LIYOTE_WITH_EGG.and(e -> !this.isHoldingEgg())));
@@ -153,8 +158,14 @@ public class Jackrobat extends BiphibianAnimal implements GeoEntity {
     public void tick() {
         super.tick();
         // slow falling
-        if(this.getDeltaMovement().y() < 0.0D) {
+        if(this.getDeltaMovement().y() < 0.1D) {
             this.setDeltaMovement(this.getDeltaMovement().multiply(1.0D, 0.85D, 1.0D));
+        }
+        if (this.hasFollowers() && this.level().random.nextInt(200) == 1) {
+            List<? extends Jackrobat> list = this.level().getEntitiesOfClass(this.getClass(), this.getBoundingBox().inflate(8.0D, 8.0D, 8.0D));
+            if (list.size() <= 1) {
+                this.groupSize = 1;
+            }
         }
     }
 
@@ -351,7 +362,7 @@ public class Jackrobat extends BiphibianAnimal implements GeoEntity {
     //// ANIMATIONS ////
 
     private <T extends GeoAnimatable> PlayState predicate(AnimationState<T> e) {
-        if(!onGround() && Math.abs(this.getDeltaMovement().y()) > 0.0002F) {
+        if(isFlying()) {
             e.getController().setAnimation(ANIM_FLY);
         } else if(e.isMoving()) {
             e.getController().setAnimation(ANIM_HOP);
@@ -370,6 +381,89 @@ public class Jackrobat extends BiphibianAnimal implements GeoEntity {
     public AnimatableInstanceCache getAnimatableInstanceCache() {
         return cache;
     }
+
+    /**
+     * Will return how many at most can spawn in a chunk at once.
+     */
+    @Override
+    public int getMaxSpawnClusterSize() {
+        return this.getMaxGroupSize();
+    }
+
+    public int getMaxGroupSize() {
+        return super.getMaxSpawnClusterSize();
+    }
+
+    protected boolean canRandomTravel() {
+        return !this.isFollower();
+    }
+
+    public boolean isFollower() {
+        return this.leader != null && this.leader.isAlive();
+    }
+
+    public Jackrobat startFollowing(Jackrobat pLeader) {
+        this.leader = pLeader;
+        pLeader.addFollower();
+        return pLeader;
+    }
+
+    public void stopFollowing() {
+        if (this.leader != null)
+        {
+            this.leader.removeFollower();
+            this.leader = null;
+        }
+    }
+
+    private void addFollower() {
+        ++this.groupSize;
+    }
+
+    private void removeFollower() {
+        --this.groupSize;
+    }
+
+    public boolean canBeFollowed() {
+        return this.hasFollowers() && this.groupSize < this.getMaxGroupSize();
+    }
+
+    public boolean hasFollowers() {
+        return this.groupSize > 1;
+    }
+
+    public boolean inRangeOfLeader() {
+        return this.distanceToSqr(this.leader) <= 121.0D;
+    }
+
+    public void pathToLeader() {
+        if (this.isFollower()) {
+            this.getNavigation().moveTo(this.leader, 1.0D);
+        }
+
+    }
+
+    public void addFollowers(Stream<? extends Jackrobat> pFollowers) {
+        pFollowers.limit((long)(this.getMaxGroupSize() - this.groupSize)).filter((p_27538_) -> {
+            return p_27538_ != this;
+        }).forEach((p_27536_) -> {
+            p_27536_.startFollowing(this);
+        });
+    }
+
+    @Nullable
+    public SpawnGroupData finalizeSpawn(ServerLevelAccessor pLevel, DifficultyInstance pDifficulty, MobSpawnType pReason, @Nullable SpawnGroupData pSpawnData, @Nullable CompoundTag pDataTag) {
+        super.finalizeSpawn(pLevel, pDifficulty, pReason, pSpawnData, pDataTag);
+        if (pSpawnData == null) {
+            pSpawnData = new JackrobatSpawnGroupData(this);
+        } else {
+            this.startFollowing(((JackrobatSpawnGroupData)pSpawnData).leader);
+        }
+
+        return pSpawnData;
+    }
+
+    public record JackrobatSpawnGroupData(Jackrobat leader) implements SpawnGroupData {}
 
     //// GOALS ////
 
@@ -399,11 +493,6 @@ public class Jackrobat extends BiphibianAnimal implements GeoEntity {
         public WanderGoal(final Jackrobat entity, final double speedModifier) {
             super(entity, speedModifier, 0.19F);
             this.entity = entity;
-        }
-
-        @Override
-        public boolean canUse() {
-            return super.canUse();
         }
 
         @Override
@@ -573,6 +662,75 @@ public class Jackrobat extends BiphibianAnimal implements GeoEntity {
         @Override
         public void stop() {
             this.target = null;
+        }
+    }
+
+    public class FollowFlockLeaderGoal extends Goal {
+        private static final int INTERVAL_TICKS = 200;
+        private final Jackrobat mob;
+        private int timeToRecalcPath;
+        private int nextStartTick;
+
+        public FollowFlockLeaderGoal(Jackrobat jackrobat) {
+            this.mob = jackrobat;
+            this.nextStartTick = this.nextStartTick(jackrobat);
+        }
+
+        protected int nextStartTick(Jackrobat pTaskOwner) {
+            return reducedTickDelay(200 + pTaskOwner.getRandom().nextInt(200) % 20);
+        }
+
+        /**
+         * Returns whether execution should begin. You can also read and cache any state necessary for execution in this
+         * method as well.
+         */
+        public boolean canUse() {
+            if (this.mob.hasFollowers()) {
+                return false;
+            } else if (this.mob.isFollower()) {
+                return true;
+            } else if (this.nextStartTick > 0) {
+                --this.nextStartTick;
+                return false;
+            } else {
+                this.nextStartTick = this.nextStartTick(this.mob);
+                Predicate<Jackrobat> predicate = (p_25258_) -> p_25258_.canBeFollowed() || !p_25258_.isFollower();
+                List<? extends Jackrobat> list = this.mob.level().getEntitiesOfClass(this.mob.getClass(), this.mob.getBoundingBox().inflate(8.0D, 8.0D, 8.0D), predicate);
+                Jackrobat jackrobat = DataFixUtils.orElse(list.stream().filter(Jackrobat::canBeFollowed).findAny(), this.mob);
+                jackrobat.addFollowers(list.stream().filter((p_25255_) -> !p_25255_.isFollower()));
+                return this.mob.isFollower();
+            }
+        }
+
+        /**
+         * Returns whether an in-progress EntityAIBase should continue executing
+         */
+        public boolean canContinueToUse() {
+            return this.mob.isFollower() && this.mob.inRangeOfLeader();
+        }
+
+        /**
+         * Execute a one shot task or start executing a continuous task
+         */
+        public void start() {
+            this.timeToRecalcPath = 0;
+        }
+
+        /**
+         * Reset the task's internal state. Called when this task is interrupted by another one
+         */
+        public void stop() {
+            this.mob.stopFollowing();
+        }
+
+        /**
+         * Keep ticking a continuous task that has already been started
+         */
+        public void tick() {
+            if (--this.timeToRecalcPath <= 0) {
+                this.timeToRecalcPath = this.adjustedTickDelay(10);
+                this.mob.pathToLeader();
+            }
         }
     }
 }

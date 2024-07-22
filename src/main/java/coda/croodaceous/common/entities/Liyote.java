@@ -61,7 +61,6 @@ public class Liyote extends Wolf implements GeoEntity {
 	private static final RawAnimation ANIM_IDLE = RawAnimation.begin().thenLoop("animation.liyote.idle");
 
 	private int eatingTicks = 0;
-	private ItemStack eatingItem = ItemStack.EMPTY;
 	private BlockPos targetNest;
 
 	private static final Predicate<ItemStack> IS_RAMU_EGG = itemStack -> itemStack.is(CEItems.RAMU_EGG.get());
@@ -70,11 +69,6 @@ public class Liyote extends Wolf implements GeoEntity {
 		super(type, level);
 		this.setCanPickUpLoot(true);
 		this.setDropChance(EquipmentSlot.MAINHAND, 1F);
-	}
-
-	@Override
-	public void lookAt(Entity pEntity, float pMaxYawIncrease, float pMaxPitchIncrease) {
-		super.lookAt(pEntity, pMaxYawIncrease, pMaxPitchIncrease);
 	}
 	
 	@Override
@@ -88,7 +82,7 @@ public class Liyote extends Wolf implements GeoEntity {
 		this.goalSelector.addGoal(12, new AvoidEntityGoal<>(this, Ramu.class, 10.0F, 1.0D, 1.2D) {
 			@Override
 			public boolean canUse() {
-				return IS_RAMU_EGG.test(eatingItem) && super.canUse();
+				return IS_RAMU_EGG.test(getEatingItem()) && super.canUse();
 			}
 		});
 		this.goalSelector.addGoal(13, new StealItemFromPlayerGoal(this, 100));
@@ -101,18 +95,18 @@ public class Liyote extends Wolf implements GeoEntity {
 		ItemStack itemstack = pPlayer.getItemInHand(pHand);
 		Item item = itemstack.getItem();
 		final boolean isFood = isFood(itemstack);
-		final boolean hasItem = !this.eatingItem.isEmpty();
+		final boolean hasItem = !getEatingItem().isEmpty();
 		// take food from player
 		if (this.isTame()) {
 			// take any item from owner
 			if(!itemstack.isEmpty() && !hasItem) {
-				this.eatingItem = itemstack.split(1);
+				setEatingItem(itemstack.split(1));
 				return InteractionResult.SUCCESS;
 			}
 			// drop eating item when given food or ramu egg by owner
 			if (isFood && hasItem && isOwnedBy(pPlayer)) {
-				spawnAtLocation(this.eatingItem.copy(), 0.25F);
-				this.eatingItem = itemstack.split(1);
+				spawnAtLocation(this.getEatingItem().copy(), 0.25F);
+				setEatingItem(itemstack.split(1));
 				return InteractionResult.SUCCESS;
 			}
 
@@ -147,7 +141,7 @@ public class Liyote extends Wolf implements GeoEntity {
 		}
 
 		if ((isFood || IS_RAMU_EGG.test(itemstack)) && !hasItem) {
-			this.eatingItem = itemstack.split(1);
+			setEatingItem(itemstack.split(1));
 			return InteractionResult.SUCCESS;
 		}
 
@@ -163,7 +157,7 @@ public class Liyote extends Wolf implements GeoEntity {
 	}
 
 	private PlayState animControllerMain(AnimationState<?> e) {
-		if (!eatingItem.isEmpty() && this.isFood(eatingItem)) {
+		if (!getEatingItem().isEmpty() && this.isFood(getEatingItem())) {
 			if (e.isMoving()) {
 				e.getController().setAnimation(ANIM_WALK_EAT);
 			} else if (isInSittingPose()) {
@@ -194,13 +188,13 @@ public class Liyote extends Wolf implements GeoEntity {
 	@Override
 	public void tick() {
 		super.tick();
-		if (!eatingItem.isEmpty() && this.isFood(eatingItem)) {
+		if (!getEatingItem().isEmpty() && this.isFood(getEatingItem())) {
 			eatingTicks++;
 			if (eatingTicks % 5 == 0 && level().isClientSide) {
 				Vec3 look = getRenderViewVector();
 				Vec3 pos = getPosition(1F);
 				Vec3 vec = pos.add(look.x, look.y, look.z);
-				ItemParticleOption type = new ItemParticleOption(ParticleTypes.ITEM, eatingItem);
+				ItemParticleOption type = new ItemParticleOption(ParticleTypes.ITEM, getEatingItem());
 				for (int i = 0; i < 6; i++) {
 					level().addParticle(type, true, vec.x, vec.y + 0.4F, vec.z, (-0.2F + random.nextFloat() / 2.5) * 0.4F, random.nextFloat() / 5, (-0.2F + random.nextFloat() / 2.5) * 0.4F);
 				}
@@ -209,13 +203,13 @@ public class Liyote extends Wolf implements GeoEntity {
 				playSound(SoundEvents.GENERIC_EAT, 8F, 1F);
 			}
 			if (eatingTicks >= 20 * 3) {
-				eatingItem = ItemStack.EMPTY;
+				setEatingItem(ItemStack.EMPTY);
 				eatingTicks = 0;
 				this.level().broadcastEntityEvent(this, EntityEvent.IN_LOVE_HEARTS);
 				heal(4);
 			}
 		}
-		if (!this.level().isClientSide() && !this.isTame() && !this.isInSittingPose() && eatingItem.isEmpty() && this.getHealth() > 5F && this.random.nextInt(1200) == 0) {
+		if (!this.level().isClientSide() && !this.isTame() && !this.isInSittingPose() && getEatingItem().isEmpty() && this.getHealth() > 5F && this.random.nextInt(1200) == 0) {
 			PoiManager poiManager = ((ServerLevel) level()).getPoiManager();
 			poiManager.findClosest(p -> {
 				assert CEPoiTypes.RAMU_NEST.getKey() != null;
@@ -229,32 +223,24 @@ public class Liyote extends Wolf implements GeoEntity {
 			if (canReachTargetNest()) {
 				this.level().setBlock(targetNest, CEBlocks.RAMU_NEST.get().defaultBlockState().setValue(RamuNestBlock.WITH_EGG, false), 3);
 				this.targetNest = null;
-				this.eatingItem = new ItemStack(CEItems.RAMU_EGG.get());
+				setEatingItem(new ItemStack(CEItems.RAMU_EGG.get()));
 			} else {
 				this.getNavigation().moveTo(targetNest.getX(), targetNest.getY(), targetNest.getZ(), 1.0D);
 			}
 		}
 		if (this.level().isClientSide) {
-			eatingItem = this.entityData.get(DATA_EI);
+			setEatingItem(this.entityData.get(DATA_EI));
 		} else {
-			this.entityData.set(DATA_EI, eatingItem);
+			this.entityData.set(DATA_EI, getEatingItem());
 		}
 	}
 	
 	public ItemStack getEatingItem() {
-		return eatingItem;
+		return getItemBySlot(EquipmentSlot.MAINHAND);
 	}
 
 	public void setEatingItem(final ItemStack item) {
-		this.eatingItem = item;
-	}
-	
-	@Override
-	public ItemStack getItemBySlot(EquipmentSlot pSlot) {
-		if (pSlot == EquipmentSlot.MAINHAND) {
-			return this.getEatingItem();
-		}
-		return super.getItemBySlot(pSlot);
+		setItemSlot(EquipmentSlot.MAINHAND, item);
 	}
 	
 	public final Vec3 getRenderViewVector() {
@@ -280,9 +266,9 @@ public class Liyote extends Wolf implements GeoEntity {
 	
 	@Override
 	public boolean hurt(DamageSource pSource, float pAmount) {
-		if (IS_RAMU_EGG.test(eatingItem) && !(pSource.getDirectEntity() instanceof Jackrobat)) {
-			this.spawnAtLocation(eatingItem.copy());
-			this.eatingItem = ItemStack.EMPTY;
+		if (IS_RAMU_EGG.test(getEatingItem()) && !(pSource.getDirectEntity() instanceof Jackrobat)) {
+			this.spawnAtLocation(getEatingItem().copy());
+			setEatingItem(ItemStack.EMPTY);
 		}
 		return super.hurt(pSource, pAmount);
 	}
@@ -290,7 +276,7 @@ public class Liyote extends Wolf implements GeoEntity {
 	@Override
 	public void addAdditionalSaveData(CompoundTag pCompound) {
 		super.addAdditionalSaveData(pCompound);
-		pCompound.put("eatingItem", eatingItem.save(new CompoundTag()));
+		pCompound.put("getEatingItem()", getEatingItem().save(new CompoundTag()));
 		pCompound.putInt("eatingTicks", eatingTicks);
 		if (targetNest != null) {
 			pCompound.putLong("targetNest", targetNest.asLong());
@@ -300,7 +286,7 @@ public class Liyote extends Wolf implements GeoEntity {
 	@Override
 	public void readAdditionalSaveData(CompoundTag pCompound) {
 		super.readAdditionalSaveData(pCompound);
-		eatingItem = ItemStack.of(pCompound.getCompound("eatingItem"));
+		setEatingItem(ItemStack.of(pCompound.getCompound("getEatingItem()")));
 		eatingTicks = pCompound.getInt("eatingTicks");
 		if (pCompound.contains("targetNest")) {
 			targetNest = BlockPos.of(pCompound.getLong("targetNest"));
@@ -322,7 +308,7 @@ public class Liyote extends Wolf implements GeoEntity {
 	
 	@Override
 	public boolean canTakeItem(ItemStack pItemstack) {
-		return eatingItem.isEmpty() || (!IS_RAMU_EGG.test(eatingItem) && IS_RAMU_EGG.test(pItemstack));
+		return getEatingItem().isEmpty() || (!IS_RAMU_EGG.test(getEatingItem()) && IS_RAMU_EGG.test(pItemstack));
 	}
 	
 	@Override
@@ -339,20 +325,4 @@ public class Liyote extends Wolf implements GeoEntity {
 	public boolean canPickUpLoot() {
 		return !isTame() && super.canPickUpLoot();
 	}
-
-//	@Override
-//	public boolean equipItemIfPossible(ItemStack p_21541_) {
-//		if (this.canHoldItem(p_21541_)) {
-//			if (!eatingItem.isEmpty()) {
-//				this.spawnAtLocation(eatingItem);
-//			}
-//
-//			eatingItem = p_21541_.copy();
-//			this.playEquipSound(p_21541_);
-//			return true;
-//		} else {
-//			return false;
-//		}
-//	}
-
 }

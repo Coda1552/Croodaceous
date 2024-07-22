@@ -123,7 +123,7 @@ public class BearPear extends Animal implements GeoEntity {
     protected void registerGoals() {
         this.goalSelector.addGoal(0, new FloatGoal(this));
         this.goalSelector.addGoal(2, new BearPear.DropAttackGoal(this, DROP_ATTACK_COOLDOWN + (int) (1.0F / DELTA_DROPPING)));
-        this.goalSelector.addGoal(4, new BearPear.MoveToLeavesGoal(this, 1.0D, MAX_DROPPING_DISTANCE, MAX_DROPPING_DISTANCE));
+        this.goalSelector.addGoal(4, new BearPear.MoveToLeavesGoal(this, 1.0D, 4, 4));
         this.goalSelector.addGoal(4, new BearPear.FleeGoal<>(this, Player.class, 6.0F, 1.2F, 1.4F));
         this.goalSelector.addGoal(5, new BearPear.RandomWanderGoal(this, 0.9D));
         this.goalSelector.addGoal(7, new BearPear.LookAwayFromPlayerGoal(this, Player.class, 8.0F));
@@ -655,9 +655,8 @@ public class BearPear extends Animal implements GeoEntity {
          * @param verticalSearchRange the vertical search range, automatically adjusted to only look above the entity
          */
         public MoveToLeavesGoal(BearPear pMob, double pSpeedModifier, int pSearchRange, int verticalSearchRange) {
-            super(pMob, pSpeedModifier, pSearchRange, (verticalSearchRange / 2) + 1);
+            super(pMob, pSpeedModifier, pSearchRange, verticalSearchRange);
             this.entity = pMob;
-            this.verticalSearchStart = verticalSearchRange / 2;
         }
 
         @Override
