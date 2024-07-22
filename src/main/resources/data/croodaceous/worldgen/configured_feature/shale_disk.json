@@ -6,15 +6,9 @@
         "type": "minecraft:weighted_state_provider",
         "entries": [
           {
-            "weight": 199,
+            "weight": 200,
             "data": {
               "Name": "croodaceous:hoodoo_shale"
-            }
-          },
-          {
-            "weight": 1,
-            "data": {
-              "Name": "croodaceous:polished_hoodoo_shale"
             }
           }
         ]
