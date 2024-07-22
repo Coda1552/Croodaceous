@@ -34,7 +34,6 @@ public class CroodaceousMod {
 		CEFeatures.FEATURES.register(bus);
 
 		CENetwork.register();
-
 	}
 
 	private void registerAttributes(final EntityAttributeCreationEvent e) {

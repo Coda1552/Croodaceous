@@ -42,6 +42,7 @@ public class CEBlocks {
 	public static final DeferredRegister<Block> BLOCKS = DeferredRegister.create(ForgeRegistries.BLOCKS, CroodaceousMod.MOD_ID);
 
     // Other
+	public static final RegistryObject<Block> PAINTED_STONE = register("painted_stone", () -> new Block(BlockBehaviour.Properties.copy(Blocks.STONE)));
 	public static final RegistryObject<Block> RAMU_NEST = register("ramu_nest", RamuNestBlock::new);
 	public static final RegistryObject<Block> DRY_BUSH = register("dry_bush", () -> new DryBushBlock(BlockBehaviour.Properties.of().instabreak().noCollission().sound(SoundType.GRASS)));
 

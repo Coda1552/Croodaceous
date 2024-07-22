@@ -2,6 +2,7 @@ package coda.croodaceous.common.blocks;
 
 import coda.croodaceous.registry.CEBlocks;
 import net.minecraft.core.BlockPos;
+import net.minecraft.tags.BlockTags;
 import net.minecraft.world.level.LevelReader;
 import net.minecraft.world.level.block.SaplingBlock;
 import net.minecraft.world.level.block.grower.AbstractTreeGrower;
@@ -15,6 +16,6 @@ public class BaobabSaplingBlock extends SaplingBlock {
 
     @Override
     public boolean canSurvive(BlockState state, LevelReader worldIn, BlockPos pos) {
-        return worldIn.getBlockState(pos.below()).getBlock().equals(CEBlocks.DESOLATE_SAND.get());
+        return worldIn.getBlockState(pos.below()).is(BlockTags.SAND);
     }
 }
