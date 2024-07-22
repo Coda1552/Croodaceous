@@ -31,6 +31,7 @@ public class CommonEvents {
             level.setBlock(pos, CEBlocks.PAINTED_STONE.get().defaultBlockState(), 3);
             level.playSound(player, pos, SoundEvents.MAGMA_CUBE_SQUISH, SoundSource.BLOCKS, 1.0F, 1.0F);
 
+            player.swing(hand);
 
             for (int i = 0; i < 20; i++) {
                 double x = pos.getX() + level.random.nextFloat() + e.getFace().getStepX();
