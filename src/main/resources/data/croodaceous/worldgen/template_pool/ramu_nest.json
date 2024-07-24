@@ -7,7 +7,7 @@
       "element": {
         "element_type": "minecraft:single_pool_element",
         "location": "croodaceous:ramu_nest",
-        "projection": "terrain_matching",
+        "projection": "rigid",
         "processors": "minecraft:empty"
       }
     }

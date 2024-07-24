@@ -260,16 +260,6 @@ public class Ramu extends Animal implements GeoEntity {
 		return InteractionResult.SUCCESS;
 	}
 
-	// todo - remove?
-/*	@Override
-	protected void usePlayerItem(Player pPlayer, InteractionHand pHand, ItemStack pStack) {
-		if (pStack.is(Items.MELON) || pStack.is(Items.PUMPKIN)) {
-			pPlayer.setItemInHand(pHand, new ItemStack(Items.WATER_BUCKET));
-		} else {
-			super.usePlayerItem(pPlayer, pHand, pStack);
-		}
-	}*/
-
 	@Override
 	public void spawnChildFromBreeding(ServerLevel p_27564_, Animal p_27565_) {
 		willLayEgg = true;
@@ -282,15 +272,6 @@ public class Ramu extends Animal implements GeoEntity {
 
 	private boolean wantsSit() {
 		return this.getTarget() == null && wantsSit;
-	}
-	
-	@Nullable
-	public SpawnGroupData finalizeSpawn(ServerLevelAccessor pLevel, DifficultyInstance pDifficulty, MobSpawnType pReason, @Nullable SpawnGroupData pSpawnData, @Nullable CompoundTag pDataTag) {
-		/*this.nestPos = this.getOnPos().above();
-		if (!level.isClientSide && pReason != MobSpawnType.SPAWN_EGG) {
-			pLevel.setBlock(nestPos, CEBlocks.RAMU_NEST.get().defaultBlockState().setValue(RamuNestBlock.WITH_EGG, this.random.nextBoolean()), 3);
-		}*/
-		return super.finalizeSpawn(pLevel, pDifficulty, pReason, pSpawnData, pDataTag);
 	}
 
 	@Nullable
