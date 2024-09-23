@@ -1,5 +1,6 @@
 package coda.croodaceous.common.entities;
 
+import coda.croodaceous.registry.CESounds;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.nbt.CompoundTag;
@@ -136,20 +137,19 @@ public class BearPear extends Animal implements GeoEntity {
     @Override
     protected SoundEvent getAmbientSound() {
         if(isAggressive()) {
-            // TODO add angry sound
-            return SoundEvents.OCELOT_AMBIENT;
+            return CESounds.BEAR_PEAR_BITE.get();
         }
-        return SoundEvents.OCELOT_AMBIENT;
+        return CESounds.BEAR_PEAR_AMBIENT.get();
     }
 
     @Override
     protected SoundEvent getHurtSound(DamageSource damageSourceIn) {
-        return SoundEvents.OCELOT_HURT;
+        return CESounds.BEAR_PEAR_HURT.get();
     }
 
     @Override
     protected SoundEvent getDeathSound() {
-        return SoundEvents.OCELOT_DEATH;
+        return CESounds.BEAR_PEAR_DEATH.get();
     }
 
     @Override
@@ -346,6 +346,7 @@ public class BearPear extends Animal implements GeoEntity {
         this.setNoGravity(false);
         this.setDeltaMovement(this.getDeltaMovement().add(0.0D, -0.08D / 4.0D, 0.0D));
         this.markHurt();
+        playSound(CESounds.BEAR_PEAR_DETACH.get());
     }
 
     /**
@@ -675,6 +676,7 @@ public class BearPear extends Animal implements GeoEntity {
                     entity.setHangingPos(targetPos.immutable());
                     entity.updateHangingPosition(targetPos);
                     entity.setJumping(false);
+                    // entity.playSound(CESounds.BEAR_PEAR_ATTACH.get()); // todo
                 }
                 stop();
                 return;

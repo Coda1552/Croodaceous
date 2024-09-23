@@ -66,5 +66,13 @@
   "block.croodaceous.desert_baobab_fence": "Desert Baobab Fence",
   "block.croodaceous.desert_baobab_fence_gate": "Desert Baobab Fence Gate",
   "block.croodaceous.potted_desert_baobab_sapling": "Potted Desert Baobab Sapling",
-  "block.croodaceous.desert_baobab_leaves": "Desert Baobab Leaves"
+  "block.croodaceous.desert_baobab_leaves": "Desert Baobab Leaves",
+
+  "croodaceous.bear_pear.ambient": "Bear Pear squeaks",
+  "croodaceous.bear_pear.hurt": "Bear Pear hurts",
+  "croodaceous.bear_pear.death": "Bear Pear dies",
+  "croodaceous.bear_pear.bite": "Bear Pear bites",
+  "croodaceous.bear_pear.bump": "Bear Pear knocks",
+  "croodaceous.bear_pear.attach": "Bear Pear rustles",
+  "croodaceous.bear_pear.detach": "Bear Pear drops"
 }

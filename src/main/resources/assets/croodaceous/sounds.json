@@ -1,0 +1,65 @@
+{
+  "bear_pear.ambient": {
+    "subtitle": "croodaceous.bear_pear.ambient",
+    "sounds": [
+      {
+        "name": "croodaceous:bear_pear/ambient",
+        "stream": true
+      }
+    ]
+  },
+  "bear_pear.hurt": {
+    "subtitle": "croodaceous.bear_pear.hurt",
+    "sounds": [
+      {
+        "name": "croodaceous:bear_pear/hurt",
+        "stream": true
+      }
+    ]
+  },
+  "bear_pear.death": {
+    "subtitle": "croodaceous.bear_pear.death",
+    "sounds": [
+      {
+        "name": "croodaceous:bear_pear/death",
+        "stream": true
+      }
+    ]
+  },
+  "bear_pear.attach": {
+    "subtitle": "croodaceous.bear_pear.attach",
+    "sounds": [
+      {
+        "name": "croodaceous:bear_pear/attach",
+        "stream": true
+      }
+    ]
+  },
+  "bear_pear.detach": {
+    "subtitle": "croodaceous.bear_pear.detach",
+    "sounds": [
+      {
+        "name": "croodaceous:bear_pear/detach",
+        "stream": true
+      }
+    ]
+  },
+  "bear_pear.bump": {
+    "subtitle": "croodaceous.bear_pear.bump",
+    "sounds": [
+      {
+        "name": "croodaceous:bear_pear/bump",
+        "stream": true
+      }
+    ]
+  },
+  "bear_pear.bite": {
+    "subtitle": "croodaceous.bear_pear.bite",
+    "sounds": [
+      {
+        "name": "croodaceous:bear_pear/bite",
+        "stream": true
+      }
+    ]
+  }
+}
