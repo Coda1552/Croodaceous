@@ -64,7 +64,7 @@ public class BranchesWallBlock extends BaseCoralWallFanBlock {
     @Nullable
     @Override
     public BlockState getStateForPlacement(BlockPlaceContext pContext) {
-        BlockState blockstate = super.getStateForPlacement(pContext);
+        BlockState blockstate = defaultBlockState();
         LevelReader iworldreader = pContext.getLevel();
         BlockPos blockpos = pContext.getClickedPos();
         Direction[] adirection = pContext.getNearestLookingDirections();

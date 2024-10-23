@@ -33,6 +33,7 @@ public class CroodaceousMod {
 		CEPoiTypes.POIS.register(bus);
 		CEFeatures.FEATURES.register(bus);
 		CESounds.SOUNDS.register(bus);
+		CELootModifiers.LOOT_MODIFIERS.register(bus);
 
 		CENetwork.register();
 	}

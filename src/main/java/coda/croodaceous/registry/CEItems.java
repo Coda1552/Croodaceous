@@ -15,6 +15,7 @@ public class CEItems {
 
     // Materials
     public static final RegistryObject<Item> PREHISTORIC_PIGMENT = ITEMS.register("prehistoric_pigment", () -> new Item(new Item.Properties()));
+    public static final RegistryObject<Item> PRIMAL_DEPICTION = ITEMS.register("primal_depiction", () -> new MapItem(new Item.Properties()));
 
     // Food
     public static final RegistryObject<Item> RAMU_EGG = ITEMS.register("ramu_egg", () -> new Item(new Item.Properties().stacksTo(16).food(new FoodProperties.Builder().saturationMod(0.55F).nutrition(6).build())));
