@@ -1,6 +1,6 @@
 {
   "bear_pear.ambient": {
-    "subtitle": "croodaceous.bear_pear.ambient",
+    "subtitle": "sound.croodaceous.bear_pear.ambient",
     "sounds": [
       {
         "name": "croodaceous:bear_pear/ambient",
@@ -9,7 +9,7 @@
     ]
   },
   "bear_pear.hurt": {
-    "subtitle": "croodaceous.bear_pear.hurt",
+    "subtitle": "sound.croodaceous.bear_pear.hurt",
     "sounds": [
       {
         "name": "croodaceous:bear_pear/hurt",
@@ -18,7 +18,7 @@
     ]
   },
   "bear_pear.death": {
-    "subtitle": "croodaceous.bear_pear.death",
+    "subtitle": "sound.croodaceous.bear_pear.death",
     "sounds": [
       {
         "name": "croodaceous:bear_pear/death",
@@ -27,7 +27,7 @@
     ]
   },
   "bear_pear.attach": {
-    "subtitle": "croodaceous.bear_pear.attach",
+    "subtitle": "sound.croodaceous.bear_pear.attach",
     "sounds": [
       {
         "name": "croodaceous:bear_pear/attach",
@@ -36,7 +36,7 @@
     ]
   },
   "bear_pear.detach": {
-    "subtitle": "croodaceous.bear_pear.detach",
+    "subtitle": "sound.croodaceous.bear_pear.detach",
     "sounds": [
       {
         "name": "croodaceous:bear_pear/detach",
@@ -45,7 +45,7 @@
     ]
   },
   "bear_pear.bump": {
-    "subtitle": "croodaceous.bear_pear.bump",
+    "subtitle": "sound.croodaceous.bear_pear.bump",
     "sounds": [
       {
         "name": "croodaceous:bear_pear/bump",
@@ -54,10 +54,154 @@
     ]
   },
   "bear_pear.bite": {
-    "subtitle": "croodaceous.bear_pear.bite",
+    "subtitle": "sound.croodaceous.bear_pear.bite",
     "sounds": [
       {
         "name": "croodaceous:bear_pear/bite",
+        "stream": true
+      }
+    ]
+  },
+  "bearowl.ambient": {
+    "subtitle": "sound.croodaceous.bearowl.ambient",
+    "sounds": [
+      {
+        "name": "croodaceous:bearowl/ambient",
+        "stream": true
+      }
+    ]
+  },
+  "bearowl.hurt": {
+    "subtitle": "sound.croodaceous.bearowl.hurt",
+    "sounds": [
+      {
+        "name": "croodaceous:bearowl/hurt",
+        "stream": true
+      }
+    ]
+  },
+  "bearowl.death": {
+    "subtitle": "sound.croodaceous.bearowl.death",
+    "sounds": [
+      {
+        "name": "croodaceous:bearowl/death",
+        "stream": true
+      }
+    ]
+  },
+  "bearowl.roar": {
+    "subtitle": "sound.croodaceous.bearowl.roar",
+    "sounds": [
+      {
+        "name": "croodaceous:bearowl/roar",
+        "stream": true
+      }
+    ]
+  },
+  "liyote.ambient": {
+    "subtitle": "sound.croodaceous.liyote.ambient",
+    "sounds": [
+      {
+        "name": "croodaceous:liyote/ambient",
+        "stream": true
+      }
+    ]
+  },
+  "liyote.hurt": {
+    "subtitle": "sound.croodaceous.liyote.hurt",
+    "sounds": [
+      {
+        "name": "croodaceous:liyote/hurt",
+        "stream": true
+      }
+    ]
+  },
+  "liyote.death": {
+    "subtitle": "sound.croodaceous.liyote.death",
+    "sounds": [
+      {
+        "name": "croodaceous:liyote/death",
+        "stream": true
+      }
+    ]
+  },
+  "ramu.ambient": {
+    "subtitle": "sound.croodaceous.ramu.ambient",
+    "sounds": [
+      {
+        "name": "croodaceous:ramu/ambient",
+        "stream": true
+      }
+    ]
+  },
+  "ramu.hurt": {
+    "subtitle": "sound.croodaceous.ramu.hurt",
+    "sounds": [
+      {
+        "name": "croodaceous:ramu/hurt",
+        "stream": true
+      }
+    ]
+  },
+  "ramu.death": {
+    "subtitle": "sound.croodaceous.ramu.death",
+    "sounds": [
+      {
+        "name": "croodaceous:ramu/death",
+        "stream": true
+      }
+    ]
+  },
+  "trip_gerbil.ambient": {
+    "subtitle": "sound.croodaceous.trip_gerbil.ambient",
+    "sounds": [
+      {
+        "name": "croodaceous:trip_gerbil/ambient",
+        "stream": true
+      }
+    ]
+  },
+  "trip_gerbil.hurt": {
+    "subtitle": "sound.croodaceous.trip_gerbil.hurt",
+    "sounds": [
+      {
+        "name": "croodaceous:trip_gerbil/hurt",
+        "stream": true
+      }
+    ]
+  },
+  "trip_gerbil.death": {
+    "subtitle": "sound.croodaceous.trip_gerbil.death",
+    "sounds": [
+      {
+        "name": "croodaceous:trip_gerbil/death",
+        "stream": true
+      }
+    ]
+  },
+  "turtle_dove.ambient": {
+    "subtitle": "sound.croodaceous.turtle_dove.ambient",
+    "sounds": [
+      {
+        "name": "croodaceous:turtle_dove/ambient",
+        "stream": true
+      }
+    ]
+  },
+  "turtle_dove.hurt": {
+    "subtitle": "sound.croodaceous.turtle_dove.hurt",
+    "sounds": [
+      {
+        "name": "croodaceous:turtle_dove/hurt",
+        "stream": true
+      }
+    ]
+  },
+  "turtle_dove.death": {
+    "subtitle": "sound.croodaceous.turtle_dove.death",
+    "sounds": [
+      {
+        "name": "croodaceous:turtle_dove/death",
         "stream": true
       }
     ]

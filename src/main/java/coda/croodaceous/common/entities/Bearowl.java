@@ -1,6 +1,7 @@
 package coda.croodaceous.common.entities;
 
 import coda.croodaceous.registry.CEEntities;
+import coda.croodaceous.registry.CESounds;
 import net.minecraft.core.BlockPos;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.NbtUtils;
@@ -8,6 +9,7 @@ import net.minecraft.network.syncher.EntityDataAccessor;
 import net.minecraft.network.syncher.EntityDataSerializers;
 import net.minecraft.network.syncher.SynchedEntityData;
 import net.minecraft.server.level.ServerLevel;
+import net.minecraft.sounds.SoundEvent;
 import net.minecraft.world.DifficultyInstance;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.damagesource.DamageSource;
@@ -234,6 +236,26 @@ public class Bearowl extends Animal implements GeoEntity {
 	}*/
 
 	// TODO: Custom Sounds
+
+	//// SOUNDS ////
+
+	@Nullable
+	@Override
+	protected SoundEvent getAmbientSound() {
+		return CESounds.BEAROWL_AMBIENT.get();
+	}
+
+	@Nullable
+	@Override
+	protected SoundEvent getHurtSound(DamageSource pDamageSource) {
+		return CESounds.BEAROWL_HURT.get();
+	}
+
+	@Nullable
+	@Override
+	protected SoundEvent getDeathSound() {
+		return CESounds.BEAROWL_DEATH.get();
+	}
 
 	//// MELEE ATTACK ////
 
@@ -553,6 +575,7 @@ public class Bearowl extends Animal implements GeoEntity {
 		public void start() {
 			entity.setStateAndBroadcast(STATE_ROAR, START_ROARING_EVENT);
 			entity.setSprinting(false);
+			entity.playSound(CESounds.BEAROWL_ROAR.get());
 			entity.animationTime = ROAR_DURATION;
 		}
 

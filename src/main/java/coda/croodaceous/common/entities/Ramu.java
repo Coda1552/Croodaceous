@@ -1,16 +1,14 @@
 package coda.croodaceous.common.entities;
 
 import coda.croodaceous.common.blocks.RamuNestBlock;
-import coda.croodaceous.registry.CEBlocks;
-import coda.croodaceous.registry.CEEntities;
-import coda.croodaceous.registry.CEItems;
-import coda.croodaceous.registry.CEPoiTypes;
+import coda.croodaceous.registry.*;
 import net.minecraft.core.BlockPos;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.syncher.EntityDataAccessor;
 import net.minecraft.network.syncher.EntityDataSerializers;
 import net.minecraft.network.syncher.SynchedEntityData;
 import net.minecraft.server.level.ServerLevel;
+import net.minecraft.sounds.SoundEvent;
 import net.minecraft.tags.BlockTags;
 import net.minecraft.util.Mth;
 import net.minecraft.util.RandomSource;
@@ -139,6 +137,23 @@ public class Ramu extends Animal implements GeoEntity {
 
 	public static boolean canSpawn(EntityType<? extends Ramu> p_223316_0_, LevelAccessor p_223316_1_, MobSpawnType p_223316_2_, BlockPos p_223316_3_, RandomSource p_223316_4_) {
 		return p_223316_1_.getBlockState(p_223316_3_.below()).is(BlockTags.SAND) && p_223316_1_.getRawBrightness(p_223316_3_, 0) > 8;
+	}
+
+	//// SOUNDS ////
+
+	@Override
+	protected SoundEvent getAmbientSound() {
+		return CESounds.RAMU_AMBIENT.get();
+	}
+
+	@Override
+	protected SoundEvent getHurtSound(DamageSource damageSourceIn) {
+		return CESounds.RAMU_HURT.get();
+	}
+
+	@Override
+	protected SoundEvent getDeathSound() {
+		return CESounds.RAMU_DEATH.get();
 	}
 
 	@Override

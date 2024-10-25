@@ -71,13 +71,34 @@
   "block.croodaceous.potted_desert_baobab_sapling": "Potted Desert Baobab Sapling",
   "block.croodaceous.desert_baobab_leaves": "Desert Baobab Leaves",
 
-  "croodaceous.bear_pear.ambient": "Bear Pear squeaks",
-  "croodaceous.bear_pear.hurt": "Bear Pear hurts",
-  "croodaceous.bear_pear.death": "Bear Pear dies",
-  "croodaceous.bear_pear.bite": "Bear Pear bites",
-  "croodaceous.bear_pear.bump": "Bear Pear knocks",
-  "croodaceous.bear_pear.attach": "Bear Pear rustles",
-  "croodaceous.bear_pear.detach": "Bear Pear drops",
+  "sound.croodaceous.bear_pear.ambient": "Bear Pear squeaks",
+  "sound.croodaceous.bear_pear.hurt": "Bear Pear hurts",
+  "sound.croodaceous.bear_pear.death": "Bear Pear dies",
+  "sound.croodaceous.bear_pear.bite": "Bear Pear bites",
+  "sound.croodaceous.bear_pear.bump": "Bear Pear knocks",
+  "sound.croodaceous.bear_pear.attach": "Bear Pear rustles",
+  "sound.croodaceous.bear_pear.detach": "Bear Pear drops",
+
+  "sound.croodaceous.bearowl.ambient": "Bearowl growls",
+  "sound.croodaceous.bearowl.hurt": "Bearowl hurts",
+  "sound.croodaceous.bearowl.death": "Bearowl dies",
+  "sound.croodaceous.bearowl.roar": "Bearowl roars",
+
+  "sound.croodaceous.liyote.ambient": "Liyote pants",
+  "sound.croodaceous.liyote.hurt": "Liyote hurts",
+  "sound.croodaceous.liyote.death": "Liyote dies",
+
+  "sound.croodaceous.ramu.ambient": "Ramu clucks",
+  "sound.croodaceous.ramu.hurt": "Ramu hurts",
+  "sound.croodaceous.ramu.death": "Ramu dies",
+
+  "sound.croodaceous.trip_gerbil.ambient": "Trip Gerbil squeaks",
+  "sound.croodaceous.trip_gerbil.hurt": "Trip Gerbil hurts",
+  "sound.croodaceous.trip_gerbil.death": "Trip Gerbil dies",
+
+  "sound.croodaceous.turtle_dove.ambient": "Turtle Dove chirps",
+  "sound.croodaceous.turtle_dove.hurt": "Turtle Dove hurts",
+  "sound.croodaceous.turtle_dove.death": "Turtle Dove dies",
 
   "filled_map.fractured_chunk": "Fractured Chunk Map"
 }

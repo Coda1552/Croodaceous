@@ -4,6 +4,7 @@ import coda.croodaceous.CroodaceousMod;
 import coda.croodaceous.common.network.CENetwork;
 import coda.croodaceous.common.network.ClientBoundTripGerbilPartnerPacket;
 import coda.croodaceous.registry.CEEntities;
+import coda.croodaceous.registry.CESounds;
 import net.minecraft.core.BlockPos;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.syncher.EntityDataAccessor;
@@ -125,17 +126,17 @@ public class TripGerbil extends Animal implements GeoEntity {
 
     @Override
     protected SoundEvent getAmbientSound() {
-        return SoundEvents.OCELOT_AMBIENT;
+        return CESounds.TRIP_GERBIL_AMBIENT.get();
     }
 
     @Override
     protected SoundEvent getHurtSound(DamageSource damageSourceIn) {
-        return SoundEvents.OCELOT_HURT;
+        return CESounds.TRIP_GERBIL_HURT.get();
     }
 
     @Override
     protected SoundEvent getDeathSound() {
-        return SoundEvents.OCELOT_DEATH;
+        return CESounds.TRIP_GERBIL_DEATH.get();
     }
 
     @Override

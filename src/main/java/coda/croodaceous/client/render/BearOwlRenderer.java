@@ -28,7 +28,7 @@ public class BearOwlRenderer extends GeoEntityRenderer<Bearowl> {
 
 	@Override
 	public RenderType getRenderType(Bearowl animatable, ResourceLocation texture, @Nullable MultiBufferSource bufferSource, float partialTick) {
-		return RenderType.entityCutout(texture);
+		return RenderType.entityTranslucent(texture);
 	}
   
 }

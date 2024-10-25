@@ -3,6 +3,7 @@ package coda.croodaceous.common.entities;
 import coda.croodaceous.CroodaceousMod;
 import coda.croodaceous.common.entities.goal.BiphibianWanderGoal;
 import coda.croodaceous.registry.CEEntities;
+import coda.croodaceous.registry.CESounds;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.nbt.CompoundTag;
@@ -246,27 +247,17 @@ public class TurtleDove extends BiphibianAnimal implements GeoEntity {
 
     @Override
     protected SoundEvent getAmbientSound() {
-        return SoundEvents.TURTLE_AMBIENT_LAND;
+        return CESounds.TURTLE_DOVE_AMBIENT.get();
     }
 
     @Override
     protected SoundEvent getHurtSound(DamageSource damageSourceIn) {
-        return SoundEvents.TURTLE_HURT;
+        return CESounds.TURTLE_DOVE_HURT.get();
     }
 
     @Override
     protected SoundEvent getDeathSound() {
-        return SoundEvents.TURTLE_DEATH;
-    }
-
-    @Override
-    protected float getSoundVolume() {
-        return super.getSoundVolume();
-    }
-
-    @Override
-    public float getVoicePitch() {
-        return super.getVoicePitch() - 0.1F;
+        return CESounds.TURTLE_DOVE_DEATH.get();
     }
 
     //// NBT ////
