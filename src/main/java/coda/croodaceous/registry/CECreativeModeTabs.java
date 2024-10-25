@@ -9,11 +9,10 @@ import net.minecraftforge.registries.DeferredRegister;
 import net.minecraftforge.registries.RegistryObject;
 
 public class CECreativeModeTabs {
-
     public static final DeferredRegister<CreativeModeTab> CREATIVE_MODE_TABS = DeferredRegister.create(Registries.CREATIVE_MODE_TAB, CroodaceousMod.MOD_ID);
 
     public static final RegistryObject<CreativeModeTab> TAB = CREATIVE_MODE_TABS.register("croodaceous", () -> CreativeModeTab.builder()
-            .title(Component.translatable("itemGroup.croodaceous"))
+            .title(Component.translatable("itemGroup." + CroodaceousMod.MOD_ID))
             .icon(CEItems.RAMU_EGG.get()::getDefaultInstance)
             .displayItems((itemDisplayParameters, output) -> {
                 CEItems.ITEMS.getEntries().forEach(itemRegistryObject -> output.accept(itemRegistryObject.get()));
