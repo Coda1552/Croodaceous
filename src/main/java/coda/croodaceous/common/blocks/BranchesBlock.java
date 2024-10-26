@@ -1,6 +1,5 @@
 package coda.croodaceous.common.blocks;
 
-import coda.croodaceous.common.world.tree.DesertBaobabTreeGrower;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.server.level.ServerLevel;
@@ -13,6 +12,7 @@ import net.minecraft.world.level.LevelReader;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.BonemealableBlock;
+import net.minecraft.world.level.block.grower.AbstractTreeGrower;
 import net.minecraft.world.level.block.state.BlockBehaviour;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.block.state.StateDefinition;
@@ -21,14 +21,16 @@ import net.minecraft.world.level.block.state.properties.IntegerProperty;
 import net.minecraft.world.phys.shapes.CollisionContext;
 import net.minecraft.world.phys.shapes.VoxelShape;
 
+// todo - why doesnt this get replaced when grown into a tree?
 public class BranchesBlock extends Block implements BonemealableBlock {
     private static final VoxelShape SHAPE = Block.box(2.0D, 0.0D, 2.0D, 14.0D, 4.0D, 14.0D);
     public static final IntegerProperty STAGE = BlockStateProperties.STAGE;
+    private final AbstractTreeGrower treeGrower;
 
-    public BranchesBlock(BlockBehaviour.Properties builder) {
+    public BranchesBlock(AbstractTreeGrower pTreeGrower, BlockBehaviour.Properties builder) {
         super(builder);
+        this.treeGrower = pTreeGrower;
         this.registerDefaultState(this.stateDefinition.any().setValue(STAGE, 0));
-
     }
 
     @Override
@@ -47,13 +49,13 @@ public class BranchesBlock extends Block implements BonemealableBlock {
         return SHAPE;
     }
 
+    @Override
     public void randomTick(BlockState pState, ServerLevel pLevel, BlockPos pPos, RandomSource pRandom) {
         if (!mayGrowOn(pPos, pLevel)) return;
         if (!pLevel.isAreaLoaded(pPos, 1)) return;
         if (pLevel.getMaxLocalRawBrightness(pPos.above()) >= 9 && pRandom.nextInt(7) == 0 && canSurvive(pState, pLevel,pPos)) {
             this.advanceTree(pLevel, pPos, pState, pRandom);
         }
-
     }
 
     protected boolean mayGrowOn(BlockPos pos, LevelReader level) {
@@ -65,7 +67,7 @@ public class BranchesBlock extends Block implements BonemealableBlock {
         if (pState.getValue(STAGE) == 0) {
             pLevel.setBlock(pPos, pState.cycle(STAGE), 4);
         } else {
-            new DesertBaobabTreeGrower().growTree(pLevel, pLevel.getChunkSource().getGenerator(), pPos, pState, pRandom);
+            treeGrower.growTree(pLevel, pLevel.getChunkSource().getGenerator(), pPos, pState, pRandom);
         }
     }
 

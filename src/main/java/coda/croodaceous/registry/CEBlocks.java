@@ -6,6 +6,7 @@ import coda.croodaceous.common.blocks.BranchesWallBlock;
 import coda.croodaceous.common.blocks.CESandBlock;
 import coda.croodaceous.common.blocks.DryBushBlock;
 import coda.croodaceous.common.blocks.RamuNestBlock;
+import coda.croodaceous.common.world.tree.DesertBaobabTreeGrower;
 import net.minecraft.core.BlockPos;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.item.BlockItem;
@@ -61,7 +62,7 @@ public class CEBlocks {
     public static final RegistryObject<Block> DESERT_BAOBAB_TRAPDOOR = register("desert_baobab_trapdoor", () -> new TrapDoorBlock(BlockBehaviour.Properties.copy(Blocks.OAK_TRAPDOOR), CEBlockSetTypes.DESERT_BAOBAB));
     public static final RegistryObject<Block> DESERT_BAOBAB_DOOR = register("desert_baobab_door", () -> new DoorBlock(BlockBehaviour.Properties.copy(Blocks.OAK_DOOR), CEBlockSetTypes.DESERT_BAOBAB));
     public static final RegistryObject<Block> DESERT_BAOBAB_FENCE_GATE = register("desert_baobab_fence_gate", () -> new FenceGateBlock(BlockBehaviour.Properties.copy(Blocks.OAK_DOOR), CEWoodTypes.DESERT_BAOBAB));
-    public static final RegistryObject<Block> DESERT_BAOBAB_BRANCHES = BLOCKS.register("desert_baobab_branches", () -> new BranchesBlock(BlockBehaviour.Properties.of().mapColor(MapColor.COLOR_BROWN).sound(SoundType.GRASS).noCollission().instabreak()));
+    public static final RegistryObject<Block> DESERT_BAOBAB_BRANCHES = BLOCKS.register("desert_baobab_branches", () -> new BranchesBlock(new DesertBaobabTreeGrower(), BlockBehaviour.Properties.of().mapColor(MapColor.COLOR_BROWN).randomTicks().sound(SoundType.GRASS).noCollission().instabreak()));
     public static final RegistryObject<Block> DESERT_BAOBAB_WALL_BRANCHES = BLOCKS.register("desert_baobab_wall_branches", () -> new BranchesWallBlock(BlockBehaviour.Properties.of().mapColor(MapColor.COLOR_BROWN).sound(SoundType.GRASS).noCollission().instabreak()));
     public static final RegistryObject<Block> DESERT_BAOBAB_LEAVES = register("desert_baobab_leaves", () -> new LeavesBlock(BlockBehaviour.Properties.of().mapColor(MapColor.COLOR_GREEN).sound(SoundType.GRASS).strength(0.2F).randomTicks().noOcclusion().ignitedByLava()));
 
