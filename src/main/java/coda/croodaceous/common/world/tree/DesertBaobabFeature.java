@@ -168,7 +168,7 @@ public class DesertBaobabFeature extends Feature<NoneFeatureConfiguration> {
         fill(iSeedReader, leavesFiller, true);
         updateLeaves(iSeedReader, filler.stream().map(e -> e.pos).collect(Collectors.toSet()));
 
-        return false;
+        return true;
     }
 
     public static boolean addDownwardsTrunk(WorldGenLevel level, List<Entry> filler, BlockPos pos) {
