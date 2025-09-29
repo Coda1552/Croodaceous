@@ -213,6 +213,11 @@ public class FangFly extends Animal implements GeoEntity, FlyingAnimal {
         return true;
     }
 
+    @Override
+    public @Nullable LivingEntity getControllingPassenger() {
+        return null;
+    }
+
     class WanderGoal extends Goal {
 
         WanderGoal() {
@@ -246,7 +251,7 @@ public class FangFly extends Animal implements GeoEntity, FlyingAnimal {
     class PickupAndHurtTargetGoal extends Goal {
 
         PickupAndHurtTargetGoal() {
-            this.setFlags(EnumSet.of(Flag.MOVE));
+            this.setFlags(EnumSet.of(Flag.MOVE, Flag.JUMP, Flag.TARGET, Flag.LOOK));
         }
 
         public boolean canUse() {
@@ -269,8 +274,7 @@ public class FangFly extends Animal implements GeoEntity, FlyingAnimal {
                 if (fly.distanceToSqr(fly.getTarget()) <= 1.0) {
                     fly.getTarget().startRiding(fly);
 
-                    // todo - fix the fang flies not reliably flying up after picking up their target (maybe because path is not starting?)
-                    Path path = fly.navigation.createPath(new BlockPos(blockPosition().getX(), blockPosition().getY() + 3, blockPosition().getZ()), 1);
+                    Path path = fly.navigation.createPath(new BlockPos(blockPosition().getX(), blockPosition().getY() + 2, blockPosition().getZ()), 1);
                     fly.navigation.moveTo(path, 1.0D);
 
                     int y = level().getHeight(Heightmap.Types.MOTION_BLOCKING_NO_LEAVES, blockPosition().getX(), blockPosition().getZ());
