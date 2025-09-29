@@ -1,6 +1,5 @@
 package coda.croodaceous.client.render;
 
-import coda.croodaceous.client.render.layer.BearowlEyesLayer;
 import coda.croodaceous.client.model.BearowlModel;
 import coda.croodaceous.common.entities.Bearowl;
 import com.mojang.blaze3d.vertex.PoseStack;
@@ -15,7 +14,6 @@ public class BearOwlRenderer extends GeoEntityRenderer<Bearowl> {
 
 	public BearOwlRenderer(EntityRendererProvider.Context mgr) {
 		super(mgr, new BearowlModel());
-		addRenderLayer(new BearowlEyesLayer(this));
 	}
 
 	@Override

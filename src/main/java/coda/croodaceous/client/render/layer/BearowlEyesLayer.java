@@ -12,6 +12,7 @@ import software.bernie.geckolib.cache.object.BakedGeoModel;
 import software.bernie.geckolib.renderer.GeoRenderer;
 import software.bernie.geckolib.renderer.layer.GeoRenderLayer;
 
+// todo - unused
 public class BearowlEyesLayer extends GeoRenderLayer<Bearowl> {
     private static final ResourceLocation EYES = new ResourceLocation(CroodaceousMod.MOD_ID, "textures/entity/bearowl/eyes.png");
     private static final ResourceLocation EYES_SLEEPING = new ResourceLocation(CroodaceousMod.MOD_ID, "textures/entity/bearowl/eyes_sleeping.png");

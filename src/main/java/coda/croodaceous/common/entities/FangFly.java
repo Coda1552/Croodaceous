@@ -269,13 +269,14 @@ public class FangFly extends Animal implements GeoEntity, FlyingAnimal {
                 if (fly.distanceToSqr(fly.getTarget()) <= 1.0) {
                     fly.getTarget().startRiding(fly);
 
-                    Path path = fly.navigation.createPath(new BlockPos(blockPosition().getX(), blockPosition().getY() + 2, blockPosition().getZ()), 1);
+                    // todo - fix the fang flies not reliably flying up after picking up their target (maybe because path is not starting?)
+                    Path path = fly.navigation.createPath(new BlockPos(blockPosition().getX(), blockPosition().getY() + 3, blockPosition().getZ()), 1);
                     fly.navigation.moveTo(path, 1.0D);
 
                     int y = level().getHeight(Heightmap.Types.MOTION_BLOCKING_NO_LEAVES, blockPosition().getX(), blockPosition().getZ());
 
                     if (position().y() > y + 8) {
-                        fly.ejectPassengers(); // todo - fix
+                        fly.ejectPassengers();
                     }
                 }
             }
