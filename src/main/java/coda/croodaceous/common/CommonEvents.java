@@ -20,29 +20,4 @@ import net.minecraftforge.fml.common.Mod;
 @Mod.EventBusSubscriber(modid = CroodaceousMod.MOD_ID, bus = Mod.EventBusSubscriber.Bus.FORGE)
 public class CommonEvents {
 
-    @SubscribeEvent
-    public static void interactBlock(PlayerInteractEvent.RightClickBlock e) {
-        BlockPos pos = e.getPos();
-        Level level = e.getLevel();
-        Player player = e.getEntity();
-        InteractionHand hand = e.getHand();
-
-        if (player.getItemInHand(hand).is(Items.RED_DYE) && level.getBlockState(pos).is(Blocks.STONE))  {
-            level.setBlock(pos, CEBlocks.PAINTED_STONE.get().defaultBlockState(), 3);
-            level.playSound(player, pos, SoundEvents.MAGMA_CUBE_SQUISH, SoundSource.BLOCKS, 1.0F, 1.0F);
-
-            player.swing(hand);
-
-            for (int i = 0; i < 20; i++) {
-                double x = pos.getX() + level.random.nextFloat() + e.getFace().getStepX();
-                double y = pos.getY() + level.random.nextFloat() + e.getFace().getStepY();
-                double z = pos.getZ() + level.random.nextFloat() + e.getFace().getStepZ();
-                level.addParticle(new ItemParticleOption(ParticleTypes.ITEM, new ItemStack(Items.RED_DYE)), x, y, z, 0.0D, 0.0D, 0.0D);
-            }
-
-            if (!player.getAbilities().instabuild) {
-                player.getItemInHand(hand).shrink(1);
-            }
-        }
-    }
 }
