@@ -59,6 +59,7 @@ import java.util.Optional;
 public class Ramu extends Animal implements GeoEntity {
 	private static final EntityDataAccessor<Boolean> DATA_SITTING = SynchedEntityData.defineId(Ramu.class, EntityDataSerializers.BOOLEAN);
 	private static final EntityDataAccessor<Boolean> DATA_CE = SynchedEntityData.defineId(Ramu.class, EntityDataSerializers.BOOLEAN);
+	private static final EntityDataAccessor<Integer> DATA_VARIANT = SynchedEntityData.defineId(Ramu.class, EntityDataSerializers.INT);
 	private final AnimatableInstanceCache factory = GeckoLibUtil.createInstanceCache(this);
 	private static final RawAnimation ANIM_CHARGE = RawAnimation.begin().thenLoop("animation.ramu.charge");
 	private static final RawAnimation ANIM_WALK = RawAnimation.begin().thenLoop("animation.ramu.walk");
@@ -137,6 +138,21 @@ public class Ramu extends Animal implements GeoEntity {
 
 	public static boolean canSpawn(EntityType<? extends Ramu> p_223316_0_, LevelAccessor p_223316_1_, MobSpawnType p_223316_2_, BlockPos p_223316_3_, RandomSource p_223316_4_) {
 		return p_223316_1_.getBlockState(p_223316_3_.below()).is(BlockTags.SAND) && p_223316_1_.getRawBrightness(p_223316_3_, 0) > 8;
+	}
+
+	@Nullable
+	@Override
+	public SpawnGroupData finalizeSpawn(ServerLevelAccessor worldIn, DifficultyInstance difficultyIn, MobSpawnType reason, @Nullable SpawnGroupData spawnDataIn, @Nullable CompoundTag dataTag) {
+		spawnDataIn = super.finalizeSpawn(worldIn, difficultyIn, reason, spawnDataIn, dataTag);
+		if (dataTag == null) {
+			setVariant(random.nextInt(2));
+		}
+		else {
+			if (dataTag.contains("Variant", 3)){
+				this.setVariant(dataTag.getInt("Variant"));
+			}
+		}
+		return spawnDataIn;
 	}
 
 	//// SOUNDS ////
@@ -292,7 +308,12 @@ public class Ramu extends Animal implements GeoEntity {
 	@Nullable
 	@Override
 	public AgeableMob getBreedOffspring(ServerLevel p_146743_, AgeableMob p_146744_) {
-		return CEEntities.RAMU.get().create(p_146743_);
+		Ramu ramu = CEEntities.RAMU.get().create(p_146743_);
+
+		ramu.setVariant(random.nextInt(2));
+		ramu.moveTo(p_146744_.position());
+
+		return ramu;
 	}
 
 	@Override
@@ -301,6 +322,7 @@ public class Ramu extends Animal implements GeoEntity {
 		this.nestPos = new BlockPos(pCompound.getInt("NestPosX"), pCompound.getInt("NestPosY"), pCompound.getInt("NestPosZ"));
 		this.sitting = pCompound.getBoolean("Sitting");
 		this.breedCooldown = pCompound.getInt("BreedCooldown");
+		setVariant(pCompound.getInt("Variant"));
 	}
 	
 	@Override
@@ -313,6 +335,7 @@ public class Ramu extends Animal implements GeoEntity {
 		}
 		pCompound.putBoolean("Sitting", this.sitting);
 		pCompound.putInt("BreedCooldown", this.breedCooldown);
+		pCompound.putInt("Variant", getVariant());
 	}
 	
 	private boolean isNearNest() {
@@ -334,8 +357,17 @@ public class Ramu extends Animal implements GeoEntity {
 		super.defineSynchedData();
 		this.entityData.define(DATA_SITTING, false);
 		this.entityData.define(DATA_CE, false);
+		this.entityData.define(DATA_VARIANT, 0);
 	}
-	
+
+	public int getVariant() {
+		return this.entityData.get(DATA_VARIANT);
+	}
+
+	public void setVariant(int variant) {
+		this.entityData.set(DATA_VARIANT, variant);
+	}
+
 	@Override
 	public boolean hurt(DamageSource pSource, float pAmount) {
 		this.sitting = false;

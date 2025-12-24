@@ -60,6 +60,7 @@ public class RamuNestBlock extends Block {
 				Ramu ramu = CEEntities.RAMU.get().create(pLevel);
 				ramu.setAge(-24000);
 				ramu.moveTo((double)pPos.getX() + 0.5D, pPos.getY() + 0.5D, (double)pPos.getZ() + 0.5D, 0.0F, 0.0F);
+				ramu.setVariant(pRandom.nextInt(2));
 				pLevel.addFreshEntity(ramu);
 			}
 		}
